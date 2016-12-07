@@ -2,8 +2,6 @@ package com.example.zebul.cameraservice.video_streaming.packetization;
 
 import com.example.zebul.cameraservice.video_streaming.rtp.header.RTPHeader;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeader;
-import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeaderDecoder;
-import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeaderEncoder;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -53,9 +51,9 @@ public class Packetizer {
         boolean start = true;
         boolean end = false;
 
-        NALUnitHeader nalUnitHeader = NALUnitHeaderDecoder.decode(dataWithNALUnit[offsetOfNALUnit]);
-        NALUnitHeader fuIndicator = new NALUnitHeader(false, nalUnitHeader.getNALReferenceIndicator(), (byte)28);
-        byte encodedFUIndicator = NALUnitHeaderEncoder.encode(fuIndicator);
+        NALUnitHeader nalUnitHeader = NALUnitHeader.fromByte(dataWithNALUnit[offsetOfNALUnit]);
+        NALUnitHeader fuIndicator = new NALUnitHeader(false, nalUnitHeader.getNalReferenceIndicator(), (byte)28);
+        byte encodedFUIndicator = fuIndicator.toByte();
         while(true){
 
             int fuPayloadLength = 0;
@@ -85,7 +83,7 @@ public class Packetizer {
             if(end){
                 E = (byte)0b01000000;
             }
-            byte type = nalUnitHeader.getNALUnitType();
+            byte type = nalUnitHeader.getNalUnitType();
             /*
             The FU header has the following format:
             +---------------+

@@ -1,6 +1,5 @@
 package com.example.zebul.cameraservice.video_streaming.rtp.payload.fragmentation_unit;
 
-import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeaderEncoder;
 import com.example.zebul.cameraservice.video_streaming.rtp.payload.RTPPayload;
 import com.example.zebul.cameraservice.video_streaming.rtp.payload.RTPPayloadType;
 
@@ -30,7 +29,7 @@ public class FU_A_RTPPayload extends RTPPayload {
 
     public void toBytes(byte[] rtpPacketBytes, int position){
 
-        rtpPacketBytes[position++] = NALUnitHeaderEncoder.encode(fuIndicator);
+        rtpPacketBytes[position++] = fuIndicator.toByte();
         rtpPacketBytes[position++] = fuHeader.toByte();
         System.arraycopy(fragmentData, 0,
                 rtpPacketBytes, position, fragmentData.length);

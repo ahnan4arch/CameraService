@@ -26,7 +26,6 @@ import com.example.zebul.cameraservice.video_streaming.rtp.RTPPacket;
 import com.example.zebul.cameraservice.video_streaming.rtp.RTPPackets;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnit;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeader;
-import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeaderDecoder;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitReader;
 import com.example.zebul.cameraservice.video_streaming.rtp.header.RTPHeader;
 import com.example.zebul.cameraservice.video_streaming.rtp.header.RTPHeaderEncoder;
@@ -252,11 +251,11 @@ public class RTPSession implements SocketMessageReceptionListener {
                     System.arraycopy(encodedRtpHeader, 0, rtpPacket, 0, RTPHeader.LENGTH);
                     Message message = new Message(clientSocketAddress, rtpPacket);
 
-                    NALUnitHeader nalUnitHeader = NALUnitHeaderDecoder.decode(nalBuffer[4]);
-                    NALUnitType nalUnitType = NALUnitType.NAL_UNIT_TYPES[nalUnitHeader.getNALUnitType()];
+                    NALUnitHeader nalUnitHeader = NALUnitHeader.fromByte(nalBuffer[4]);
+                    NALUnitType nalUnitType = NALUnitType.NAL_UNIT_TYPES[nalUnitHeader.getNalUnitType()];
                     Log.d(TAG, "marker " + markerBit + " timestamp: " + timestamp +
-                            ", nal unit type:" + (int) nalUnitHeader.getNALUnitType() + " (" + nalUnitType + ")" +
-                            ", NRI:" + (int) nalUnitHeader.getNALReferenceIndicator() +
+                            ", nal unit type:" + (int) nalUnitHeader.getNalUnitType() + " (" + nalUnitType + ")" +
+                            ", NRI:" + (int) nalUnitHeader.getNalReferenceIndicator() +
                             ", packet len:" + rtpPacket.length);
 
                     socketEngine.post(message);
@@ -330,11 +329,11 @@ public class RTPSession implements SocketMessageReceptionListener {
                     Message message = new Message(clientSocketAddress, RTPPacket);
 
 
-                    NALUnitHeader nalUnitHeader = NALUnitHeaderDecoder.decode(nalBuffer[4]);
-                    NALUnitType nalUnitType = NALUnitType.NAL_UNIT_TYPES[nalUnitHeader.getNALUnitType()];
+                    NALUnitHeader nalUnitHeader = NALUnitHeader.fromByte(nalBuffer[4]);
+                    NALUnitType nalUnitType = NALUnitType.NAL_UNIT_TYPES[nalUnitHeader.getNalUnitType()];
                     Log.d(TAG, "marker " + markerBit + " timestamp: "+timestamp+
-                            ", nal unit type:"+(int)nalUnitHeader.getNALUnitType()+" ("+nalUnitType+")"+
-                            ", NRI:"+(int)nalUnitHeader.getNALReferenceIndicator()+
+                            ", nal unit type:"+(int)nalUnitHeader.getNalUnitType()+" ("+nalUnitType+")"+
+                            ", NRI:"+(int)nalUnitHeader.getNalReferenceIndicator()+
                             ", packet len:"+RTPPacket.length);
 
                     socketEngine.post(message);

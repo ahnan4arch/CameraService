@@ -7,9 +7,6 @@ import com.example.zebul.cameraservice.video_streaming.rtp.RTPPackets;
 import com.example.zebul.cameraservice.video_streaming.rtp.header.RTPHeader;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnit;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeader;
-import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeaderDecoder;
-import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeaderEncoder;
-import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitReader;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitType;
 import com.example.zebul.cameraservice.video_streaming.rtp.payload.RTPPayload;
 import com.example.zebul.cameraservice.video_streaming.rtp.payload.RTPPayloadType;
@@ -107,8 +104,8 @@ public class RTPPacketizationSession {
             //TODO: remove after test
             byte [] dataWithNalUnit = avPacket.getNALUnit().getData();
             int offsetOfNALUnit = NALUnit.START_CODES.length;
-            NALUnitHeader nalUnitHeader = NALUnitHeaderDecoder.decode(dataWithNalUnit[offsetOfNALUnit]);
-            byte type = nalUnitHeader.getNALUnitType();
+            NALUnitHeader nalUnitHeader = NALUnitHeader.fromByte(dataWithNalUnit[offsetOfNALUnit]);
+            byte type = nalUnitHeader.getNalUnitType();
             Log.d(TAG, "single NALUnitType type: "+type);
             //TODO: -----------------
 
@@ -126,8 +123,8 @@ public class RTPPacketizationSession {
             boolean end = false;
 
             byte [] dataWithNalUnit = avPacket.getNALUnit().getData();
-            NALUnitHeader nalUnitHeader = NALUnitHeaderDecoder.decode(dataWithNalUnit[offsetOfNALUnit]);
-            FUIndicator fuIndicator = new FUIndicator(false, nalUnitHeader.getNALReferenceIndicator());
+            NALUnitHeader nalUnitHeader = NALUnitHeader.fromByte(dataWithNalUnit[offsetOfNALUnit]);
+            FUIndicator fuIndicator = new FUIndicator(false, nalUnitHeader.getNalReferenceIndicator());
             while(true){
 
                 int payloadFragmentDataLength = 0;
@@ -146,7 +143,7 @@ public class RTPPacketizationSession {
                 System.arraycopy(dataWithNalUnit, offsetOfDataInNalUnit,
                         payloadFragmentData, 0, payloadFragmentDataLength);
 
-                byte nalUnitType = nalUnitHeader.getNALUnitType();
+                byte nalUnitType = nalUnitHeader.getNalUnitType();
                 //TODO: remove after test
                 Log.d(TAG, "fragmentation NALUnitType type: "+nalUnitType);
                 //-----------------------

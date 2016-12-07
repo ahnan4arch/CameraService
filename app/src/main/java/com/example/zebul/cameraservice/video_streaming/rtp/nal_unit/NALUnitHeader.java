@@ -2,18 +2,42 @@ package com.example.zebul.cameraservice.video_streaming.rtp.nal_unit;
 
 /**
  * Created by zebul on 10/27/16.
+ +---------------+
+ |0|1|2|3|4|5|6|7|
+ +-+-+-+-+-+-+-+-+
+ |F|NRI|  Type   |
+ +---------------+
  */
+
 public class NALUnitHeader {
 
     public static final int LENGTH = 1;
     private boolean forbiddenZeroBit;
-    private byte NALReferenceIndicator;
-    private byte NALUnitType;
+    private byte nalReferenceIndicator;
+    private byte nalUnitType;
 
-    public NALUnitHeader(boolean forbiddenZeroBit, byte NALReferenceIndicator, byte NALUnitType){
+    public NALUnitHeader(boolean forbiddenZeroBit, byte nalReferenceIndicator, byte nalUnitType){
         this.forbiddenZeroBit = forbiddenZeroBit;
-        this.NALReferenceIndicator = NALReferenceIndicator;
-        this.NALUnitType = NALUnitType;
+        this.nalReferenceIndicator = nalReferenceIndicator;
+        this.nalUnitType = nalUnitType;
+    }
+
+    public byte toByte(){
+
+        byte encodedNALUnit = 0;
+        encodedNALUnit |= (byte) (forbiddenZeroBit ? 0b10000000 : 0b00000000);
+        encodedNALUnit |= (byte) (nalReferenceIndicator <<5);
+        encodedNALUnit |= (byte) nalUnitType;
+        return encodedNALUnit;
+    }
+
+    public static NALUnitHeader fromByte(byte rtpPacketByte) {
+
+        boolean F = ((rtpPacketByte&0b10000000)==0b10000000);
+        byte NRI =  (byte)((rtpPacketByte>>5)&0x03);
+        byte Type =  (byte)(rtpPacketByte&0x1F);
+        NALUnitHeader nalUnitHeader = new NALUnitHeader(F, NRI, Type);
+        return nalUnitHeader;
     }
 
     public boolean getForbiddenZeroBit(){
@@ -21,14 +45,14 @@ public class NALUnitHeader {
         return forbiddenZeroBit;
     }
 
-    public byte getNALReferenceIndicator(){
+    public byte getNalReferenceIndicator(){
 
-        return NALReferenceIndicator;
+        return nalReferenceIndicator;
     }
 
-    public byte getNALUnitType(){
+    public byte getNalUnitType(){
 
-        return NALUnitType;
+        return nalUnitType;
     }
 
     @Override
@@ -39,16 +63,16 @@ public class NALUnitHeader {
         NALUnitHeader that = (NALUnitHeader) o;
 
         if (forbiddenZeroBit != that.forbiddenZeroBit) return false;
-        if (NALReferenceIndicator != that.NALReferenceIndicator) return false;
-        return NALUnitType == that.NALUnitType;
+        if (nalReferenceIndicator != that.nalReferenceIndicator) return false;
+        return nalUnitType == that.nalUnitType;
 
     }
 
     @Override
     public int hashCode() {
         int result = (forbiddenZeroBit ? 1 : 0);
-        result = 31 * result + (int) NALReferenceIndicator;
-        result = 31 * result + (int) NALUnitType;
+        result = 31 * result + (int) nalReferenceIndicator;
+        result = 31 * result + (int) nalUnitType;
         return result;
     }
 }
