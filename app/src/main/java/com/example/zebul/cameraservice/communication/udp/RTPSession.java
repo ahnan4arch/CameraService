@@ -16,9 +16,14 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.Surface;
 
+import com.example.zebul.cameraservice.AssetFileAVPacketProducer;
+import com.example.zebul.cameraservice.CameraAVPacketProducer;
 import com.example.zebul.cameraservice.CameraService;
 import com.example.zebul.cameraservice.video_streaming.packetization.Packetizer;
+import com.example.zebul.cameraservice.video_streaming.packetization.RTPPacketizationSession;
 import com.example.zebul.cameraservice.video_streaming.rtp.Clock;
+import com.example.zebul.cameraservice.video_streaming.rtp.RTPPacket;
+import com.example.zebul.cameraservice.video_streaming.rtp.RTPPackets;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnit;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeader;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitHeaderDecoder;
@@ -27,6 +32,10 @@ import com.example.zebul.cameraservice.video_streaming.rtp.header.RTPHeader;
 import com.example.zebul.cameraservice.video_streaming.rtp.header.RTPHeaderEncoder;
 import com.example.zebul.cameraservice.message.Message;
 import com.example.zebul.cameraservice.video_streaming.rtp.nal_unit.NALUnitType;
+import com.example.zebul.cameraservice.video_streaming.video_data.AVPacket;
+import com.example.zebul.cameraservice.video_streaming.video_data.AVPacketProducer;
+import com.example.zebul.cameraservice.video_streaming.video_data.AVPackets;
+import com.example.zebul.cameraservice.video_streaming.video_data.AVPacketProductionException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -53,7 +62,6 @@ public class RTPSession implements SocketMessageReceptionListener {
     private byte[] pps;
     private byte[] sps;
     private byte[] stapa;
-
     public RTPSession(InetSocketAddress socketAddress){
 
         this.clientSocketAddress = socketAddress;
@@ -65,7 +73,7 @@ public class RTPSession implements SocketMessageReceptionListener {
     public void start(){
 
         socketEngine.start();
-        thread = new Thread(/*new Session()*/new SSS());
+        thread = new Thread(/*new Session()*//*new ZZZ()*/new AAA());
         thread.start();
     }
 
@@ -131,6 +139,136 @@ public class RTPSession implements SocketMessageReceptionListener {
         }
     }
 
+    class AAA implements Runnable{
+
+        private static final String TAG = "ZZZ";
+
+        AVPacketProducer avPacketProducer =
+                //new AssetFileAVPacketProducer("H264_artifacts_motion.h264");
+                new CameraAVPacketProducer();
+
+        RTPPacketizationSession rtpPacketizationSession = new RTPPacketizationSession();
+        @Override
+        public void run() {
+
+            try {
+
+                while (true) {
+
+                    packetize();
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            catch(AVPacketProductionException exc_){
+
+                int foo = 1;
+                int bar = foo;
+            }
+        }
+
+        private void packetize() throws AVPacketProductionException {
+
+            AVPackets avPackets = avPacketProducer.produceAVPackets();
+            Log.d(TAG, "produced: "+avPackets.getNumberOfPackets()+" avPackets");
+            RTPPackets rtpPackets = rtpPacketizationSession.createRTPPackests(avPackets);
+            Log.d(TAG, "created: "+rtpPackets.getNumberOfPackets()+" rtpPackets");
+            int count = rtpPackets.getNumberOfPackets();
+            for (RTPPacket rtpPacket : rtpPackets) {
+
+                byte [] rtpPacketBytes = rtpPacket.toBytes();
+                Log.d(TAG, rtpPacketBytes.length +" bytes will be sent");
+                Message message = new Message(clientSocketAddress, rtpPacketBytes);
+                socketEngine.post(message);
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    class ZZZ implements Runnable{
+
+        private static final String TAG = "ZZZ";
+
+        AssetFileAVPacketProducer videoDataPackProducer =
+                new AssetFileAVPacketProducer("H264_artifacts_motion.h264");
+
+        @Override
+        public void run() {
+
+            try {
+
+                while (true) {
+
+                    packetize();
+                }
+            }
+            catch(AVPacketProductionException exc_){
+
+                int foo = 1;
+                int bar = foo;
+            }
+        }
+
+        private void packetize() throws AVPacketProductionException {
+
+            AVPackets videoDataPack = videoDataPackProducer.produceAVPackets();
+            for (AVPacket videoData : videoDataPack.getAVPackets()) {
+
+                NALUnit nalUnit = videoData.getNALUnit();
+
+                if ((nalUnit.getBeg() == -1) || (nalUnit.getEnd() == -1)) {
+                    return;
+                }
+
+                byte[] nalBuffer = nalUnit.getData();
+                if (nalBuffer.length <= 4) {
+
+                    continue;
+                }
+
+                int timestamp = (int) videoData.getTimestamp().getTimestampInMillis();
+
+                Packetizer packetizer = new Packetizer();
+                Log.d(TAG, "Before packetizer.makePackets nalBuffer.len: " + nalBuffer.length);
+                List<byte[]> headerlessRTPPackets = packetizer.makePackets(nalBuffer, NALUnit.START_CODES.length);
+                Log.d(TAG, "After packetizer.makePackets");
+
+                for (int i = 0; i < headerlessRTPPackets.size(); i++) {
+
+                    boolean isLast = (i + 1) == headerlessRTPPackets.size();
+                    boolean markerBit = isLast ? true : false;
+                    byte payloadType = 96;
+                    RTPHeader rtpHeader = new RTPHeader(
+                            markerBit, payloadType, sequenceNumber++, timestamp, SSRC);
+                    byte[] encodedRtpHeader = RTPHeaderEncoder.encode(rtpHeader);
+                    byte[] rtpPacket = headerlessRTPPackets.get(i);
+                    System.arraycopy(encodedRtpHeader, 0, rtpPacket, 0, RTPHeader.LENGTH);
+                    Message message = new Message(clientSocketAddress, rtpPacket);
+
+                    NALUnitHeader nalUnitHeader = NALUnitHeaderDecoder.decode(nalBuffer[4]);
+                    NALUnitType nalUnitType = NALUnitType.NAL_UNIT_TYPES[nalUnitHeader.getNALUnitType()];
+                    Log.d(TAG, "marker " + markerBit + " timestamp: " + timestamp +
+                            ", nal unit type:" + (int) nalUnitHeader.getNALUnitType() + " (" + nalUnitType + ")" +
+                            ", NRI:" + (int) nalUnitHeader.getNALReferenceIndicator() +
+                            ", packet len:" + rtpPacket.length);
+
+                    socketEngine.post(message);
+                }
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
     class SSS implements Runnable{
 
         private static final String TAG = "SSS";
@@ -138,7 +276,7 @@ public class RTPSession implements SocketMessageReceptionListener {
 
         @Override
         public void run() {
-            byte [] movieData = readMovieData(/*"H264_artifacts_motion.h264"*/"sample_iPod.m4v");
+            byte [] movieData = readMovieData("H264_artifacts_motion.h264"/*"sample_iPod.m4v"*/);
             NALUnitReader reader = new NALUnitReader(movieData);
             clock.restart();
 
@@ -149,7 +287,7 @@ public class RTPSession implements SocketMessageReceptionListener {
                     break;
                 }
 
-                int timestamp = (int)clock.getTimestamp();
+                int timestamp = (int)clock.getTimestamp().getTimestampInMillis();
                 byte [] nalBuffer = nalUnit.getData();
 
                 if(nalBuffer.length <= 4){
@@ -176,7 +314,7 @@ public class RTPSession implements SocketMessageReceptionListener {
                 */
                 Packetizer packetizer = new Packetizer();
                 Log.d(TAG, "Before packetizer.makePackets nalBuffer.len: "+nalBuffer.length);
-                List<byte[]> headerlessRTPPackets = packetizer.makePackets(nalBuffer, NALUnitReader.NAL_UNIT_START_CODES.length);
+                List<byte[]> headerlessRTPPackets = packetizer.makePackets(nalBuffer, NALUnit.START_CODES.length);
                 Log.d(TAG, "After packetizer.makePackets");
 
                 for(int i=0; i<headerlessRTPPackets.size(); i++){
@@ -229,7 +367,7 @@ public class RTPSession implements SocketMessageReceptionListener {
 
                         byte [] nalBuffer = frameData.data;
                         Packetizer packetizer = new Packetizer();
-                        List<byte[]> headerlessRTPPackets = packetizer.makePackets(nalBuffer, NALUnitReader.NAL_UNIT_START_CODES.length);
+                        List<byte[]> headerlessRTPPackets = packetizer.makePackets(nalBuffer, NALUnit.START_CODES.length);
 
                         int timestamp = (int)((frameData.presentationTimeUs/1000000.0f)*Clock.DEFAULT_CLOCK_RATE);
                         for(int i=0; i<headerlessRTPPackets.size(); i++){

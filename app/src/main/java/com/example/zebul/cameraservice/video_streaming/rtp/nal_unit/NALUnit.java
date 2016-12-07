@@ -2,6 +2,8 @@ package com.example.zebul.cameraservice.video_streaming.rtp.nal_unit;
 
 public class NALUnit {
 
+	public static final byte [] START_CODES = {(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01};
+
 	private int beg;
 	private byte[] data;
 	

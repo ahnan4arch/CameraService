@@ -40,9 +40,9 @@ public class Packetizer {
 
     private byte[] makeSingleNALUnitPacket(byte[] dataWithNALUnit, int offsetOfNALUnit) {
 
-        byte [] RTPpacket = new byte[RTPHeader.LENGTH+(dataWithNALUnit.length-offsetOfNALUnit)];
-        System.arraycopy(dataWithNALUnit, offsetOfNALUnit, RTPpacket, RTPHeader.LENGTH, RTPpacket.length-RTPHeader.LENGTH);
-        return RTPpacket;
+        byte [] rtpPacket = new byte[RTPHeader.LENGTH+(dataWithNALUnit.length-offsetOfNALUnit)];
+        System.arraycopy(dataWithNALUnit, offsetOfNALUnit, rtpPacket, RTPHeader.LENGTH, rtpPacket.length-RTPHeader.LENGTH);
+        return rtpPacket;
     }
 
     private List<byte[]> makeMultipleFragmentationUnitPackets(byte[] dataWithNALUnit, int offsetOfNALUnit) {
@@ -53,26 +53,26 @@ public class Packetizer {
         boolean start = true;
         boolean end = false;
 
-        NALUnitHeader NALUnitHeader_ = NALUnitHeaderDecoder.decode(dataWithNALUnit[offsetOfNALUnit]);
-        NALUnitHeader FUIndicator = new NALUnitHeader(false, NALUnitHeader_.getNALReferenceIndicator(), (byte)28);
-        byte encodedFUIndicator = NALUnitHeaderEncoder.encode(FUIndicator);
+        NALUnitHeader nalUnitHeader = NALUnitHeaderDecoder.decode(dataWithNALUnit[offsetOfNALUnit]);
+        NALUnitHeader fuIndicator = new NALUnitHeader(false, nalUnitHeader.getNALReferenceIndicator(), (byte)28);
+        byte encodedFUIndicator = NALUnitHeaderEncoder.encode(fuIndicator);
         while(true){
 
-            int FUPayloadLength = 0;
+            int fuPayloadLength = 0;
             if(offsetOfData+ maxPayloadLength < dataWithNALUnit.length){
 
-                FUPayloadLength = maxPayloadLength;
+                fuPayloadLength = maxPayloadLength;
                 end = false;
             }
             else{
 
-                FUPayloadLength = dataWithNALUnit.length-offsetOfData;
+                fuPayloadLength = dataWithNALUnit.length-offsetOfData;
                 end = true;
             }
 
-            int FUPayloadOffsetInPacket = RTPHeader.LENGTH+FU_INDICATOR_LENGTH+FU_HEADER_LENGTH;
-            byte [] RTPpacket = new byte[FUPayloadOffsetInPacket+FUPayloadLength];
-            System.arraycopy(dataWithNALUnit, offsetOfData, RTPpacket, FUPayloadOffsetInPacket, FUPayloadLength);
+            int fuPayloadOffsetInPacket = RTPHeader.LENGTH+FU_INDICATOR_LENGTH+FU_HEADER_LENGTH;
+            byte [] rtpPacket = new byte[fuPayloadOffsetInPacket+fuPayloadLength];
+            System.arraycopy(dataWithNALUnit, offsetOfData, rtpPacket, fuPayloadOffsetInPacket, fuPayloadLength);
 
 
             byte S = 0;//start
@@ -85,7 +85,7 @@ public class Packetizer {
             if(end){
                 E = (byte)0b01000000;
             }
-            byte type = NALUnitHeader_.getNALUnitType();
+            byte type = nalUnitHeader.getNALUnitType();
             /*
             The FU header has the following format:
             +---------------+
@@ -96,15 +96,15 @@ public class Packetizer {
             */
             byte encodedFUHeader = (byte)(S|E|R|type);
 
-            RTPpacket[RTPHeader.LENGTH] = encodedFUIndicator;
-            RTPpacket[RTPHeader.LENGTH+FU_INDICATOR_LENGTH] = encodedFUHeader;
-            listOfPackets.add(RTPpacket);
+            rtpPacket[RTPHeader.LENGTH] = encodedFUIndicator;
+            rtpPacket[RTPHeader.LENGTH+FU_INDICATOR_LENGTH] = encodedFUHeader;
+            listOfPackets.add(rtpPacket);
 
             if(end){
                 break;
             }
             else{
-                offsetOfData+=FUPayloadLength;
+                offsetOfData+=fuPayloadLength;
             }
         }
         return listOfPackets;

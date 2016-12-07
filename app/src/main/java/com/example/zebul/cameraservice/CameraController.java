@@ -43,7 +43,7 @@ public class CameraController {
 
         try{
 
-            camera = Camera.open(0);
+            //camera = Camera.open(0);
         }
         catch(Exception exc_){
 

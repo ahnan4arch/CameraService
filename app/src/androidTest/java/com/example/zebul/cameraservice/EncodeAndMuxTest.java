@@ -135,7 +135,12 @@ public class EncodeAndMuxTest extends AndroidTestCase {
 
         // Output filename.  Ideally this would use Context.getFilesDir() rather than a
         // hard-coded output directory.
-        String outputPath = new File(OUTPUT_DIR,
+
+        String outputDir = Environment.getDataDirectory().getPath();//getExternalStorageDirectory().getPath();
+        String outputPath = new File(
+                OUTPUT_DIR,
+                //outputDir,
+                //"/storage/emulated/",
                 "test." + mWidth + "x" + mHeight + ".mp4").toString();
         Log.d(TAG, "output file is " + outputPath);
 

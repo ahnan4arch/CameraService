@@ -64,5 +64,11 @@ public enum NALUnitType {
     Reserved30,
     Reserved31;
 
+
     public static NALUnitType [] NAL_UNIT_TYPES = NALUnitType.values();
+
+    public static NALUnitType fromByte(byte value){
+
+        return NAL_UNIT_TYPES[value];
+    }
 }

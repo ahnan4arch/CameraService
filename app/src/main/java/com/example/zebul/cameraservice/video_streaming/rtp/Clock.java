@@ -1,5 +1,7 @@
 package com.example.zebul.cameraservice.video_streaming.rtp;
 
+import com.example.zebul.cameraservice.video_streaming.rtp.header.Timestamp;
+
 /**
  * Created by zebul on 10/31/16.
  */
@@ -7,7 +9,10 @@ package com.example.zebul.cameraservice.video_streaming.rtp;
 public class Clock {
 
     public static final long DEFAULT_CLOCK_RATE = 90000;
-    public long startTimestamp = 0;
+    private long startTimestamp = System.currentTimeMillis();;
+
+    public Clock(){
+    }
 
     public static long computeTimestamp(long presentationTimeInMilliseconds){
 
@@ -24,9 +29,10 @@ public class Clock {
         startTimestamp = System.currentTimeMillis();
     }
 
-    public long getTimestamp(){
+    public Timestamp getTimestamp(){
 
         long nowTimestamp = System.currentTimeMillis();
-        return computeTimestamp(nowTimestamp-startTimestamp);
+        long timestampInMillis = computeTimestamp(nowTimestamp-startTimestamp);
+        return new Timestamp(timestampInMillis);
     }
 }

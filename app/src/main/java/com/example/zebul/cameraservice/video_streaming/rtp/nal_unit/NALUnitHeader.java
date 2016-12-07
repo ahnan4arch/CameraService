@@ -5,6 +5,7 @@ package com.example.zebul.cameraservice.video_streaming.rtp.nal_unit;
  */
 public class NALUnitHeader {
 
+    public static final int LENGTH = 1;
     private boolean forbiddenZeroBit;
     private byte NALReferenceIndicator;
     private byte NALUnitType;

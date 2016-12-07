@@ -14,7 +14,6 @@ public class NALUnitReader {
 	private byte[] data;
 	private int endExclusive = 0;
 	private int shift = 0;
-	public static final byte [] NAL_UNIT_START_CODES = {(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01};
 	private static final int NOT_FOUND = -1; 
 	
 	public NALUnitReader(String fileFullPath){
@@ -48,7 +47,7 @@ public class NALUnitReader {
 
 	private void moveEnd(){
 
-		endExclusive = findPosOfPattern(data, NAL_UNIT_START_CODES, endExclusive+shift);
+		endExclusive = findPosOfPattern(data, NALUnit.START_CODES, endExclusive+shift);
 		shift = 1;
 		if(0 < endExclusive){
 			if(data[endExclusive-1]==0){
