@@ -1,22 +1,22 @@
 package com.example.zebul.cameraservice.communication.tcp;
 
+import com.example.zebul.cameraservice.av_streaming.rtsp.transport.Transport;
 import com.example.zebul.cameraservice.communication.udp.RTPSession;
-import com.example.zebul.cameraservice.video_streaming.rtsp.Method;
-import com.example.zebul.cameraservice.video_streaming.rtsp.StatusCode;
-import com.example.zebul.cameraservice.video_streaming.rtsp.error.RTSP4xxClientRequestError;
-import com.example.zebul.cameraservice.video_streaming.rtsp.message.body.Body;
-import com.example.zebul.cameraservice.video_streaming.rtsp.message.header.Header;
-import com.example.zebul.cameraservice.video_streaming.rtsp.message.header.HeaderField;
-import com.example.zebul.cameraservice.video_streaming.rtsp.message.header.HeaderFields;
-import com.example.zebul.cameraservice.video_streaming.rtsp.request.RTSPRequest;
-import com.example.zebul.cameraservice.video_streaming.rtsp.request.RTSPRequestDecoder;
-import com.example.zebul.cameraservice.video_streaming.rtsp.response.RTSPResponse;
-import com.example.zebul.cameraservice.video_streaming.rtsp.response.RTSPResponseEncoder;
-import com.example.zebul.cameraservice.video_streaming.rtsp.session.Session;
-import com.example.zebul.cameraservice.video_streaming.rtsp.transport.Transport;
-import com.example.zebul.cameraservice.video_streaming.rtsp.transport.TransportDecoder;
-import com.example.zebul.cameraservice.video_streaming.rtsp.transport.TransportEncoder;
-import com.example.zebul.cameraservice.video_streaming.rtsp.version.Version;
+import com.example.zebul.cameraservice.av_streaming.rtsp.Method;
+import com.example.zebul.cameraservice.av_streaming.rtsp.StatusCode;
+import com.example.zebul.cameraservice.av_streaming.rtsp.error.RTSP4xxClientRequestError;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.body.Body;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Header;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderField;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderFields;
+import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequest;
+import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequestDecoder;
+import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponse;
+import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponseEncoder;
+import com.example.zebul.cameraservice.av_streaming.rtsp.session.Session;
+import com.example.zebul.cameraservice.av_streaming.rtsp.transport.TransportDecoder;
+import com.example.zebul.cameraservice.av_streaming.rtsp.transport.TransportEncoder;
+import com.example.zebul.cameraservice.av_streaming.rtsp.version.Version;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -123,20 +123,32 @@ public class RTSPSession extends Thread {
             int CSeq = request.getHeader().getCSeq();
             HeaderFields headerFields = new HeaderFields();
             Header header = new Header(CSeq, headerFields);
+            session.setVideoTrackId(1);
+            session.setAudioTrackId(2);
             Body body = new Body(session.getDescription());
             return new RTSPResponse(StatusCode.OK, request.getVersion(), header, body);
         }
         else if(request.getMethod().equals(Method.SETUP)){
 
             HeaderField transportHeaderField = request.getHeader().getHeaderFields().find("Transport");
-            if(!transportHeaderField.isEmpty()){
+            int trackId = request.getRequestUri().getTrackId();
+            Transport transport = TransportDecoder.decode(transportHeaderField.getValue());
+            if(!transportHeaderField.isEmpty()) {
 
-                Transport transport = TransportDecoder.decode(transportHeaderField.getValue());
-                session.setTransport(transport);
+                if(trackId == session.getVideoTrackId()){
+
+                    transport.setSsrc("11221A87");
+                    session.setVideoTransport(transport);
+                }
+                else if(trackId == session.getAudioTrackId()){
+
+                    transport.setSsrc("9E7D1A87");
+                    session.setAudioTransport(transport);
+                }
             }
+
             int CSeq = request.getHeader().getCSeq();
             HeaderFields headerFields = new HeaderFields();
-            Transport transport = session.getTransport();
             try {
                 transport.setDestination(InetAddress.getLocalHost().getHostAddress());
             } catch (UnknownHostException exc_) {
@@ -144,7 +156,7 @@ public class RTSPSession extends Thread {
             }
 
             transport.setMode(Transport.Mode.PLAY);
-            transport.setSsrc("9E7D1A87");
+
             headerFields.add(new HeaderField("Transport", TransportEncoder.encode(transport)));
             headerFields.add(new HeaderField("Session", session.getIdentifier()));
             headerFields.add(new HeaderField("Cache-Control", "no-cache"));
@@ -161,21 +173,26 @@ public class RTSPSession extends Thread {
             headerFields.add(new HeaderField("Session", session.getIdentifier()));
             int CSeq = request.getHeader().getCSeq();
             Header header = new Header(CSeq, headerFields);
-            Transport transport = session.getTransport();
             SocketAddress socketAddress = clientSocket.getRemoteSocketAddress();
             String clientIp = "127.0.0.1";
             String [] addressElems = socketAddress.toString().split(":");
             if(1<addressElems.length){
                 clientIp = addressElems[0].replaceAll("/", "");
             }
-            InetSocketAddress address = new InetSocketAddress(clientIp, transport.getMinClientPort());
+            Transport videoTransport = session.getVideoTransport();
+            Transport audioTransport = session.getAudioTransport();
+            InetSocketAddress videoSocketAddress = new InetSocketAddress(
+                    clientIp, videoTransport.getMinClientPort());
+            InetSocketAddress audioSocketAddress = new InetSocketAddress(
+                    clientIp, audioTransport.getMinClientPort());
+
             /*
 
             String fileFullPath = "/home/zebul/Videos/output.mov";
             rtpEngine = new RTPEngine(address, fileFullPath);
             rtpEngine.start();
             */
-            rtpSession = new RTPSession(address);
+            rtpSession = new RTPSession(videoSocketAddress, audioSocketAddress);
             rtpSession.start();
             return new RTSPResponse(StatusCode.OK, request.getVersion(), header);
         }
