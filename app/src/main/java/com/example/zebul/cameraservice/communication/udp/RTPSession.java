@@ -2,15 +2,20 @@ package com.example.zebul.cameraservice.communication.udp;
 
 import android.util.Log;
 
-import com.example.zebul.cameraservice.packet_producers.CameraVideoPacketProducer;
-import com.example.zebul.cameraservice.av_streaming.packetization.RTPPacketizationSession;
+import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacket;
+import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacketListener;
+import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPackets;
+import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264Packets;
+import com.example.zebul.cameraservice.av_streaming.rtp.aac.AACPacketizer;
+import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packetizer;
+import com.example.zebul.cameraservice.av_streaming.rtsp.AudioSettings;
+import com.example.zebul.cameraservice.packet_producers.video.CameraVideoH264PacketProducer;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPPacket;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPPackets;
 import com.example.zebul.cameraservice.message.Message;
-import com.example.zebul.cameraservice.av_streaming.av_packet.AVPacketProducer;
-import com.example.zebul.cameraservice.av_streaming.av_packet.AVPackets;
-import com.example.zebul.cameraservice.av_streaming.av_packet.AVPacketProductionException;
-import com.example.zebul.cameraservice.packet_producers.MicrophoneAudioPacketProducer;
+import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264PacketProducer;
+import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionException;
+import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneAudioAACPacketProducer;
 
 import java.net.InetSocketAddress;
 
@@ -27,7 +32,7 @@ public class RTPSession {
     private SocketEngine audioSocketEngine;
 
     private Thread videoThread;
-    private Thread audioThread;
+    AudioSession audioSession = new AudioSession();
 
     public RTPSession(InetSocketAddress videoSocketAddress, InetSocketAddress audioSocketAddress){
 
@@ -62,8 +67,7 @@ public class RTPSession {
         videoThread.start();
 
         audioSocketEngine.start();
-        audioThread = new Thread(new AudioSession());
-        audioThread.start();
+        audioSession.start();
     }
 
     public void stop(){
@@ -72,44 +76,29 @@ public class RTPSession {
         videoThread.interrupt();
 
         audioSocketEngine.stop();
-        audioThread.interrupt();
+        audioSession.stop();
     }
 
-    class AudioSession implements Runnable{
+    class AudioSession implements AACPacketListener {
 
         private final String TAG = AudioSession.class.getSimpleName();
 
-        AVPacketProducer avPacketProducer =
-                new MicrophoneAudioPacketProducer();
+        MicrophoneAudioAACPacketProducer aacPacketProducer =
+                new MicrophoneAudioAACPacketProducer(AudioSettings.DEFAULT, this);
 
-        RTPPacketizationSession rtpPacketizationSession = new RTPPacketizationSession();
-        @Override
-        public void run() {
+        AACPacketizer aacPacketizer = new AACPacketizer();
 
-            try {
+        public void start() {
 
-                while (true) {
-
-                    packetize();
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            catch(AVPacketProductionException exc_){
-
-                int foo = 1;
-                int bar = foo;
-            }
+            aacPacketProducer.start();
         }
 
-        private void packetize() throws AVPacketProductionException {
+        @Override
+        public void onAACPacket(AACPacket aacPacket) {
 
-            AVPackets avPackets = avPacketProducer.produceAVPackets();
-            Log.d(TAG, "produced: "+avPackets.getNumberOfPackets()+" avPackets");
-            RTPPackets rtpPackets = rtpPacketizationSession.createRTPPackests(avPackets);
+            AACPackets aacPackets = new AACPackets();
+            aacPackets.addPacket(aacPacket);
+            RTPPackets rtpPackets = aacPacketizer.createRTPPackets(aacPackets);
             Log.d(TAG, "created: "+rtpPackets.getNumberOfPackets()+" rtpPackets");
             int count = rtpPackets.getNumberOfPackets();
             for (RTPPacket rtpPacket : rtpPackets) {
@@ -118,12 +107,12 @@ public class RTPSession {
                 Log.d(TAG, rtpPacketBytes.length +" bytes will be sent");
                 Message message = new Message(audioSocketAddress, rtpPacketBytes);
                 audioSocketEngine.post(message);
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
+        }
+
+        public void stop() {
+
+            aacPacketProducer.stop();
         }
     }
 
@@ -131,11 +120,11 @@ public class RTPSession {
 
         private static final String TAG = "ZZZ";
 
-        AVPacketProducer avPacketProducer =
+        H264PacketProducer avPacketProducer =
                 //new AssetFileAVPacketProducer("H264_artifacts_motion.h264");
-                new CameraVideoPacketProducer();
+                new CameraVideoH264PacketProducer();
 
-        RTPPacketizationSession rtpPacketizationSession = new RTPPacketizationSession();
+        H264Packetizer h264RtpPacketizer = new H264Packetizer();
         @Override
         public void run() {
 
@@ -151,18 +140,18 @@ public class RTPSession {
                     }
                 }
             }
-            catch(AVPacketProductionException exc_){
+            catch(PacketProductionException exc_){
 
                 int foo = 1;
                 int bar = foo;
             }
         }
 
-        private void packetize() throws AVPacketProductionException {
+        private void packetize() throws PacketProductionException {
 
-            AVPackets avPackets = avPacketProducer.produceAVPackets();
+            H264Packets H264Packets = avPacketProducer.produceH264Packets();
             //Log.d(TAG, "produced: "+avPackets.getNumberOfPackets()+" avPackets");
-            RTPPackets rtpPackets = rtpPacketizationSession.createRTPPackests(avPackets);
+            RTPPackets rtpPackets = h264RtpPacketizer.createRTPPackets(H264Packets);
             //Log.d(TAG, "created: "+rtpPackets.getNumberOfPackets()+" rtpPackets");
             int count = rtpPackets.getNumberOfPackets();
             for (RTPPacket rtpPacket : rtpPackets) {

@@ -130,11 +130,11 @@ public class ProjectStructure {
         }
     }
 
-    class RTPPacketizationSession{
+    class H264Packetizer{
         private int sequenceNumber = 0;
         private int SSRC = 0;
 
-        List<RTPDataPacket> createRTPPackests(AVPackets videoDataPack_){
+        List<RTPDataPacket> createRTPPackests(DataPackets videoDataPack_){
         }
         class RTPPacketizer{
 
@@ -146,7 +146,7 @@ public class ProjectStructure {
         private int sequenceNumber = 0;
         private int SSRC = 0;
 
-        AVPackets createVideoDataPack(RTPPacketData rtpPacketData){
+        DataPackets createVideoDataPack(RTPPacketData rtpPacketData){
 
             rtpDepacketizer.createNALUnit(rtpPacketData);
         }

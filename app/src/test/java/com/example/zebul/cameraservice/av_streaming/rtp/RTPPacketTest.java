@@ -1,7 +1,5 @@
 package com.example.zebul.cameraservice.av_streaming.rtp;
 
-import com.example.zebul.cameraservice.av_streaming.rtp.header.RTPHeader;
-
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;

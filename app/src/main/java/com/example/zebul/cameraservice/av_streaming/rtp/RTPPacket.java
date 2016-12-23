@@ -1,7 +1,6 @@
 package com.example.zebul.cameraservice.av_streaming.rtp;
 
-import com.example.zebul.cameraservice.av_streaming.rtp.header.RTPHeader;
-import com.example.zebul.cameraservice.av_streaming.rtp.payload.RTPPayload;
+import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.H264Payload;
 
 /**
  * Created by zebul on 11/21/16.

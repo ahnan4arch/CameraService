@@ -1,6 +1,6 @@
 package com.example.zebul.cameraservice.av_streaming;
 
-import com.example.zebul.cameraservice.av_streaming.rtp.header.RTPHeader;
+import com.example.zebul.cameraservice.av_streaming.rtp.RTPHeader;
 
 import org.junit.Test;
 

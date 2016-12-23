@@ -31,4 +31,8 @@ public class RTPPackets implements Iterable<RTPPacket>{
 
         this.rtpPackets.addAll(rtpPackets);
     }
+
+    public RTPPacket getPacket(int position) {
+        return rtpPackets.get(position);
+    }
 }

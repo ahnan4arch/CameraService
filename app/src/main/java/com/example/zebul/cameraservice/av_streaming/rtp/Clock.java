@@ -1,7 +1,5 @@
 package com.example.zebul.cameraservice.av_streaming.rtp;
 
-import com.example.zebul.cameraservice.av_streaming.rtp.header.Timestamp;
-
 /**
  * Created by zebul on 10/31/16.
  */
