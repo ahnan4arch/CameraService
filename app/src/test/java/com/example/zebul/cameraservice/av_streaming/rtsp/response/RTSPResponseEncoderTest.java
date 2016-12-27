@@ -10,11 +10,6 @@ public class RTSPResponseEncoderTest {
 
 	private static final String SEP = RTSPProtocol.LINE_SEPARATOR;
 	
-	@Test
-	public void test_encoded_response_contains_at_least_one_message_length_indicator() {
-		fail("Not yet implemented");
-	}
-	
 
 	public void test_describe_response(){
 		

@@ -60,4 +60,24 @@ public class NALUnitHeader {
         return nalUnitType;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        NALUnitHeader that = (NALUnitHeader) o;
+
+        if (forbiddenZeroBit != that.forbiddenZeroBit) return false;
+        if (nalReferenceIndicator != that.nalReferenceIndicator) return false;
+        return nalUnitType == that.nalUnitType;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (forbiddenZeroBit ? 1 : 0);
+        result = 31 * result + (int) nalReferenceIndicator;
+        result = 31 * result + nalUnitType.hashCode();
+        return result;
+    }
 }
