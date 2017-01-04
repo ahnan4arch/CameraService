@@ -68,7 +68,6 @@ public class CameraVideoH264PacketProducer extends HardwarePacketProducer {
 
     private MediaCodec.BufferInfo bufferInfo;
     private static final String MIME_TYPE = "video/avc";    // H.264 Advanced Video Coding
-    private static final int FRAME_RATE = 30;               // 30fps
     private static final int IFRAME_INTERVAL = 5;           // 5 seconds between I-frames
 
     private String sessionName;
@@ -351,7 +350,7 @@ public class CameraVideoH264PacketProducer extends HardwarePacketProducer {
             // open() call to throw an unhelpful exception.
 
             format.setInteger(MediaFormat.KEY_BIT_RATE, videoSettings.getBitRate());
-            format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
+            format.setInteger(MediaFormat.KEY_FRAME_RATE, videoSettings.getFrameRate());
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
 

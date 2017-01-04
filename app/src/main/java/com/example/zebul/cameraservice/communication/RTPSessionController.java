@@ -36,7 +36,9 @@ public class RTPSessionController implements RTSPRequestListener{
     private Socket clientSocket;
     private RTPSession rtpSession;
 
-    private VideoSettings videoSettings = new VideoSettings(Resolution._640x480, 1000000/*6000000*/);
+    private VideoSettings videoSettings =
+            new VideoSettings(Resolution._640x480, 1000000/*6000000*/, VideoSettings.DEFAULT_FRAME_RATE);
+
     private AudioSettings audioSettings = AudioSettings.DEFAULT;
 
     private int port = 5001;

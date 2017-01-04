@@ -67,7 +67,7 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
                                                int i) {
 
         Resolution resolution = Resolution._640x480;
-        VideoSettings videoSettings = new VideoSettings(resolution, 6000000);
+        VideoSettings videoSettings = new VideoSettings(resolution, 6000000, VideoSettings.DEFAULT_FRAME_RATE);
         CameraSettings cameraSettings = new CameraSettings(videoSettings);
         producer.start(cameraSettings, i+"");
         Timeout timeout = new Timeout(5, TimeUnit.SECONDS);

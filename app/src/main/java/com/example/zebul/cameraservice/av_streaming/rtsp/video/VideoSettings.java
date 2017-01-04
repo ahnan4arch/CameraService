@@ -6,10 +6,13 @@ package com.example.zebul.cameraservice.av_streaming.rtsp.video;
 
 public class VideoSettings {
 
+    public static final int DEFAULT_FRAME_RATE = 30;// 30fps
+
     private Resolution resolution;
     private int bitRate;
+    private int frameRate = DEFAULT_FRAME_RATE;
 
-    public VideoSettings(Resolution resolution, int bitRate){
+    public VideoSettings(Resolution resolution, int bitRate, int frameRate){
 
         this.resolution = resolution;
         this.bitRate = bitRate;
@@ -21,5 +24,9 @@ public class VideoSettings {
 
     public int getBitRate() {
         return bitRate;
+    }
+
+    public int getFrameRate() {
+        return frameRate;
     }
 }
