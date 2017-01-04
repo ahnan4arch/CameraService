@@ -2,11 +2,13 @@ package com.example.zebul.cameraservice.packet_producers;
 
 import android.test.AndroidTestCase;
 
+import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionException;
+import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionExceptionListener;
 import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacket;
 import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacketListener;
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPackets;
-import com.example.zebul.cameraservice.av_streaming.rtsp.AudioSettings;
+import com.example.zebul.cameraservice.av_streaming.rtsp.audio.AudioSettings;
 import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneAudioAACPacketProducer;
+import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneSettings;
 import com.example.zebul.cameraservice.utils.Timeout;
 
 import java.util.concurrent.TimeUnit;
@@ -19,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MicrophoneAudioAACPacketProducerTest extends AndroidTestCase {
 
 
-    class Idleness {
+    static class Idleness {
 
         public void makeIdle(long milliseconds_) {
 
@@ -30,21 +32,50 @@ public class MicrophoneAudioAACPacketProducerTest extends AndroidTestCase {
             }
         }
     }
+
     public void testAudioAACPacketProduction() throws Throwable {
 
         final AtomicBoolean packetReceived = new AtomicBoolean(false);
-        MicrophoneAudioAACPacketProducer producer =
-                new MicrophoneAudioAACPacketProducer(AudioSettings.DEFAULT,
-                        new AACPacketListener() {
-                            @Override
-                            public void onAACPacket(AACPacket aacPacket) {
+        final AtomicBoolean errorReceived = new AtomicBoolean(false);
 
-                                packetReceived.set(true);
-                            }
-                });
-        producer.start();
+        AACPacketListener aacPacketListener = new AACPacketListener() {
+            @Override
+            public void onAACPacket(AACPacket aacPacket) {
 
-        Timeout timeout = new Timeout(2, TimeUnit.SECONDS);
+                packetReceived.set(true);
+            }
+        };
+        PacketProductionExceptionListener packetProductionExceptionListener =
+                new PacketProductionExceptionListener() {
+                    @Override
+                    public void onPacketProductionException(PacketProductionException exc) {
+
+                        errorReceived.set(true);
+                        throw new RuntimeException(exc);
+                    }
+                };
+
+        MicrophoneAudioAACPacketProducer producer = new MicrophoneAudioAACPacketProducer(
+                aacPacketListener, packetProductionExceptionListener);
+
+        for(int i=0; i<10; i++){
+
+            packetReceived.set(false);
+            errorReceived.set(false);
+            audioAACPacketProduction(producer, packetReceived, i);
+            assertTrue("error in iteration: "+i, packetReceived.get());
+            assertFalse("error in iteration: "+i, errorReceived.get());
+        }
+    }
+
+    public void audioAACPacketProduction(
+            MicrophoneAudioAACPacketProducer producer,
+            AtomicBoolean packetReceived,
+            int i){
+
+        MicrophoneSettings microphoneSettings = new MicrophoneSettings(AudioSettings.DEFAULT);
+        producer.start(microphoneSettings);
+        Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
         while(!timeout.isTimeout()) {
 
             if(packetReceived.get()){
@@ -54,8 +85,6 @@ public class MicrophoneAudioAACPacketProducerTest extends AndroidTestCase {
                 new Idleness().makeIdle(100);
             }
         }
-
         producer.stop();
-        assertTrue(packetReceived.get());
     }
 }

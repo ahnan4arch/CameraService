@@ -1,4 +1,4 @@
-package com.example.zebul.cameraservice.packet_producers.video;
+package com.example.zebul.cameraservice.packet_producers.video.file;
 
 import android.content.res.AssetManager;
 

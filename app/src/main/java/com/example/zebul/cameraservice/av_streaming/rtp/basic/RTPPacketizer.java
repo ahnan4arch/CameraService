@@ -27,6 +27,11 @@ public abstract class RTPPacketizer {
         this(0, new Random().nextInt());
     }
 
+    public static int generateRandomInt(){
+
+        return new Random().nextInt();
+    }
+
     protected RTPHeader createRTPHeader(Timestamp timestamp, boolean isLast){
 
         boolean markerBit = isLast ? true : false;///???????????????

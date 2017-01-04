@@ -18,6 +18,11 @@ import java.util.List;
 
 public class AACPacketizer extends RTPPacketizer {
 
+    public AACPacketizer(int sequenceNumber, int SSRC){
+
+        super(sequenceNumber, SSRC);
+    }
+
     public RTPPackets createRTPPackets(AACPackets aacPackets) {
 
         RTPPackets rtpPackets = new RTPPackets();
@@ -28,10 +33,10 @@ public class AACPacketizer extends RTPPacketizer {
         return rtpPackets;
     }
 
-    private List<RTPPacket> createRTPPackets(AACPacket aacPacket) {
+    public RTPPackets createRTPPackets(AACPacket aacPacket) {
 
-        List<RTPPacket> rtpPackets = new LinkedList<RTPPacket>();
-        rtpPackets.add(createRTPPacket(aacPacket));
+        RTPPackets rtpPackets = new RTPPackets();
+        rtpPackets.addRTPPacket(createRTPPacket(aacPacket));
         return rtpPackets;
     }
 

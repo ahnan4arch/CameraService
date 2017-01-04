@@ -6,8 +6,13 @@ package com.example.zebul.cameraservice.av_streaming.av_packet;
 
 public class PacketProductionException extends Exception{
 
-    public PacketProductionException(String message_){
+    public PacketProductionException(Throwable cause){
 
-        super(message_);
+        super(cause);
+    }
+
+    public PacketProductionException(String message){
+
+        super(message);
     }
 }

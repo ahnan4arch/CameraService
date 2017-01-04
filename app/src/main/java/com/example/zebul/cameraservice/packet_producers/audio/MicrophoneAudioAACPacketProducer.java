@@ -8,14 +8,15 @@ import android.media.MediaFormat;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacketListener;
-import com.example.zebul.cameraservice.av_streaming.rtsp.AudioSettings;
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacket;
 import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionException;
+import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionExceptionListener;
+import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacketListener;
+import com.example.zebul.cameraservice.av_streaming.rtsp.audio.AudioSettings;
+import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacket;
 import com.example.zebul.cameraservice.av_streaming.rtp.Clock;
 import com.example.zebul.cameraservice.av_streaming.rtp.Timestamp;
 import com.example.zebul.cameraservice.av_streaming.rtp.aac.AccessUnit;
-import com.example.zebul.cameraservice.packet_producers.ProductionEngine;
+import com.example.zebul.cameraservice.packet_producers.ProductionThread;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,35 +27,34 @@ import java.nio.ByteBuffer;
 
 public class MicrophoneAudioAACPacketProducer implements Runnable{
 
-    private static final String TAG = "CameraPacketProducer";
-    private AudioSettings audioSettings;
-    private AACPacketListener aacPacketListener;
+    private static final String TAG = MicrophoneAudioAACPacketProducer.class.getSimpleName();
+    private static final long OUTPUT_BUFFER_TIMEOUT_US = 500000;
+    private static final long INPUT_BUFFER_TIMEOUT_US = 10000;
 
-    protected AudioRecord mAudioRecord = null;
-    protected MediaCodec mMediaCodec;
-
-    private ProductionEngine engine = new ProductionEngine();
+    private ProductionThread engine = new ProductionThread();
     private MediaCodec.BufferInfo mBufferInfo = new MediaCodec.BufferInfo();
+
+    private AACPacketListener aacPacketListener;
+    private PacketProductionExceptionListener packetProductionExceptionListener;
+
+    private AudioSettings audioSettings;
+    private AudioRecord audioRecord;
+    private MediaCodec mediaCodec;
+
     private Clock clock;
-
     private int bufferSize = 0;
+
     public MicrophoneAudioAACPacketProducer(
-            AudioSettings audioSettings,
-            AACPacketListener aacPacketListener){
+            AACPacketListener aacPacketListener,
+            PacketProductionExceptionListener packetProductionExceptionListener){
 
-        this.audioSettings = audioSettings;
         this.aacPacketListener = aacPacketListener;
-
-        clock = new Clock(audioSettings.getSamplingRate());
-
-        bufferSize = AudioRecord.getMinBufferSize(
-                audioSettings.getSamplingRate(),
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT)*2;
+        this.packetProductionExceptionListener = packetProductionExceptionListener;
     }
 
-    public void start(){
+    public void start(MicrophoneSettings microphoneSettings){
 
+        this.audioSettings = microphoneSettings.getAudioSettings();
         engine.start(this);
     }
 
@@ -72,31 +72,67 @@ public class MicrophoneAudioAACPacketProducer implements Runnable{
 
                 produce();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception exc) {
+
+            PacketProductionException ppe = new PacketProductionException(exc);
+            packetProductionExceptionListener.onPacketProductionException(ppe);
+        }
+        finally {
+
+            tryRelease();
+        }
+    }
+
+    private void tryRelease() {
+
+        try {
+            release();
+        } catch (Exception exc) {
+            PacketProductionException ppe = new PacketProductionException(exc);
+            packetProductionExceptionListener.onPacketProductionException(ppe);
+        }
+    }
+
+    private void release() {
+
+        if(mediaCodec != null){
+            //mediaCodec.stop();
+            mediaCodec.release();
+        }
+        if(audioRecord != null){
+            audioRecord.stop();
+            audioRecord.release();
         }
     }
 
     private void configure() throws IOException {
 
-        mAudioRecord = new AudioRecord(
+        clock = new Clock(audioSettings.getSamplingRate());
+
+        bufferSize = AudioRecord.getMinBufferSize(
+                audioSettings.getSamplingRate(),
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT)*2;
+
+        audioRecord = new AudioRecord(
                 MediaRecorder.AudioSource.MIC,
                 audioSettings.getSamplingRate(),
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
                 bufferSize);
 
-        mMediaCodec = MediaCodec.createEncoderByType("audio/mp4a-latm");
+        final String mimeType =  "audio/mp4a-latm";
+        mediaCodec = MediaCodec.createEncoderByType(mimeType);
         MediaFormat format = new MediaFormat();
-        format.setString(MediaFormat.KEY_MIME, "audio/mp4a-latm");
+        format.setString(MediaFormat.KEY_MIME, mimeType);
         format.setInteger(MediaFormat.KEY_BIT_RATE, audioSettings.getBitRate());
         format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
         format.setInteger(MediaFormat.KEY_SAMPLE_RATE, audioSettings.getSamplingRate());
         format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
         format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize);
-        mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-        mAudioRecord.startRecording();
-        mMediaCodec.start();
+        mediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        audioRecord.startRecording();
+        mediaCodec.start();
     }
 
     private void produce() {
@@ -107,110 +143,101 @@ public class MicrophoneAudioAACPacketProducer implements Runnable{
 
     private void manageInput(){
 
-        try {
-            long timeoutUs = 10000;
-            int inputBufferId = mMediaCodec.dequeueInputBuffer(timeoutUs);
-            if (inputBufferId>=0) {
-                final ByteBuffer[] inputBuffers = mMediaCodec.getInputBuffers();
-                inputBuffers[inputBufferId].clear();
-                int len = mAudioRecord.read(inputBuffers[inputBufferId], bufferSize);
-                if (len ==  AudioRecord.ERROR_INVALID_OPERATION || len == AudioRecord.ERROR_BAD_VALUE) {
-                    Log.e(TAG,"An error occured with the AudioRecord API !");
-                    int foo = 1;
-                    int bar = foo;
-                } else {
-                    //Log.v(TAG,"Pushing raw audio to the decoder: len="+len+" bs: "+inputBuffers[bufferIndex].capacity());
-                    mMediaCodec.queueInputBuffer(inputBufferId, 0, len, System.nanoTime()/1000, 0);
-                }
+        int inputBufferIndex = mediaCodec.dequeueInputBuffer(INPUT_BUFFER_TIMEOUT_US);
+        if ( inputBufferIndex>=0 ) {
 
-            }
-        } catch (Exception e) {
+            onInputSuccess(inputBufferIndex);
+        }
+        else{
 
-            int foo = 1;
-            int bar = foo;
-            e.printStackTrace();
+            onInputFailure(inputBufferIndex);
         }
     }
 
     private void manageOutput() {
 
-        long timeoutUs = 500000;
-        int outputBufferIndex = mMediaCodec.dequeueOutputBuffer(mBufferInfo, timeoutUs);
+        int outputBufferIndex = mediaCodec.dequeueOutputBuffer(mBufferInfo, OUTPUT_BUFFER_TIMEOUT_US);
         if ( outputBufferIndex>=0 ){
-            //Log.d(TAG,"Index: "+mIndex+" Time: "+mBufferInfo.presentationTimeUs+" size: "+mBufferInfo.size);
-            final ByteBuffer[] outputBuffers = mMediaCodec.getOutputBuffers();
 
-            Log.d(TAG, "Queue Buffer out " + outputBufferIndex);
-            ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
-            if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0)
-            {
-                // Config Bytes means SPS and PPS
-                Log.d(TAG, "Got config bytes");
-            }
+            onOutputSuccess(outputBufferIndex);
+        }
+        else{
 
-            if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) != 0)
-            {
-                // Marks a Keyframe
-                Log.d(TAG, "Got Sync Frame");
-            }
+            onOutputFailure(outputBufferIndex);
+        }
+    }
 
-            if (mBufferInfo.size != 0)
-            {
-                // adjust the ByteBuffer values to match BufferInfo (not needed?)
-                outputBuffer.position(mBufferInfo.offset);
-                outputBuffer.limit(mBufferInfo.offset + mBufferInfo.size);
-                Log.d(TAG, "Audio data out len: " + mBufferInfo.size);
-                try{
+    private void onInputSuccess(int inputBufferIndex) {
 
-                    byte [] accessUnitData = new byte[mBufferInfo.size];
-                    outputBuffer.get(accessUnitData, 0, mBufferInfo.size);
+        final ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
+        inputBuffers[inputBufferIndex].clear();
+        int len = audioRecord.read(inputBuffers[inputBufferIndex], bufferSize);
+        if (len ==  AudioRecord.ERROR_INVALID_OPERATION) {
+            Log.e(TAG, "AudioRecord.ERROR_INVALID_OPERATION");
+        }
+        else if (len == AudioRecord.ERROR_BAD_VALUE) {
+            Log.e(TAG, "AudioRecord.ERROR_BAD_VALUE");
+        }
+        else {
+            long presentationTimeUs = System.nanoTime()/1000;
+            mediaCodec.queueInputBuffer(inputBufferIndex, 0, len, presentationTimeUs, 0);
+        }
+    }
 
-                    AccessUnit accessUnit = new AccessUnit(accessUnitData);
-                    Timestamp timestamp = clock.getTimestamp();
-                    AACPacket aacPacket = new AACPacket(accessUnit, timestamp);
+    private void onInputFailure(int inputBufferId) {
 
-                    aacPacketListener.onAACPacket(aacPacket);
-                    Log.d(TAG, "added " + mBufferInfo.size + " bytes to sent + presentation time ms"+timestamp.getTimestampInMillis());
-                }
-                catch(Exception exc_){
+    }
 
-                    int foo = 1;
-                    int bar = foo;
-                }
-            }
+    private void onOutputSuccess(int outputBufferIndex) {
 
-            mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
+        final ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
+        ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
+        if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0)
+        {
+            Log.d(TAG, "Got config bytes");
+        }
 
-            if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0)
-            {
-                // Stream is marked as done,
-                // break out of while
-                Log.d(TAG, "Marked EOS");
-                int foo = 1;
-                int bar = foo;
-            }
+        if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) != 0)
+        {
+            Log.d(TAG, "Got Sync Frame");
+        }
 
-        } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
+        if (mBufferInfo.size != 0)
+        {
+            // adjust the ByteBuffer values to match BufferInfo (not needed?)
+            outputBuffer.position(mBufferInfo.offset);
+            outputBuffer.limit(mBufferInfo.offset + mBufferInfo.size);
+            Log.d(TAG, "Audio data out len: " + mBufferInfo.size);
+            byte [] accessUnitData = new byte[mBufferInfo.size];
+            outputBuffer.get(accessUnitData, 0, mBufferInfo.size);
 
-            int foo = 1;
-            int bar = foo;
-        } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+            AccessUnit accessUnit = new AccessUnit(accessUnitData);
+            Timestamp timestamp = clock.getTimestamp();
+            AACPacket aacPacket = new AACPacket(accessUnit, timestamp);
 
-            int foo = 1;
-            int bar = foo;
-        } else if (outputBufferIndex == MediaCodec.INFO_TRY_AGAIN_LATER) {
+            aacPacketListener.onAACPacket(aacPacket);
+            Log.d(TAG, "added " + mBufferInfo.size + " bytes to sent + presentation time ms"+timestamp.getTimestampInMillis());
+        }
 
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            int foo = 1;
-            int bar = foo;
-        } else {
+        mediaCodec.releaseOutputBuffer(outputBufferIndex, false);
 
-            int foo = 1;
-            int bar = foo;
+        if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0)
+        {
+            // Stream is marked as done,
+            // break out of while
+            Log.d(TAG, "Marked EOS");
+        }
+    }
+
+    private void onOutputFailure(int infoIndex) {
+
+        switch(infoIndex){
+            case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
+                break;
+            case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
+                break;
+            case MediaCodec.INFO_TRY_AGAIN_LATER:
+                break;
         }
     }
 }

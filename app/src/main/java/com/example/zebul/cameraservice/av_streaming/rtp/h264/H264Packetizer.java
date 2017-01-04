@@ -48,37 +48,37 @@ public class H264Packetizer extends RTPPacketizer {
         return rtpPackets;
     }
 
-    public List<RTPPacket> createRTPPackets(H264Packet h264packet){
+    public RTPPackets createRTPPackets(H264Packet h264Packet){
 
-        NALUnit nalUnit = h264packet.getNALUnit();
+        NALUnit nalUnit = h264Packet.getNALUnit();
         byte [] nalUnitData = nalUnit.getData();
         if(nalUnitData.length < maxPayloadLength){
 
-            List<RTPPacket> rtpPackets = new LinkedList<RTPPacket>();
+            RTPPackets rtpPackets = new RTPPackets();
             if(nalUnitData.length <= 4){
                 return rtpPackets;
             }
-            RTPPacket rtpPacket = createSingleTimeNALUnitPacket(h264packet);
-            rtpPackets.add(rtpPacket);
+            RTPPacket rtpPacket = createSingleTimeNALUnitPacket(h264Packet);
+            rtpPackets.addRTPPacket(rtpPacket);
             return rtpPackets;
         }
         else{
 
-            return createFragmentationUnitPackets(h264packet);
+            return createFragmentationUnitPackets(h264Packet);
         }
     }
 
-    private RTPPacket createSingleTimeNALUnitPacket(H264Packet h264packet) {
+    private RTPPacket createSingleTimeNALUnitPacket(H264Packet h264Packet) {
 
-        RTPHeader rtpHeader = createRTPHeader(h264packet.getTimestamp(), true);
-        H264Payload rtpPayload = new STAP_A_RTPPayload(h264packet.getNALUnit());
+        RTPHeader rtpHeader = createRTPHeader(h264Packet.getTimestamp(), true);
+        H264Payload rtpPayload = new STAP_A_RTPPayload(h264Packet.getNALUnit());
         RTPPacket rtpPacket = new RTPPacket(rtpHeader, rtpPayload);
         return rtpPacket;
     }
 
-    private List<RTPPacket> createFragmentationUnitPackets(H264Packet h264packet) {
+    private RTPPackets createFragmentationUnitPackets(H264Packet h264packet) {
 
-        List<RTPPacket> rtpPackets = new LinkedList<RTPPacket>();
+        RTPPackets rtpPackets = new RTPPackets();
 
         int offsetOfNALUnit = NALUnit.START_CODES.length;
         int offsetOfDataInNalUnit = offsetOfNALUnit+1;//omit NALUnit header
@@ -116,7 +116,7 @@ public class H264Packetizer extends RTPPacketizer {
             RTPHeader rtpHeader = createRTPHeader(h264packet.getTimestamp(), end);
             H264Payload rtpPayload = new FU_A_RTPPayload(fuIndicator, fuHeader, payloadFragmentData);
             RTPPacket rtpPacket = new RTPPacket(rtpHeader, rtpPayload);
-            rtpPackets.add(rtpPacket);
+            rtpPackets.addRTPPacket(rtpPacket);
 
             if(end){
                 break;

@@ -21,10 +21,8 @@ public class Session {
     private Transport audioTransport;
 	private String identifier;
 
-    public static final int TRACK_UNUSED = -1;
-
-    private int videoTrackId = TRACK_UNUSED;
-    private int audioTrackId = TRACK_UNUSED;
+    private SessionAudioInfo sessionAudioInfo;
+    private SessionVideoInfo sessionVideoInfo;
 	
 	public Session(int destinationPort){
 		
@@ -56,24 +54,40 @@ public class Session {
 		return identifier;
 	}
 
-    public int getAudioTrackId(){
+	public boolean isVideoTrackId(int trackId) {
 
-        return audioTrackId;
+		if(sessionVideoInfo == null){
+			return false;
+		}
+		return sessionVideoInfo.getVideoTrackId()==trackId;
+	}
+
+	public boolean isAudioTrackId(int trackId) {
+
+		if(sessionAudioInfo == null){
+			return false;
+		}
+		return sessionAudioInfo.getAudioTrackId()==trackId;
+	}
+
+    public SessionAudioInfo getSessionAudioInfo(){
+
+        return sessionAudioInfo;
     }
 
-    public void setAudioTrackId(int audioTrackId){
+    public void setSessionAudioInfo(SessionAudioInfo sessionAudioInfo){
 
-        this.audioTrackId = audioTrackId;
+        this.sessionAudioInfo = sessionAudioInfo;
     }
 
-    public int getVideoTrackId(){
+    public SessionVideoInfo getSessionVideoInfo(){
 
-        return videoTrackId;
+        return sessionVideoInfo;
     }
 
-    public void setVideoTrackId(int videoTrackId){
+    public void setSessionVideoInfo(SessionVideoInfo sessionVideoInfo){
 
-        this.videoTrackId = videoTrackId;
+        this.sessionVideoInfo = sessionVideoInfo;
     }
 	
 	
@@ -89,7 +103,7 @@ public class Session {
 		descriptionBuilder.append(t_formatTime()				+RTSPProtocol.LINE_SEPARATOR);
 
 		// ---- BEG OF VIDEO SECTION
-        if(videoTrackId != TRACK_UNUSED){
+        if(sessionVideoInfo != null){
 
             descriptionBuilder.append(m_formatMediaDescriptions(Media.Video)
                     +RTSPProtocol.LINE_SEPARATOR);
@@ -102,7 +116,7 @@ public class Session {
 
 
         // ---- BEG OF AUDIO SECTION
-        if(audioTrackId != TRACK_UNUSED){
+        if(sessionAudioInfo != null){
 
             descriptionBuilder.append(m_formatMediaDescriptions(Media.Audio)
                     +RTSPProtocol.LINE_SEPARATOR);

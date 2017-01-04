@@ -1,5 +1,6 @@
 package com.example.zebul.cameraservice.av_streaming.rtp;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,9 +28,9 @@ public class RTPPackets implements Iterable<RTPPacket>{
         return rtpPackets.size();
     }
 
-    public void addRTPPackets(List<RTPPacket> rtpPackets) {
+    public void addRTPPackets(RTPPackets rtpPackets) {
 
-        this.rtpPackets.addAll(rtpPackets);
+        this.rtpPackets.addAll(rtpPackets.rtpPackets);
     }
 
     public RTPPacket getPacket(int position) {

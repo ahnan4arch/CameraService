@@ -30,4 +30,9 @@ public abstract class DataPackets<DATA_PACKET extends DataPacket> implements Ite
 
         return avPackets.size();
     }
+
+    public boolean containsPackets() {
+
+        return !avPackets.isEmpty();
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.zebul.cameraservice.av_streaming.rtsp;
+package com.example.zebul.cameraservice.av_streaming.rtsp.audio;
 
 /**
  * Created by zebul on 12/23/16.

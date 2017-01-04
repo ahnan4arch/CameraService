@@ -9,7 +9,7 @@ import static org.junit.Assert.assertNotNull;
 public class VersionDecoderTest {
 
 	@Test
-	public void test_when_version_text_is_valid_then_Version_is_can_be_decoded() throws VersionDecodeException {
+	public void test_when_version_text_is_valid_then_Version_can_be_decoded() throws VersionDecodeException {
 		
 		String versionAsText = "RTSP/1.0";
 		Version version = VersionDecoder.decode(versionAsText);
