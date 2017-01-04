@@ -16,6 +16,7 @@ public class VideoSettings {
 
         this.resolution = resolution;
         this.bitRate = bitRate;
+        this.frameRate = frameRate;
     }
 
     public Resolution getResolution() {
