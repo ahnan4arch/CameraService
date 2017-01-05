@@ -17,6 +17,7 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.transport.TransportDeco
 import com.example.zebul.cameraservice.av_streaming.rtsp.transport.TransportEncoder;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.Resolution;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.VideoSettings;
+import com.example.zebul.cameraservice.communication.tcp.RTSPSessionLifecycleListener;
 import com.example.zebul.cameraservice.communication.udp.RTPSession;
 import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneSettings;
 import com.example.zebul.cameraservice.packet_producers.video.camera.CameraSettings;
@@ -31,7 +32,7 @@ import java.net.UnknownHostException;
  * Created by zebul on 1/1/17.
  */
 
-public class RTPSessionController implements RTSPRequestListener{
+public class RTPSessionController implements RTSPRequestListener, RTSPSessionLifecycleListener {
 
     private Socket clientSocket;
     private RTPSession rtpSession;
@@ -51,6 +52,7 @@ public class RTPSessionController implements RTSPRequestListener{
 
     @Override
     public RTSPResponse onDescribe(RTSPRequest request) throws RTSP4xxClientRequestError {
+
         int CSeq = request.getHeader().getCSeq();
         HeaderFields headerFields = new HeaderFields();
         Header header = new Header(CSeq, headerFields);
@@ -174,6 +176,30 @@ public class RTPSessionController implements RTSPRequestListener{
 
     @Override
     public RTSPResponse onTeardown(RTSPRequest request) throws RTSP4xxClientRequestError {
-        throw new RTSP4xxClientRequestError(StatusCode.NOT_IMPLEMENTED, "Not impelmented");
+
+        close();
+        int CSeq = request.getHeader().getCSeq();
+        HeaderFields headerFields = new HeaderFields();
+        Header header = new Header(CSeq, headerFields);
+        return new RTSPResponse(StatusCode.OK, request.getVersion(), header);
+    }
+
+    public void close() {
+
+        if(rtpSession != null){
+
+            rtpSession.stop();
+            rtpSession = null;
+        }
+    }
+
+    @Override
+    public void onSessionCreated() {
+
+    }
+
+    @Override
+    public void onSessionDestroyed() {
+        close();
     }
 }

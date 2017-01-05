@@ -77,8 +77,8 @@ public class RTPSession {
         videoSocketEngine.start();
         videoSession.start();
 
-        //audioSocketEngine.start();
-        //audioSession.start();
+        audioSocketEngine.start();
+        audioSession.start();
     }
 
     public void stop(){

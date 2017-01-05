@@ -11,6 +11,7 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequestDeco
 import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponse;
 import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponseEncoder;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.Version;
+import com.example.zebul.cameraservice.communication.RTSPRequestListener;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -27,14 +28,19 @@ public class RTSPSession extends Thread {
     private DataInputStream input;
     private DataOutputStream output;
     private Socket clientSocket;
-    private RTPSessionController rtpSessionController;
+    private RTSPRequestListener rtspRequestListener;
+    private RTSPSessionLifecycleListener rtspSessionLifecycleListener;
 
-    public RTSPSession(Socket aClientSocket) {
+    public RTSPSession(Socket clientSocket,
+                       RTSPSessionLifecycleListener rtspSessionLifecycleListener,
+                       RTSPRequestListener rtspRequestListener) {
         try {
-            clientSocket = aClientSocket;
-            input = new DataInputStream( clientSocket.getInputStream());
-            output =new DataOutputStream( clientSocket.getOutputStream());
-            rtpSessionController = new RTPSessionController(clientSocket);
+            this.clientSocket = clientSocket;
+            this.rtspSessionLifecycleListener = rtspSessionLifecycleListener;
+            this.rtspRequestListener = rtspRequestListener;
+
+            input = new DataInputStream( this.clientSocket.getInputStream());
+            output =new DataOutputStream( this.clientSocket.getOutputStream());
             this.start();
         }
         catch(IOException e) {
@@ -45,6 +51,7 @@ public class RTSPSession extends Thread {
     public void run() {
         try {
 
+            rtspSessionLifecycleListener.onSessionCreated();
             while(true){
 
                 byte[] messageBytes = new byte[1000];
@@ -90,6 +97,7 @@ public class RTSPSession extends Thread {
         finally {
             try {
                 clientSocket.close();
+                rtspSessionLifecycleListener.onSessionCreated();
             }
             catch (IOException e){/*close failed*/}
         }
@@ -100,21 +108,29 @@ public class RTSPSession extends Thread {
 
         if(request.getMethod().equals(Method.OPTIONS)){
 
-            return rtpSessionController.onOptions(request);
+            return rtspRequestListener.onOptions(request);
         }
         else if(request.getMethod().equals(Method.DESCRIBE)){
 
-            return rtpSessionController.onDescribe(request);
+            return rtspRequestListener.onDescribe(request);
         }
         else if(request.getMethod().equals(Method.SETUP)){
 
-            return rtpSessionController.onSetup(request);
+            return rtspRequestListener.onSetup(request);
         }
         else if(request.getMethod().equals(Method.PLAY)){
 
-            return rtpSessionController.onPlay(request);
+            return rtspRequestListener.onPlay(request);
         }
-        throw new RTSP4xxClientRequestError(StatusCode.NOT_IMPLEMENTED, "Not impelmented");
+        else if(request.getMethod().equals(Method.TEARDOWN)){
+
+            return rtspRequestListener.onTeardown(request);
+        }
+        else{
+
+            throw new RTSP4xxClientRequestError(StatusCode.NOT_IMPLEMENTED, "Not impelmented");
+        }
+
     }
 
 }
