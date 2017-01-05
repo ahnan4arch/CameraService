@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void startCameraService(){
 
-
         Intent intent = new Intent(this, CameraService.class);
         startService(intent);
     }

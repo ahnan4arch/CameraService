@@ -1,6 +1,5 @@
 package com.example.zebul.cameraservice.communication.tcp;
 
-import com.example.zebul.cameraservice.communication.RTPSessionController;
 import com.example.zebul.cameraservice.av_streaming.rtsp.Method;
 import com.example.zebul.cameraservice.av_streaming.rtsp.StatusCode;
 import com.example.zebul.cameraservice.av_streaming.rtsp.error.RTSP4xxClientRequestError;
@@ -51,7 +50,7 @@ public class RTSPSession extends Thread {
     public void run() {
         try {
 
-            rtspSessionLifecycleListener.onSessionCreated();
+            rtspSessionLifecycleListener.onRTSPSessionCreated();
             while(true){
 
                 byte[] messageBytes = new byte[1000];
@@ -97,7 +96,7 @@ public class RTSPSession extends Thread {
         finally {
             try {
                 clientSocket.close();
-                rtspSessionLifecycleListener.onSessionCreated();
+                rtspSessionLifecycleListener.onRTSPSessionCreated();
             }
             catch (IOException e){/*close failed*/}
         }

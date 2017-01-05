@@ -177,14 +177,14 @@ public class RTPSessionController implements RTSPRequestListener, RTSPSessionLif
     @Override
     public RTSPResponse onTeardown(RTSPRequest request) throws RTSP4xxClientRequestError {
 
-        close();
+        stop();
         int CSeq = request.getHeader().getCSeq();
         HeaderFields headerFields = new HeaderFields();
         Header header = new Header(CSeq, headerFields);
         return new RTSPResponse(StatusCode.OK, request.getVersion(), header);
     }
 
-    public void close() {
+    private void stop() {
 
         if(rtpSession != null){
 
@@ -194,12 +194,13 @@ public class RTPSessionController implements RTSPRequestListener, RTSPSessionLif
     }
 
     @Override
-    public void onSessionCreated() {
+    public void onRTSPSessionCreated() {
 
     }
 
     @Override
-    public void onSessionDestroyed() {
-        close();
+    public void onRTSPSessionDestroyed() {
+
+        stop();
     }
 }
