@@ -4,6 +4,7 @@ import android.content.Context;
 import android.hardware.Camera;
 
 import com.example.zebul.cameraservice.communication.tcp.RTSPServer;
+import com.example.zebul.cameraservice.communication.tcp.RTSPSessionEventListener;
 import com.example.zebul.cameraservice.communication.udp.SocketEngine;
 import com.example.zebul.cameraservice.communication.udp.SocketMessageReceptionListener;
 import com.example.zebul.cameraservice.message.Message;
@@ -66,6 +67,18 @@ public class CameraController {
 
     public Camera getCamera() {
         return camera;
+    }
+
+    public void attachRTSPSessionLifecycleListener(
+            RTSPSessionEventListener rtspSessionLifecycleListener) {
+
+        rtspServer.attachRTSPSessionLifecycleListener(rtspSessionLifecycleListener);
+    }
+
+    public void detachRTSPSessionLifecycleListener(
+            RTSPSessionEventListener rtspSessionLifecycleListener) {
+
+        rtspServer.detachRTSPSessionLifecycleListener(rtspSessionLifecycleListener);
     }
 
 

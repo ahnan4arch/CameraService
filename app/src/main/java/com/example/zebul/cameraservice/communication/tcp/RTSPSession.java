@@ -17,40 +17,49 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketAddress;
 
 
 /**
  * Created by zebul on 10/22/16.
  */
+
+@Deprecated //apply composition over inheritance
 public class RTSPSession extends Thread {
 
     private DataInputStream input;
     private DataOutputStream output;
     private Socket clientSocket;
     private RTSPRequestListener rtspRequestListener;
-    private RTSPSessionLifecycleListener rtspSessionLifecycleListener;
+    private RTSPSessionEventListener rtspSessionLifecycleListener;
 
     public RTSPSession(Socket clientSocket,
-                       RTSPSessionLifecycleListener rtspSessionLifecycleListener,
+                       RTSPSessionEventListener rtspSessionLifecycleListener,
                        RTSPRequestListener rtspRequestListener) {
         try {
+
             this.clientSocket = clientSocket;
             this.rtspSessionLifecycleListener = rtspSessionLifecycleListener;
             this.rtspRequestListener = rtspRequestListener;
 
             input = new DataInputStream( this.clientSocket.getInputStream());
             output =new DataOutputStream( this.clientSocket.getOutputStream());
-            this.start();
         }
         catch(IOException e) {
             System.out.println("Connection:"+e.getMessage());
         }
     }
 
+    @Override
+    public void start(){
+
+        super.start();
+    }
+
     public void run() {
         try {
 
-            rtspSessionLifecycleListener.onRTSPSessionCreated();
+            onSessionCreated();
             while(true){
 
                 byte[] messageBytes = new byte[1000];
@@ -96,10 +105,24 @@ public class RTSPSession extends Thread {
         finally {
             try {
                 clientSocket.close();
-                rtspSessionLifecycleListener.onRTSPSessionCreated();
+                onSessionDestroyed();
             }
             catch (IOException e){/*close failed*/}
         }
+    }
+
+    private void onSessionCreated() {
+
+        SocketAddress remoteSocketAddress = clientSocket.getRemoteSocketAddress();
+        RTSPSessionCreatedEvent rtspSessionCreatedEvent = new RTSPSessionCreatedEvent(remoteSocketAddress);
+        rtspSessionLifecycleListener.onRTSPSessionCreatedEvent(rtspSessionCreatedEvent);
+    }
+
+    private void onSessionDestroyed() {
+
+        SocketAddress remoteSocketAddress = clientSocket.getRemoteSocketAddress();
+        RTSPSessionDestroyedEvent rtspSessionDestroyedEvent = new RTSPSessionDestroyedEvent(remoteSocketAddress);
+        rtspSessionLifecycleListener.onRTSPSessionDestroyedEvent(rtspSessionDestroyedEvent);
     }
 
     private RTSPResponse processRequest(RTSPRequest request)

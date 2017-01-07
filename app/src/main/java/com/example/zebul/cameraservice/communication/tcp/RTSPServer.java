@@ -5,6 +5,8 @@ import com.example.zebul.cameraservice.communication.RTPSessionController;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -15,6 +17,9 @@ public class RTSPServer implements Runnable{
     private int serverPort = 9999;
     private Thread thread;
     private SocketProxy socketProxy = new SocketProxy();
+
+    private List<RTSPSessionEventListener> rtspSessionLifecycleListeners =
+            new LinkedList<RTSPSessionEventListener>();
 
     public RTSPServer(int serverPort){
 
@@ -51,6 +56,18 @@ public class RTSPServer implements Runnable{
         thread = null;
     }
 
+    public void attachRTSPSessionLifecycleListener(
+            RTSPSessionEventListener rtspSessionLifecycleListener) {
+
+        rtspSessionLifecycleListeners.add(rtspSessionLifecycleListener);
+    }
+
+    public void detachRTSPSessionLifecycleListener(
+            RTSPSessionEventListener rtspSessionLifecycleListener) {
+
+        rtspSessionLifecycleListeners.remove(rtspSessionLifecycleListener);
+    }
+
     class SocketProxy{
 
         private ServerSocket serverSocket;
@@ -81,8 +98,33 @@ public class RTSPServer implements Runnable{
             while(!Thread.interrupted()){
 
                 Socket clientSocket = serverSocket.accept();
-                RTPSessionController rtpSessionController = new RTPSessionController(clientSocket);
-                RTSPSession c = new RTSPSession(clientSocket, rtpSessionController, rtpSessionController);
+                final RTPSessionController rtpSessionController = new RTPSessionController(clientSocket);
+
+                RTSPSessionEventListener rtspSessionEventListener = new RTSPSessionEventListener(){
+
+                    @Override
+                    public void onRTSPSessionCreatedEvent(
+                            RTSPSessionCreatedEvent rtspSessionCreatedEvent) {
+
+                        for(RTSPSessionEventListener rtspSessionEventListener: rtspSessionLifecycleListeners){
+
+                            rtspSessionEventListener.onRTSPSessionCreatedEvent(rtspSessionCreatedEvent);
+                        }
+                    }
+
+                    @Override
+                    public void onRTSPSessionDestroyedEvent(
+                            RTSPSessionDestroyedEvent rtspSessionDestroyedEvent) {
+
+                        rtpSessionController.stop();
+                        for(RTSPSessionEventListener rtspSessionEventListener: rtspSessionLifecycleListeners){
+
+                            rtspSessionEventListener.onRTSPSessionDestroyedEvent(rtspSessionDestroyedEvent);
+                        }
+                    }
+                };
+                RTSPSession c = new RTSPSession(clientSocket, rtspSessionEventListener, rtpSessionController);
+                c.start();
             }
         } catch (IOException e) {
             e.printStackTrace();

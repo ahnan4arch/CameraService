@@ -17,7 +17,10 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.transport.TransportDeco
 import com.example.zebul.cameraservice.av_streaming.rtsp.transport.TransportEncoder;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.Resolution;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.VideoSettings;
-import com.example.zebul.cameraservice.communication.tcp.RTSPSessionLifecycleListener;
+import com.example.zebul.cameraservice.communication.tcp.RTSPSessionCreatedEvent;
+import com.example.zebul.cameraservice.communication.tcp.RTSPSessionDestroyedEvent;
+import com.example.zebul.cameraservice.communication.tcp.RTSPSessionEvent;
+import com.example.zebul.cameraservice.communication.tcp.RTSPSessionEventListener;
 import com.example.zebul.cameraservice.communication.udp.RTPSession;
 import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneSettings;
 import com.example.zebul.cameraservice.packet_producers.video.camera.CameraSettings;
@@ -32,7 +35,7 @@ import java.net.UnknownHostException;
  * Created by zebul on 1/1/17.
  */
 
-public class RTPSessionController implements RTSPRequestListener, RTSPSessionLifecycleListener {
+public class RTPSessionController implements RTSPRequestListener {
 
     private Socket clientSocket;
     private RTPSession rtpSession;
@@ -184,23 +187,12 @@ public class RTPSessionController implements RTSPRequestListener, RTSPSessionLif
         return new RTSPResponse(StatusCode.OK, request.getVersion(), header);
     }
 
-    private void stop() {
+    public void stop() {
 
         if(rtpSession != null){
 
             rtpSession.stop();
             rtpSession = null;
         }
-    }
-
-    @Override
-    public void onRTSPSessionCreated() {
-
-    }
-
-    @Override
-    public void onRTSPSessionDestroyed() {
-
-        stop();
     }
 }

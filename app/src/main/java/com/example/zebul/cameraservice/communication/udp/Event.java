@@ -27,7 +27,6 @@ public class Event {
         }
     }
 
-
     public void waitForSignalInfinite(){
 
         waitForSignalFor(0);

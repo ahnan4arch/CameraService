@@ -1,20 +1,31 @@
 package com.example.zebul.cameraservice;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
+import com.example.zebul.cameraservice.communication.tcp.RTSPSessionCreatedEvent;
+import com.example.zebul.cameraservice.communication.tcp.RTSPSessionDestroyedEvent;
+import com.example.zebul.cameraservice.communication.tcp.RTSPSessionEventListener;
+
+import java.net.SocketAddress;
+
 /**
  * Created by zebul on 9/18/16.
  */
-public class CameraService extends Service{
+public class CameraService extends Service implements RTSPSessionEventListener {
 
+    private static final int EXECUTE_COMMAND = 1;
+    private static final String SERVICE_NAME = CameraService.class.getSimpleName();
     private CameraController cameraController = new CameraController(this);
     public static CameraService CAMERA_SERVICE;
 
@@ -42,17 +53,18 @@ public class CameraService extends Service{
 
     @Override
     public void onCreate() {
-        super.onCreate();
 
+        super.onCreate();
         CAMERA_SERVICE = this;
         setUp();
         showToastServiceIsAlive();
+        cameraController.attachRTSPSessionLifecycleListener(this);
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
 
+        super.onDestroy();
         tearDown();
         showToastServiceIsDead();
     }
@@ -88,8 +100,8 @@ public class CameraService extends Service{
 
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.ic_remove_red_eye_white_18dp)
-                        .setContentTitle( "Camera Service" )
+                        .setSmallIcon(R.mipmap.ic_videocam_white_18dp)
+                        .setContentTitle( SERVICE_NAME )
                         .setContentText( "Beware you are spied" )
                         .setContentIntent(pendingIntent);
 
@@ -98,4 +110,80 @@ public class CameraService extends Service{
         return notification;
     }
 
+    private void updateNotification(String contentText, int imageResId){
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Sets an ID for the notification, so it can be updated
+        NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this)
+                .setContentTitle(SERVICE_NAME)
+                .setContentText(contentText)
+                .setSmallIcon(imageResId);
+
+        notificationManager.notify(
+                CAMERA_SERVICE_NOTIFICATION_ID,
+                notifyBuilder.build());
+    }
+
+    final Handler handler = new Handler(new Handler.Callback() {
+
+        @Override
+        public boolean handleMessage(Message msg) {
+
+            if(msg.what == EXECUTE_COMMAND){
+
+                Command command = (Command)msg.obj;
+                command.execute();
+            }
+            return false;
+        }
+    });
+
+    interface Command{
+
+        void execute();
+    }
+
+    class ShowToastCommand implements Command{
+
+        private Context context;
+        private String textMessage;
+
+        ShowToastCommand(Context context, String textMessage){
+
+            this.context = context;
+            this.textMessage = textMessage;
+        }
+
+        @Override
+        public void execute() {
+
+            Toast.makeText(context, textMessage, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRTSPSessionCreatedEvent(RTSPSessionCreatedEvent rtspSessionCreatedEvent) {
+
+        final SocketAddress remoteSocketAddress = rtspSessionCreatedEvent.getRemoteSocketAddress();
+        String textMessage = "Session created by: "+remoteSocketAddress.toString();
+        showTextMessageAsToast(textMessage);
+        updateNotification(textMessage, R.mipmap.ic_remove_red_eye_white_18dp);
+    }
+
+    @Override
+    public void onRTSPSessionDestroyedEvent(RTSPSessionDestroyedEvent rtspSessionDestroyedEvent) {
+
+        final SocketAddress remoteSocketAddress = rtspSessionDestroyedEvent.getRemoteSocketAddress();
+        String textMessage = "Session destroyed by: "+remoteSocketAddress.toString();
+        showTextMessageAsToast(textMessage);
+        updateNotification(textMessage, R.mipmap.ic_videocam_white_18dp);
+    }
+
+    private void showTextMessageAsToast(String textMessage){
+
+        Message message = handler.obtainMessage(EXECUTE_COMMAND);
+        message.obj = new ShowToastCommand(this, textMessage);
+        message.sendToTarget();
+    }
 }
