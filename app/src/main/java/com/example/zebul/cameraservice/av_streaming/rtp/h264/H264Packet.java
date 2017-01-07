@@ -1,6 +1,6 @@
-package com.example.zebul.cameraservice.av_streaming.av_packet.h264;
+package com.example.zebul.cameraservice.av_streaming.rtp.h264;
 
-import com.example.zebul.cameraservice.av_streaming.av_packet.basic.DataPacket;
+import com.example.zebul.cameraservice.av_streaming.rtp.DataPacket;
 import com.example.zebul.cameraservice.av_streaming.rtp.Timestamp;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.NALUnit;
 

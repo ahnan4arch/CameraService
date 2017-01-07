@@ -1,8 +1,5 @@
 package com.example.zebul.cameraservice.packet_producers;
 
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionException;
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionExceptionListener;
-
 /**
  * Created by zebul on 1/4/17.
  */

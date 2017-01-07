@@ -5,34 +5,21 @@ import android.hardware.Camera;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.opengl.EGL14;
-import android.opengl.EGLConfig;
-import android.opengl.EGLContext;
-import android.opengl.EGLDisplay;
-import android.opengl.EGLExt;
-import android.opengl.EGLSurface;
-import android.opengl.GLES11Ext;
-import android.opengl.GLES20;
-import android.opengl.Matrix;
 import android.util.Log;
-import android.view.Surface;
 
-import com.example.zebul.cameraservice.ManualResetEvent;
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionExceptionListener;
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264Packet;
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264PacketListener;
+import com.example.zebul.cameraservice.packet_producers.PacketProductionExceptionListener;
+import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
+import com.example.zebul.cameraservice.packet_producers.video.H264PacketListener;
 import com.example.zebul.cameraservice.av_streaming.rtp.Clock;
 import com.example.zebul.cameraservice.av_streaming.rtp.Timestamp;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.NALUnit;
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionException;
+import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.Resolution;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.VideoSettings;
 import com.example.zebul.cameraservice.packet_producers.HardwarePacketProducer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 
 /**
  * Created by zebul on 12/1/16.

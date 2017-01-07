@@ -1,16 +1,9 @@
 package com.example.zebul.cameraservice.av_streaming.rtp.aac;
 
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacket;
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPackets;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPHeader;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPPacket;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPPackets;
 import com.example.zebul.cameraservice.av_streaming.rtp.basic.RTPPacketizer;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.H264Payload;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.single_time.STAP_A_RTPPayload;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created by zebul on 12/21/16.

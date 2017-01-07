@@ -3,10 +3,8 @@ package com.example.zebul.cameraservice.packet_producers;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionException;
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionExceptionListener;
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264Packet;
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264PacketListener;
+import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
+import com.example.zebul.cameraservice.packet_producers.video.H264PacketListener;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.Resolution;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.VideoSettings;
 import com.example.zebul.cameraservice.packet_producers.video.camera.CameraSettings;

@@ -1,7 +1,5 @@
 package com.example.zebul.cameraservice.av_streaming.rtp.h264;
 
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264Packet;
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264Packets;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPPacket;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPPackets;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPHeader;
@@ -12,10 +10,7 @@ import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.fragmentati
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.fragmentation_unit.FUIndicator;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.fragmentation_unit.FU_A_RTPPayload;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.single_time.STAP_A_RTPPayload;
-import com.example.zebul.cameraservice.av_streaming.av_packet.basic.DataPacket;
-
-import java.util.LinkedList;
-import java.util.List;
+import com.example.zebul.cameraservice.av_streaming.rtp.DataPacket;
 
 /**
  * Created by zebul on 11/20/16.

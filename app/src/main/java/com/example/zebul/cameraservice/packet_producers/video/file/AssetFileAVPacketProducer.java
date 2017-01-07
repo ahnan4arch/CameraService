@@ -4,12 +4,12 @@ import android.content.res.AssetManager;
 
 import com.example.zebul.cameraservice.CameraService;
 import com.example.zebul.cameraservice.NALUnitReader;
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264Packet;
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264Packets;
+import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
+import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packets;
 import com.example.zebul.cameraservice.av_streaming.rtp.Clock;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.NALUnit;
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264PacketProducer;
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionException;
+import com.example.zebul.cameraservice.packet_producers.video.H264PacketProducer;
+import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;

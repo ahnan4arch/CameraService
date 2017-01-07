@@ -8,11 +8,10 @@ import android.media.MediaFormat;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionException;
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionExceptionListener;
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacketListener;
+import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
+import com.example.zebul.cameraservice.packet_producers.PacketProductionExceptionListener;
 import com.example.zebul.cameraservice.av_streaming.rtsp.audio.AudioSettings;
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacket;
+import com.example.zebul.cameraservice.av_streaming.rtp.aac.AACPacket;
 import com.example.zebul.cameraservice.av_streaming.rtp.Clock;
 import com.example.zebul.cameraservice.av_streaming.rtp.Timestamp;
 import com.example.zebul.cameraservice.av_streaming.rtp.aac.AccessUnit;

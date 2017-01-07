@@ -1,4 +1,4 @@
-package com.example.zebul.cameraservice.av_streaming.av_packet;
+package com.example.zebul.cameraservice.packet_producers;
 
 /**
  * Created by zebul on 12/23/16.

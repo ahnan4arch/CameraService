@@ -2,11 +2,11 @@ package com.example.zebul.cameraservice.communication.udp;
 
 import android.util.Log;
 
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionExceptionListener;
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacket;
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacketListener;
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264Packet;
-import com.example.zebul.cameraservice.av_streaming.av_packet.h264.H264PacketListener;
+import com.example.zebul.cameraservice.packet_producers.PacketProductionExceptionListener;
+import com.example.zebul.cameraservice.av_streaming.rtp.aac.AACPacket;
+import com.example.zebul.cameraservice.packet_producers.audio.AACPacketListener;
+import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
+import com.example.zebul.cameraservice.packet_producers.video.H264PacketListener;
 import com.example.zebul.cameraservice.av_streaming.rtp.aac.AACPacketizer;
 import com.example.zebul.cameraservice.av_streaming.rtp.basic.RTPPacketizer;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packetizer;
@@ -16,7 +16,7 @@ import com.example.zebul.cameraservice.packet_producers.video.camera.CameraVideo
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPPacket;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPPackets;
 import com.example.zebul.cameraservice.message.Message;
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionException;
+import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
 import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneAudioAACPacketProducer;
 
 import java.net.InetSocketAddress;

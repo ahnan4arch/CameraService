@@ -2,10 +2,8 @@ package com.example.zebul.cameraservice.packet_producers;
 
 import android.test.AndroidTestCase;
 
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionException;
-import com.example.zebul.cameraservice.av_streaming.av_packet.PacketProductionExceptionListener;
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacket;
-import com.example.zebul.cameraservice.av_streaming.av_packet.aac.AACPacketListener;
+import com.example.zebul.cameraservice.av_streaming.rtp.aac.AACPacket;
+import com.example.zebul.cameraservice.packet_producers.audio.AACPacketListener;
 import com.example.zebul.cameraservice.av_streaming.rtsp.audio.AudioSettings;
 import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneAudioAACPacketProducer;
 import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneSettings;
