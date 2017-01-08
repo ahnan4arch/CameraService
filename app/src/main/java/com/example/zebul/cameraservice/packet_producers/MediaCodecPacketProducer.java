@@ -4,12 +4,12 @@ package com.example.zebul.cameraservice.packet_producers;
  * Created by zebul on 1/4/17.
  */
 
-public abstract class HardwarePacketProducer implements Runnable{
+public abstract class MediaCodecPacketProducer implements Runnable{
 
     protected ProductionThread thread = new ProductionThread();
     protected PacketProductionExceptionListener packetProductionExceptionListener;
 
-    protected HardwarePacketProducer(
+    protected MediaCodecPacketProducer(
             PacketProductionExceptionListener packetProductionExceptionListener){
 
         this.packetProductionExceptionListener = packetProductionExceptionListener;
