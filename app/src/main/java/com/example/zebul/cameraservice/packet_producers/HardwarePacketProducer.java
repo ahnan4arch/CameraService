@@ -15,14 +15,24 @@ public abstract class HardwarePacketProducer implements Runnable{
         this.packetProductionExceptionListener = packetProductionExceptionListener;
     }
 
-    protected void start(){
+    protected boolean start(){
 
-        thread.start(this);
+        try {
+            thread.start(this);
+            return true;
+        } catch (IllegalProductionStateException exc) {
+            packetProductionExceptionListener.onPacketProductionException(exc);
+        }
+        return false;
     }
 
     public void stop(){
 
-        thread.stop();
+        try {
+            thread.stop();
+        } catch (IllegalProductionStateException exc) {
+            packetProductionExceptionListener.onPacketProductionException(exc);
+        }
     }
 
     @Override
@@ -64,5 +74,9 @@ public abstract class HardwarePacketProducer implements Runnable{
         } catch (PacketProductionException exc) {
             packetProductionExceptionListener.onPacketProductionException(exc);
         }
+    }
+
+    public boolean isWorking() {
+        return thread.isWorking();
     }
 }

@@ -134,7 +134,7 @@ public class RTPSession {
 
         private static final String TAG = "ZZZ";
 
-        CameraVideoH264PacketProducer avPacketProducer =
+        CameraVideoH264PacketProducer h264PacketProducer =
                 //new AssetFileAVPacketProducer("H264_artifacts_motion.h264");
                 new CameraVideoH264PacketProducer(this, this);
 
@@ -144,12 +144,18 @@ public class RTPSession {
 
         public void start() {
 
-            avPacketProducer.start(cameraSettings, "1");
+            if(!h264PacketProducer.isWorking()){
+
+                h264PacketProducer.start(cameraSettings, "1");
+            }
         }
 
         public void stop() {
 
-            avPacketProducer.stop();
+            if(h264PacketProducer.isWorking()){
+
+                h264PacketProducer.stop();
+            }
         }
 
         private int h264PacketCounter = 0;

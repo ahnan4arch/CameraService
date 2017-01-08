@@ -8,6 +8,7 @@ import android.media.MediaFormat;
 import android.media.MediaRecorder;
 import android.util.Log;
 
+import com.example.zebul.cameraservice.packet_producers.IllegalProductionStateException;
 import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
 import com.example.zebul.cameraservice.packet_producers.PacketProductionExceptionListener;
 import com.example.zebul.cameraservice.av_streaming.rtsp.audio.AudioSettings;
@@ -51,15 +52,23 @@ public class MicrophoneAudioAACPacketProducer implements Runnable{
         this.packetProductionExceptionListener = packetProductionExceptionListener;
     }
 
-    public void start(MicrophoneSettings microphoneSettings){
+    public void start(MicrophoneSettings microphoneSettings) {
 
         this.audioSettings = microphoneSettings.getAudioSettings();
-        engine.start(this);
+        try {
+            engine.start(this);
+        } catch (IllegalProductionStateException exc) {
+            packetProductionExceptionListener.onPacketProductionException(exc);
+        }
     }
 
     public void stop() {
 
-        engine.stop();
+        try {
+            engine.stop();
+        } catch (IllegalProductionStateException exc) {
+            packetProductionExceptionListener.onPacketProductionException(exc);
+        }
     }
 
     @Override

@@ -21,8 +21,7 @@ public class RTPPacket {
 
     public byte [] toBytes(){
 
-        int length = RTPHeader.LENGTH;
-        length += rtpPayload.computeLenght();
+        int length = RTPHeader.LENGTH + rtpPayload.computeLenght();
         byte [] rtpPacketBytes = new byte[length];
         rtpHeader.toBytes(rtpPacketBytes, 0);
         rtpPayload.toBytes(rtpPacketBytes, RTPHeader.LENGTH);

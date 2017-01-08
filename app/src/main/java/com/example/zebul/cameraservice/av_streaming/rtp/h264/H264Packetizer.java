@@ -10,7 +10,7 @@ import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.fragmentati
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.fragmentation_unit.FUIndicator;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.fragmentation_unit.FU_A_RTPPayload;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.single_time.STAP_A_RTPPayload;
-import com.example.zebul.cameraservice.av_streaming.rtp.DataPacket;
+import com.example.zebul.cameraservice.av_streaming.rtp.basic.DataPacket;
 
 /**
  * Created by zebul on 11/20/16.

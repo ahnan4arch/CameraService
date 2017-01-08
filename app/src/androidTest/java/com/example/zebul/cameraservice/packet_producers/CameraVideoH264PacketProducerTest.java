@@ -13,6 +13,7 @@ import com.example.zebul.cameraservice.utils.Timeout;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by zebul on 12/28/16.
@@ -20,10 +21,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
 
-    public void testVideoH264PacketProduction() throws PacketProductionException {
+    private final Resolution defaultResolution = Resolution._640x480;
+    private final VideoSettings defaultVideoSettings = new VideoSettings(defaultResolution, 6000000, VideoSettings.DEFAULT_FRAME_RATE);
+    private final CameraSettings defaultCameraSettings = new CameraSettings(defaultVideoSettings);
 
+    public void test_when_VideoH264PacketProducer_is_restarted_then_produces_packets_in_expected_time(){
+
+        //given
         final AtomicBoolean packetReceived = new AtomicBoolean(false);
-        final AtomicBoolean errorReceived = new AtomicBoolean(false);
+        final AtomicBoolean exceptionReceived = new AtomicBoolean(false);
 
         H264PacketListener h264PacketListener = new H264PacketListener(){
 
@@ -40,7 +46,7 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
                     @Override
                     public void onPacketProductionException(PacketProductionException exc) {
 
-                        errorReceived.set(true);
+                        exceptionReceived.set(true);
                         throw new RuntimeException(exc);
                     }
                 };
@@ -52,33 +58,118 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
 
             Log.d("*** iteration ***", "before test"+i);
             packetReceived.set(false);
-            errorReceived.set(false);
-            testVideoH264PacketProduction(producer, packetReceived, i);
+            exceptionReceived.set(false);
+
+            //when
+            producer.start(defaultCameraSettings, i+"");
+            Timeout timeout = new Timeout(2, TimeUnit.SECONDS);
+            while(!timeout.isTimeout()) {
+
+                if(packetReceived.get()){
+                    break;
+                }
+                else{
+                    new MicrophoneAudioAACPacketProducerTest.Idleness().makeIdle(100);
+                }
+            }
+            producer.stop();
+
+            //then
             assertTrue("error in iteration: "+i, packetReceived.get());
-            assertFalse("error in iteration: "+i, errorReceived.get());
+            assertFalse("error in iteration: "+i, exceptionReceived.get());
             Log.d("*** iteration ***", "after test"+i);
         }
     }
 
-    private void testVideoH264PacketProduction(CameraVideoH264PacketProducer producer,
-                                               AtomicBoolean packetReceived,
-                                               int i) {
+    private class H264PacketListenerFake implements H264PacketListener{
 
-        Resolution resolution = Resolution._640x480;
-        VideoSettings videoSettings = new VideoSettings(resolution, 6000000, VideoSettings.DEFAULT_FRAME_RATE);
-        CameraSettings cameraSettings = new CameraSettings(videoSettings);
-        producer.start(cameraSettings, i+"");
-        Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
-        while(!timeout.isTimeout()) {
+        @Override
+        public void onH264Packet(H264Packet h264Packet) {
 
-            if(packetReceived.get()){
-                break;
-            }
-            else{
-                new MicrophoneAudioAACPacketProducerTest.Idleness().makeIdle(100);
-            }
         }
-        producer.stop();
+    }
+
+    private class PacketProductionExceptionListenerFake implements PacketProductionExceptionListener{
+
+        PacketProductionException receivedException;
+        @Override
+        public void onPacketProductionException(PacketProductionException exc) {
+
+            receivedException = exc;
+        }
+    }
+
+    public void test_when_CameraVideoH264PacketProducer_starts_second_time_in_row_then_IllegalProductionStateException_is_received(){
+
+        //given
+        PacketProductionExceptionListenerFake exceptionListener =
+                new PacketProductionExceptionListenerFake();
+
+        CameraVideoH264PacketProducer producer = new CameraVideoH264PacketProducer(
+                new H264PacketListenerFake(), exceptionListener);
+
+        try {
+
+            producer.start(defaultCameraSettings, "1");//1'st time
+            assertNull(exceptionListener.receivedException);
+
+            //when
+            producer.start(defaultCameraSettings, "2");//2'nd time
+
+            //then
+            assertNotNull(exceptionListener.receivedException);
+            assertTrue(exceptionListener.receivedException instanceof IllegalProductionStateException);
+        }
+        finally {
+            producer.stop();
+        }
+    }
+
+    public void test_when_CameraVideoH264PacketProducer_starts_second_time_in_row_then_returns_false(){
+
+        //given
+        PacketProductionExceptionListenerFake exceptionListener =
+                new PacketProductionExceptionListenerFake();
+
+        CameraVideoH264PacketProducer producer = new CameraVideoH264PacketProducer(
+                new H264PacketListenerFake(), exceptionListener);
+
+        try {
+
+            boolean startResult1 = producer.start(defaultCameraSettings, "1");//1'st time
+            assertTrue(startResult1);
+
+            //when
+            boolean startResult2 = producer.start(defaultCameraSettings, "2");//2'nd time
+
+            //then
+            assertFalse(startResult2);
+        }
+        finally {
+            producer.stop();
+        }
+    }
+
+    public void test_when_VideoH264PacketProducer_has_started_then_isWorking_returns_true_otherwise_false(){
+
+        //given
+        CameraVideoH264PacketProducer producer = new CameraVideoH264PacketProducer(
+                new H264PacketListenerFake(), new PacketProductionExceptionListenerFake());
+
+        assertFalse(producer.isWorking());
+
+        for(int i=0; i<3; i++){
+
+            //when
+            producer.start(defaultCameraSettings, i+"");
+            //then
+            assertTrue(producer.isWorking());
+
+            //when
+            producer.stop();
+            //then
+            assertFalse(producer.isWorking());
+        }
     }
 
 }

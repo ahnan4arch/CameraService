@@ -7,6 +7,7 @@ import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.util.Log;
 
+import com.example.zebul.cameraservice.packet_producers.IllegalProductionStateException;
 import com.example.zebul.cameraservice.packet_producers.PacketProductionExceptionListener;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
 import com.example.zebul.cameraservice.packet_producers.video.H264PacketListener;
@@ -67,13 +68,11 @@ public class CameraVideoH264PacketProducer extends HardwarePacketProducer {
         this.h264PacketListener = h264PacketListener;
     }
 
-    public void start(CameraSettings cameraSettings, String sessionName) {
+    public boolean start(CameraSettings cameraSettings, String sessionName) {
 
         this.cameraSettings = cameraSettings;
         this.sessionName = sessionName;
-        LogMe("before engine.start");
-        super.start();
-        LogMe("after engine.start");
+        return super.start();
     }
 
     private void LogMe(String message) {

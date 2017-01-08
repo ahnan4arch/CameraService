@@ -13,20 +13,29 @@ public class ProductionThread {
 
     private ManualResetEvent stopEvent = new ManualResetEvent(false);
     private ManualResetEvent startEvent = new ManualResetEvent(false);
+    private volatile boolean isWorking = false;
 
-    public void start(Runnable runnable){
+    public void start(Runnable runnable) throws IllegalProductionStateException{
 
+        if(isWorking){
+            throw new IllegalProductionStateException("Thread already started");
+        }
         resetStarted();
         doStop();
         doStart(runnable);
         waitUntilStarted();
+        isWorking = true;
     }
 
-    public void stop(){
+    public void stop()throws IllegalProductionStateException{
 
+        if(!isWorking){
+            throw new IllegalProductionStateException("Thread already stopped");
+        }
         resetStopped();
         doStop();
         waitUntilStopped();
+        isWorking = false;
     }
 
     private void resetStarted() {
@@ -67,23 +76,6 @@ public class ProductionThread {
         stopEvent.set();
     }
 
-    private class Runner implements Runnable{
-
-        private Runnable runnable;
-        private Runner(Runnable runnable){
-
-            this.runnable = runnable;
-        }
-
-        @Override
-        public void run() {
-
-            notifyStarted();
-            runnable.run();
-            notifyStopped();
-        }
-    }
-
     private void doStart(final Runnable runnable){
 
         synchronized (threadLock){
@@ -114,4 +106,7 @@ public class ProductionThread {
         }
     }
 
+    public boolean isWorking() {
+        return isWorking;
+    }
 }
