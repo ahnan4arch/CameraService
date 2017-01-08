@@ -7,7 +7,6 @@ import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.util.Log;
 
-import com.example.zebul.cameraservice.packet_producers.IllegalProductionStateException;
 import com.example.zebul.cameraservice.packet_producers.PacketProductionExceptionListener;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
 import com.example.zebul.cameraservice.packet_producers.video.H264PacketListener;
@@ -17,7 +16,7 @@ import com.example.zebul.cameraservice.av_streaming.rtp.h264.NALUnit;
 import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.Resolution;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.VideoSettings;
-import com.example.zebul.cameraservice.packet_producers.HardwarePacketProducer;
+import com.example.zebul.cameraservice.packet_producers.MediaCodecPacketProducer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,7 +25,7 @@ import java.nio.ByteBuffer;
  * Created by zebul on 12/1/16.
  */
 
-public class CameraVideoH264PacketProducer extends HardwarePacketProducer {
+public class CameraVideoH264PacketProducer extends MediaCodecPacketProducer {
 
     private static final String TAG = "CameraPacketProducer";
     private static final boolean VERBOSE = false;           // lots of logging
@@ -46,15 +45,12 @@ public class CameraVideoH264PacketProducer extends HardwarePacketProducer {
 
     private Clock clock = new Clock();
 
-    private MediaCodec mediaCodec;
     private CodecInputSurface inputSurface;
 
     private SurfaceTexture surfaceTexture;
     private CameraSettings cameraSettings;
 
     private H264PacketListener h264PacketListener;
-
-    private MediaCodec.BufferInfo bufferInfo;
     private static final String MIME_TYPE = "video/avc";    // H.264 Advanced Video Coding
     private static final int IFRAME_INTERVAL = 5;           // 5 seconds between I-frames
 
@@ -83,29 +79,12 @@ public class CameraVideoH264PacketProducer extends HardwarePacketProducer {
     @Override
     protected void open() throws PacketProductionException {
 
-        LogMe("before prepareCamera");
         prepareCamera();
-        LogMe("after prepareCamera");
-
-        LogMe("before prepareEncoder");
         prepareEncoder();
-        LogMe("after prepareEncoder");
-
-        LogMe("before inputSurface.makeCurrent");
         inputSurface.makeCurrent();
-        LogMe("after inputSurface.makeCurrent");
-
-        LogMe("before prepareSurfaceTexture");
         prepareSurfaceTexture();
-        LogMe("after prepareSurfaceTexture");
-
-        LogMe("before startPreview");
         camera.startPreview();
-        LogMe("after startPreview");
-
-        LogMe("before getSurfaceTexture");
         surfaceTexture = mStManager.getSurfaceTexture();
-        LogMe("after getSurfaceTexture");
     }
 
     private int frameCount = 0;
@@ -114,9 +93,7 @@ public class CameraVideoH264PacketProducer extends HardwarePacketProducer {
     protected void produce() throws PacketProductionException, InterruptedException{
 
         // Feed any pending encoder output into the muxer.
-        LogMe("before drainEncoder");
-        drainEncoder();
-        LogMe("after drainEncoder");
+        flushMediaCodecOutput();
 
         // Switch up the colors every 15 frames.  Besides demonstrating the use of
         // fragment shaders for video editing, this provides a visual indication of
@@ -136,41 +113,25 @@ public class CameraVideoH264PacketProducer extends HardwarePacketProducer {
         // time to render it on screen.  The texture can be shared between contexts by
         // passing the GLSurfaceView's EGLContext as eglCreateContext()'s share_context
         // argument.
-        LogMe("before mStManager.awaitNewImage");
         mStManager.awaitNewImage();
-        LogMe("after mStManager.awaitNewImage");
-
-        LogMe("before mStManager.drawImage");
         mStManager.drawImage();
-        LogMe("after mStManager.drawImage");
-
 
         // Set the presentation time stamp from the SurfaceTexture's time stamp.  This
         // will be used by MediaMuxer to set the PTS in the video.
-        LogMe("before inputSurface.setPresentationTime");
         inputSurface.setPresentationTime(surfaceTexture.getTimestamp());
-        LogMe("after inputSurface.setPresentationTime");
 
         // Submit it to the encoder.  The eglSwapBuffers call will block if the input
         // is full, which would be bad if it stayed full until we dequeued an output
         // buffer (which we can't do, since we're stuck here).  So long as we fully drain
         // the encoder before supplying additional input, the system guarantees that we
         // can supply another frame without blocking.
-
-        LogMe("before inputSurface.swapBuffers");
         inputSurface.swapBuffers();
-        LogMe("after inputSurface.swapBuffers");
     }
 
     @Override
     protected void close() throws PacketProductionException{
 
-        if(mediaCodec != null){
-
-            mediaCodec.release();
-            mediaCodec = null;
-        }
-
+        super.close();
         if(inputSurface != null){
 
             inputSurface.release();
@@ -184,76 +145,49 @@ public class CameraVideoH264PacketProducer extends HardwarePacketProducer {
         }
     }
 
-    private void drainEncoder() {
+    @Override
+    protected void onFlushMediaCodecOutputSuccess(int outputBufferIndex) {
 
-        ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
-        while(true)
+        final ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
+        Log.d(TAG, "Queue Buffer out " + outputBufferIndex);
+        ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
+        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0)
         {
-            int outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, 0);
-            if (outputBufferIndex >= 0)
-            {
-                Log.d(TAG, "Queue Buffer out " + outputBufferIndex);
-                ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
-                if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0)
-                {
-                    // Config Bytes means SPS and PPS
-                    Log.d(TAG, "Got config bytes");
-                }
+            // Config Bytes means SPS and PPS
+            Log.d(TAG, "Got config bytes");
+        }
 
-                if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) != 0)
-                {
-                    // Marks a Keyframe
-                    Log.d(TAG, "Got Sync Frame");
-                }
+        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) != 0)
+        {
+            // Marks a Keyframe
+            Log.d(TAG, "Got Sync Frame");
+        }
 
-                if (bufferInfo.size != 0)
-                {
-                    // adjust the ByteBuffer values to match BufferInfo (not needed?)
-                    outputBuffer.position(bufferInfo.offset);
-                    outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
+        if (bufferInfo.size != 0)
+        {
+            // adjust the ByteBuffer values to match BufferInfo (not needed?)
+            outputBuffer.position(bufferInfo.offset);
+            outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
 
-                    byte [] data = new byte[bufferInfo.size];
-                    outputBuffer.get(data, bufferInfo.offset, data.length);
-                    //return bufferInfo.presentationTimeUs;
+            byte [] data = new byte[bufferInfo.size];
+            outputBuffer.get(data, bufferInfo.offset, data.length);
+            //return bufferInfo.presentationTimeUs;
 
-                    NALUnit nalUnit = new NALUnit(0, data);
-                    //long timestampInMillis = bufferInfo.presentationTimeUs/1000;
-                    Timestamp timestamp = clock.getTimestamp(); /*new Timestamp(timestampInMillis);*/
-                    H264Packet h264Packet = new H264Packet(nalUnit, timestamp);
+            NALUnit nalUnit = new NALUnit(0, data);
+            //long timestampInMillis = bufferInfo.presentationTimeUs/1000;
+            Timestamp timestamp = clock.getTimestamp(); /*new Timestamp(timestampInMillis);*/
+            H264Packet h264Packet = new H264Packet(nalUnit, timestamp);
 
-                    h264PacketListener.onH264Packet(h264Packet);
-                }
+            h264PacketListener.onH264Packet(h264Packet);
+        }
 
-                mediaCodec.releaseOutputBuffer(outputBufferIndex, false);
+        mediaCodec.releaseOutputBuffer(outputBufferIndex, false);
 
-                if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0)
-                {
-                    // Stream is marked as done,
-                    // break out of while
-                    Log.d(TAG, "Marked EOS");
-                    break;
-                }
-            }
-            else if(outputBufferIndex == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED)
-            {
-                outputBuffers = mediaCodec.getOutputBuffers();
-                Log.d(TAG, "Output Buffer changed " + outputBuffers);
-            }
-            else if(outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED)
-            {
-                MediaFormat newFormat = mediaCodec.getOutputFormat();
-                Log.d(TAG, "Media Format Changed " + newFormat);
-            }
-            else if(outputBufferIndex == MediaCodec.INFO_TRY_AGAIN_LATER)
-            {
-                // No Data, break out
-                break;
-            }
-            else
-            {
-                // Unexpected State, ignore it
-                Log.d(TAG, "Unexpected State " + outputBufferIndex);
-            }
+        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0)
+        {
+            // Stream is marked as done,
+            // break out of while
+            Log.d(TAG, "Marked EOS");
         }
     }
 
