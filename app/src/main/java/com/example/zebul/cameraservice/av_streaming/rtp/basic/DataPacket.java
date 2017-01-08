@@ -1,4 +1,4 @@
-package com.example.zebul.cameraservice.av_streaming.rtp;
+package com.example.zebul.cameraservice.av_streaming.rtp.basic;
 
 import com.example.zebul.cameraservice.av_streaming.rtp.Timestamp;
 import com.example.zebul.cameraservice.av_streaming.rtp.basic.DataUnit;
