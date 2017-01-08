@@ -9,6 +9,7 @@ import android.media.MediaRecorder;
 import android.util.Log;
 
 import com.example.zebul.cameraservice.packet_producers.IllegalProductionStateException;
+import com.example.zebul.cameraservice.packet_producers.MediaCodecPacketProducer;
 import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
 import com.example.zebul.cameraservice.packet_producers.PacketProductionExceptionListener;
 import com.example.zebul.cameraservice.av_streaming.rtsp.audio.AudioSettings;
@@ -25,21 +26,15 @@ import java.nio.ByteBuffer;
  * Created by zebul on 12/8/16.
  */
 
-public class MicrophoneAudioAACPacketProducer implements Runnable{
+public class MicrophoneAudioAACPacketProducer extends MediaCodecPacketProducer {
 
     private static final String TAG = MicrophoneAudioAACPacketProducer.class.getSimpleName();
-    private static final long OUTPUT_BUFFER_TIMEOUT_US = 500000;
     private static final long INPUT_BUFFER_TIMEOUT_US = 10000;
 
-    private ProductionThread engine = new ProductionThread();
-    private MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
-
     private AACPacketListener aacPacketListener;
-    private PacketProductionExceptionListener packetProductionExceptionListener;
 
     private AudioSettings audioSettings;
     private AudioRecord audioRecord;
-    private MediaCodec mediaCodec;
 
     private Clock clock;
     private int bufferSize = 0;
@@ -48,134 +43,86 @@ public class MicrophoneAudioAACPacketProducer implements Runnable{
             AACPacketListener aacPacketListener,
             PacketProductionExceptionListener packetProductionExceptionListener){
 
+        super(packetProductionExceptionListener);
         this.aacPacketListener = aacPacketListener;
-        this.packetProductionExceptionListener = packetProductionExceptionListener;
+        bufferInfo = new MediaCodec.BufferInfo();
     }
 
-    public void start(MicrophoneSettings microphoneSettings) {
+    public boolean start(MicrophoneSettings microphoneSettings) {
 
         this.audioSettings = microphoneSettings.getAudioSettings();
-        try {
-            engine.start(this);
-        } catch (IllegalProductionStateException exc) {
-            packetProductionExceptionListener.onPacketProductionException(exc);
-        }
+        return super.start();
     }
 
-    public void stop() {
+    @Override
+    protected void open() throws PacketProductionException {
 
         try {
-            engine.stop();
-        } catch (IllegalProductionStateException exc) {
-            packetProductionExceptionListener.onPacketProductionException(exc);
+
+            clock = new Clock(audioSettings.getSamplingRate());
+
+            bufferSize = AudioRecord.getMinBufferSize(
+                    audioSettings.getSamplingRate(),
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT) * 2;
+
+            audioRecord = new AudioRecord(
+                    MediaRecorder.AudioSource.MIC,
+                    audioSettings.getSamplingRate(),
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    bufferSize);
+
+            final String mimeType = "audio/mp4a-latm";
+            mediaCodec = MediaCodec.createEncoderByType(mimeType);
+            MediaFormat format = new MediaFormat();
+            format.setString(MediaFormat.KEY_MIME, mimeType);
+            format.setInteger(MediaFormat.KEY_BIT_RATE, audioSettings.getBitRate());
+            format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
+            format.setInteger(MediaFormat.KEY_SAMPLE_RATE, audioSettings.getSamplingRate());
+            format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+            format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize);
+            mediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            audioRecord.startRecording();
+            mediaCodec.start();
+        }
+        catch(IOException exc){
+
+            throw new PacketProductionException(exc);
         }
     }
 
     @Override
-    public void run() {
+    protected void close()throws PacketProductionException{
 
-        try {
-            configure();
-            while(!Thread.interrupted()){
-
-                produce();
-            }
-        } catch (Exception exc) {
-
-            PacketProductionException ppe = new PacketProductionException(exc);
-            packetProductionExceptionListener.onPacketProductionException(ppe);
-        }
-        finally {
-
-            tryRelease();
-        }
-    }
-
-    private void tryRelease() {
-
-        try {
-            release();
-        } catch (Exception exc) {
-            PacketProductionException ppe = new PacketProductionException(exc);
-            packetProductionExceptionListener.onPacketProductionException(ppe);
-        }
-    }
-
-    private void release() {
-
-        if(mediaCodec != null){
-            //mediaCodec.stop();
-            mediaCodec.release();
-        }
+        super.close();
         if(audioRecord != null){
             audioRecord.stop();
             audioRecord.release();
         }
     }
 
-    private void configure() throws IOException {
+    @Override
+    protected void produce() throws PacketProductionException, InterruptedException{
 
-        clock = new Clock(audioSettings.getSamplingRate());
-
-        bufferSize = AudioRecord.getMinBufferSize(
-                audioSettings.getSamplingRate(),
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT)*2;
-
-        audioRecord = new AudioRecord(
-                MediaRecorder.AudioSource.MIC,
-                audioSettings.getSamplingRate(),
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                bufferSize);
-
-        final String mimeType =  "audio/mp4a-latm";
-        mediaCodec = MediaCodec.createEncoderByType(mimeType);
-        MediaFormat format = new MediaFormat();
-        format.setString(MediaFormat.KEY_MIME, mimeType);
-        format.setInteger(MediaFormat.KEY_BIT_RATE, audioSettings.getBitRate());
-        format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
-        format.setInteger(MediaFormat.KEY_SAMPLE_RATE, audioSettings.getSamplingRate());
-        format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-        format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bufferSize);
-        mediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-        audioRecord.startRecording();
-        mediaCodec.start();
+        flushMediaCodecInput();
+        flushMediaCodecOutput();
     }
 
-    private void produce() {
-
-        manageInput();
-        manageOutput();
-    }
-
-    private void manageInput(){
+    private void flushMediaCodecInput(){
 
         int inputBufferIndex = mediaCodec.dequeueInputBuffer(INPUT_BUFFER_TIMEOUT_US);
         if ( inputBufferIndex>=0 ) {
 
-            onInputSuccess(inputBufferIndex);
+            onFlushMediaCodecInputSuccess(inputBufferIndex);
         }
         else{
 
-            onInputFailure(inputBufferIndex);
+            onFlushMediaCodecInputFailure(inputBufferIndex);
         }
     }
 
-    private void manageOutput() {
-
-        int outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, OUTPUT_BUFFER_TIMEOUT_US);
-        if ( outputBufferIndex>=0 ){
-
-            onOutputSuccess(outputBufferIndex);
-        }
-        else{
-
-            onOutputFailure(outputBufferIndex);
-        }
-    }
-
-    private void onInputSuccess(int inputBufferIndex) {
+    private void onFlushMediaCodecInputSuccess(int inputBufferIndex) {
 
         final ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
         inputBuffers[inputBufferIndex].clear();
@@ -192,11 +139,12 @@ public class MicrophoneAudioAACPacketProducer implements Runnable{
         }
     }
 
-    private void onInputFailure(int inputBufferId) {
+    private void onFlushMediaCodecInputFailure(int inputBufferId) {
 
     }
 
-    private void onOutputSuccess(int outputBufferIndex) {
+    @Override
+    protected void onFlushMediaCodecOutputSuccess(int outputBufferIndex) {
 
         final ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
         ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
@@ -234,18 +182,6 @@ public class MicrophoneAudioAACPacketProducer implements Runnable{
             // Stream is marked as done,
             // break out of while
             Log.d(TAG, "Marked EOS");
-        }
-    }
-
-    private void onOutputFailure(int infoIndex) {
-
-        switch(infoIndex){
-            case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
-                break;
-            case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
-                break;
-            case MediaCodec.INFO_TRY_AGAIN_LATER:
-                break;
         }
     }
 }

@@ -26,11 +26,25 @@ public class MainActivity extends AppCompatActivity {
                 startCameraService();
             }
         });
+
+        Button startDisplayVideoActivityButton = (Button) findViewById(R.id.startDisplayVideoActivityButton);
+        startDisplayVideoActivityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                startDisplayVideoActivity();
+            }
+        });
     }
 
     private void startCameraService(){
 
         Intent intent = new Intent(this, CameraService.class);
         startService(intent);
+    }
+
+    private void startDisplayVideoActivity() {
+
+
     }
 }

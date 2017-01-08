@@ -8,9 +8,10 @@ import android.media.MediaCodec;
 
 public abstract class MediaCodecPacketProducer implements Runnable{
 
+    private static final long OUTPUT_BUFFER_TIMEOUT_US = 500000;
+
     protected ProductionThread thread = new ProductionThread();
     protected PacketProductionExceptionListener packetProductionExceptionListener;
-
     protected MediaCodec mediaCodec;
     protected MediaCodec.BufferInfo bufferInfo;
 
@@ -94,7 +95,6 @@ public abstract class MediaCodecPacketProducer implements Runnable{
 
     protected void flushMediaCodecOutput(){
 
-        final long OUTPUT_BUFFER_TIMEOUT_US = 500000;
         int outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, OUTPUT_BUFFER_TIMEOUT_US);
         if ( outputBufferIndex>=0 ){
 
