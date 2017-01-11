@@ -27,7 +27,11 @@
 
         <service android:name=".CameraService" />
 
-        <activity android:name=".DisplayVideoActivity"></activity>
+        <activity android:name=".DisplayVideoActivity" />
+        <activity
+            android:name=".PlayMovieActivity"
+            android:label="@string/title_activity_play_movie"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

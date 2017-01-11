@@ -35,6 +35,15 @@ public class MainActivity extends AppCompatActivity {
                 startDisplayVideoActivity();
             }
         });
+
+        Button playMovieActivityButton = (Button) findViewById(R.id.playMovieActivityButton);
+        playMovieActivityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                startMoviePlayerActivity();
+            }
+        });
     }
 
     private void startCameraService(){
@@ -45,6 +54,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void startDisplayVideoActivity() {
 
+        Intent intent = new Intent(this, DisplayVideoActivity.class);
+        startActivity(intent);
+    }
 
+    private void startMoviePlayerActivity(){
+
+        Intent intent = new Intent(this, PlayMovieActivity.class);
+        startActivity(intent);
     }
 }

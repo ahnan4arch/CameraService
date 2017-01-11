@@ -14,12 +14,21 @@
         android:id="@+id/startCameraServiceButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start Camera Service!" />
+        android:layout_weight="0.34"
+        android:text="Start Cam Service!" />
 
 
     <Button
         android:id="@+id/startDisplayVideoActivityButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start Video Activity!" />
+        android:layout_weight="0.33"
+        android:text="Play Movie 1!" />
+
+    <Button
+        android:id="@+id/playMovieActivityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.33"
+        android:text="Play Movie 2" />
 </LinearLayout>

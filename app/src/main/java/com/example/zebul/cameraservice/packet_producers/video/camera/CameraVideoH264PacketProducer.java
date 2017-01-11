@@ -27,7 +27,9 @@ import java.nio.ByteBuffer;
 
 public class CameraVideoH264PacketProducer extends MediaCodecPacketProducer {
 
+    public static final String MIME_TYPE = "video/avc";    // H.264 Advanced Video Coding
     private static final String TAG = "CameraPacketProducer";
+    private static final int IFRAME_INTERVAL = 5;           // 5 seconds between I-frames
     private static final boolean VERBOSE = false;           // lots of logging
 
     private Camera camera;
@@ -51,10 +53,6 @@ public class CameraVideoH264PacketProducer extends MediaCodecPacketProducer {
     private CameraSettings cameraSettings;
 
     private H264PacketListener h264PacketListener;
-    private static final String MIME_TYPE = "video/avc";    // H.264 Advanced Video Coding
-    private static final int IFRAME_INTERVAL = 5;           // 5 seconds between I-frames
-
-    private String sessionName;
 
     public CameraVideoH264PacketProducer(
             H264PacketListener h264PacketListener,
@@ -64,16 +62,10 @@ public class CameraVideoH264PacketProducer extends MediaCodecPacketProducer {
         this.h264PacketListener = h264PacketListener;
     }
 
-    public boolean start(CameraSettings cameraSettings, String sessionName) {
+    public boolean start(CameraSettings cameraSettings) {
 
         this.cameraSettings = cameraSettings;
-        this.sessionName = sessionName;
         return super.start();
-    }
-
-    private void LogMe(String message) {
-
-        Log.d(TAG, "Session-"+sessionName+": "+message);
     }
 
     @Override

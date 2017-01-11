@@ -146,7 +146,7 @@ public class RTPSession {
 
             if(!h264PacketProducer.isWorking()){
 
-                h264PacketProducer.start(cameraSettings, "1");
+                h264PacketProducer.start(cameraSettings);
             }
         }
 
