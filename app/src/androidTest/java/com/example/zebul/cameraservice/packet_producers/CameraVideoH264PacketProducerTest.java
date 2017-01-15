@@ -61,7 +61,7 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
             exceptionReceived.set(false);
 
             //when
-            producer.start(defaultCameraSettings, i+"");
+            producer.start(defaultCameraSettings);
             Timeout timeout = new Timeout(2, TimeUnit.SECONDS);
             while(!timeout.isTimeout()) {
 
@@ -110,11 +110,11 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
 
         try {
 
-            producer.start(defaultCameraSettings, "1");//1'st time
+            producer.start(defaultCameraSettings);//1'st time
             assertNull(exceptionListener.receivedException);
 
             //when
-            producer.start(defaultCameraSettings, "2");//2'nd time
+            producer.start(defaultCameraSettings);//2'nd time
 
             //then
             assertNotNull(exceptionListener.receivedException);
@@ -136,7 +136,7 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
 
         try {
 
-            boolean startResult1 = producer.start(defaultCameraSettings, "1");//1'st time
+            boolean startResult1 = producer.start(defaultCameraSettings);//1'st time
             assertTrue(startResult1);
 
             //when

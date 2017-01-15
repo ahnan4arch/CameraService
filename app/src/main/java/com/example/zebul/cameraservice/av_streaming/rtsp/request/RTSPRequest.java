@@ -12,11 +12,11 @@ public class RTSPRequest extends RTSPMessage {
 	private Method method;
 	private URI requestUri;
 	
-	public RTSPRequest(Version version, Header header, Method method, URI requestUri) {
+	public RTSPRequest(URI requestUri, Version version, Header header, Method method) {
 		
 		super(version, header);
-		this.method = method;
 		this.requestUri = requestUri;
+		this.method = method;
 	}
 
 	public Method getMethod() {

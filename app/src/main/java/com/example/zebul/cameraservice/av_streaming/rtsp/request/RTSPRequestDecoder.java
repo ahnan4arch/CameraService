@@ -37,7 +37,7 @@ public class RTSPRequestDecoder {
 		String[] requestRepresentaionAsTextLines = splitByLines(requestRepresentaionAsText);
 		RequestLine requestLine = decodeRequestLine(requestRepresentaionAsTextLines);
 		Header header = decodeRequestHeader(requestRepresentaionAsTextLines);
-		return new RTSPRequest(requestLine.version, header, requestLine.method, requestLine.requestUri);
+		return new RTSPRequest(requestLine.requestUri, requestLine.version, header, requestLine.method);
 	}
 
 	private static final String[] splitByLines(String requestRepresentaionAsText) 
@@ -164,11 +164,6 @@ public class RTSPRequestDecoder {
 		
 			name = headerFieldAsTextLine.substring(0, indexOfColon).trim();
 			value = headerFieldAsTextLine.substring(indexOfColon+1, headerFieldAsTextLine.length()).trim();
-		}
-		else{
-			
-			int foo = 1;
-			int bar = foo;
 		}
 		
 		return new HeaderField(name, value); 
