@@ -140,7 +140,7 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
             assertTrue(startResult1);
 
             //when
-            boolean startResult2 = producer.start(defaultCameraSettings, "2");//2'nd time
+            boolean startResult2 = producer.start(defaultCameraSettings);//2'nd time
 
             //then
             assertFalse(startResult2);
@@ -161,7 +161,7 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
         for(int i=0; i<3; i++){
 
             //when
-            producer.start(defaultCameraSettings, i+"");
+            producer.start(defaultCameraSettings);
             //then
             assertTrue(producer.isWorking());
 
