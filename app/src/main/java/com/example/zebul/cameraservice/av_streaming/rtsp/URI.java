@@ -1,6 +1,9 @@
 package com.example.zebul.cameraservice.av_streaming.rtsp;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by zebul on 12/11/16.
@@ -8,40 +11,55 @@ import java.net.URL;
 
 public class URI {
 
-    private int trackId = -1;
+    private URL url;
 
-    public URI(String uriString){
-
-        fromString(uriString);
+    public URI(){
     }
 
-    public void fromString(String uriString){
+    public static URI decodeFromString(String uriString) throws MalformedURLException {
 
-        String [] uriTokens = uriString.split("/");
-        for(String uriToken: uriTokens){
-
-            String [] nameValuePair = uriToken.split("=");
-            if(nameValuePair.length==2){
-
-                setParameter(nameValuePair[0], nameValuePair[1]);
-            }
-        }
+        URI uri = new URI();
+        uri.fromString(uriString);
+        return uri;
     }
 
-    private void setParameter(String paramName, String paramValue) {
+    public void fromString(String uriString) throws MalformedURLException {
 
-        if(paramName.toLowerCase().equals("trackid")){
-            trackId = Integer.parseInt(paramValue);
-        }
+        url = new URL(uriString.replace("rtsp", "http"));
     }
 
     @Override
     public String toString(){
 
-        return "";
+        return url.toString().replace("http", "rtsp");
     }
 
     public int getTrackId() {
-        return trackId;
+
+        if(url == null){
+            return -1;
+        }
+        String paramValue = getParameterValue("trackid");
+        if(paramValue != null){
+            return Integer.parseInt(paramValue);
+        }
+        return -1;
+    }
+
+    private String getParameterValue(String parameterName) {
+
+        String [] pathTokens = url.getPath().split("&");
+        for(String pathToken: pathTokens){
+
+            String [] nameValuePair = pathToken.split("=");
+            if(nameValuePair.length==2){
+
+                String name = nameValuePair[0].replace("/", "");
+                if(name.compareToIgnoreCase(parameterName) == 0){
+                    return nameValuePair[1];
+                }
+            }
+        }
+        return null;
     }
 }

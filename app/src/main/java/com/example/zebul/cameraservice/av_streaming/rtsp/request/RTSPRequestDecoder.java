@@ -12,6 +12,7 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.version.Version;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.VersionDecodeException;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.VersionDecoder;
 
+import java.net.MalformedURLException;
 import java.util.Arrays;
 
 
@@ -93,7 +94,11 @@ public class RTSPRequestDecoder {
 		
 		RequestLine requestLine = new RequestLine();
 		requestLine.method = method;
-		requestLine.requestUri = new URI(requestLineTokens[POS_OF_REQUEST_URI_IN_REQUEST_LINE]);
+		try {
+			requestLine.requestUri = URI.decodeFromString(requestLineTokens[POS_OF_REQUEST_URI_IN_REQUEST_LINE]);
+		} catch (MalformedURLException e) {
+			throw new RTSP4xxClientRequestError(StatusCode.BAD_REQUEST, e.getMessage());
+		}
 		requestLine.version = version;
 		return requestLine;
 	}
