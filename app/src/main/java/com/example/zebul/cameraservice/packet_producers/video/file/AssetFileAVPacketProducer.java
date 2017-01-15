@@ -1,5 +1,6 @@
 package com.example.zebul.cameraservice.packet_producers.video.file;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 
 import com.example.zebul.cameraservice.CameraService;
@@ -25,8 +26,11 @@ public class AssetFileAVPacketProducer implements H264PacketProducer {
     private byte [] data = null;
     private NALUnitReader reader;
     private Clock clock = new Clock();
-    public AssetFileAVPacketProducer(String assetFileName){
+    private Context context;
 
+    public AssetFileAVPacketProducer(Context context, String assetFileName){
+
+        this.context = context;
         data = readFileData(assetFileName);
         if(data != null){
             reader = new NALUnitReader(data);
@@ -51,7 +55,7 @@ public class AssetFileAVPacketProducer implements H264PacketProducer {
     private byte [] readFileData(String assetFileName){
 
         try {
-            AssetManager assetManager = CameraService.CAMERA_SERVICE.getAssets();
+            AssetManager assetManager = context.getAssets();
             InputStream inputStream = assetManager.open(assetFileName);
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             int readCount = 0;

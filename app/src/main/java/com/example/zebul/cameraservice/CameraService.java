@@ -27,7 +27,6 @@ public class CameraService extends Service implements RTSPSessionEventListener {
     private static final int EXECUTE_COMMAND = 1;
     private static final String SERVICE_NAME = CameraService.class.getSimpleName();
     private CameraController cameraController = new CameraController(this);
-    public static CameraService CAMERA_SERVICE;
 
     private static final int CAMERA_SERVICE_NOTIFICATION_ID = 1;
 
@@ -55,7 +54,6 @@ public class CameraService extends Service implements RTSPSessionEventListener {
     public void onCreate() {
 
         super.onCreate();
-        CAMERA_SERVICE = this;
         setUp();
         showToastServiceIsAlive();
         cameraController.attachRTSPSessionLifecycleListener(this);
