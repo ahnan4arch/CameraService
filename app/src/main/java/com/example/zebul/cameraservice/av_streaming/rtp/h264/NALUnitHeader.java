@@ -5,7 +5,7 @@ package com.example.zebul.cameraservice.av_streaming.rtp.h264;
  +---------------+
  |0|1|2|3|4|5|6|7|
  +-+-+-+-+-+-+-+-+
- |F|NRI|  Type   |
+ |F|NRI|  KnownName   |
  +---------------+
  */
 

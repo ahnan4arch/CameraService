@@ -90,7 +90,7 @@ public class RTSPSession extends Thread {
 
                     Version version = new Version(1,0);
                     HeaderFields headerFields = new HeaderFields();
-                    Header header = new Header(1, headerFields);
+                    Header header = new Header(headerFields);
                     response = new RTSPResponse(error.getStatusCode(), version, header);
                 }
                 String responseRepresentaionAsText = RTSPResponseEncoder.encode(response);

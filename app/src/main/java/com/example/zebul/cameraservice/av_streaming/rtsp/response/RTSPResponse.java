@@ -4,6 +4,7 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.StatusCode;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.RTSPMessage;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.body.Body;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Header;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderField;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderFields;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.Version;
 
@@ -37,8 +38,10 @@ public class RTSPResponse extends RTSPMessage {
 	}
 	
 	private static Header createEmptyHeader(int CSeq) {
-		
-		return new Header(CSeq, new HeaderFields());
+
+		HeaderFields headerFields = new HeaderFields();
+		headerFields.add(new HeaderField(HeaderField.KnownName.CSeq, CSeq));
+		return new Header(headerFields);
 	}
 
 	private static Body createEmptyBody() {

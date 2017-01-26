@@ -6,6 +6,7 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.StatusCode;
 import com.example.zebul.cameraservice.av_streaming.rtsp.URI;
 import com.example.zebul.cameraservice.av_streaming.rtsp.error.RTSP4xxClientRequestError;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Header;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderDecoder;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderField;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderFields;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.Version;
@@ -27,7 +28,6 @@ public class RTSPRequestDecoder {
                         [ message-body ]		; Section 4.3 
 	*/
 	private static final int POS_OF_REQUEST_LINE = 0;
-	private static final int POS_OF_HEADER_LINE = 1;
 	
 	private static final int POS_OF_METHOD_IN_REQUEST_LINE = 0;
 	private static final int POS_OF_REQUEST_URI_IN_REQUEST_LINE = 1;
@@ -37,14 +37,14 @@ public class RTSPRequestDecoder {
 		
 		String[] requestRepresentaionAsTextLines = splitByLines(requestRepresentaionAsText);
 		RequestLine requestLine = decodeRequestLine(requestRepresentaionAsTextLines);
-		Header header = decodeRequestHeader(requestRepresentaionAsTextLines);
+		Header header = HeaderDecoder.decode(requestRepresentaionAsTextLines);
 		return new RTSPRequest(requestLine.requestUri, requestLine.version, header, requestLine.method);
 	}
 
 	private static final String[] splitByLines(String requestRepresentaionAsText) 
 			throws RTSP4xxClientRequestError{
 		
-		final int minLineNumber = POS_OF_HEADER_LINE+1;
+		final int minLineNumber = HeaderDecoder.POS_OF_HEADER_LINE+1;
 		String[] requestRepresentaionAsTextLines = requestRepresentaionAsText.split(
 				RTSPProtocol.LINE_SEPARATOR);
 		if(requestRepresentaionAsTextLines.length < minLineNumber){
@@ -71,7 +71,7 @@ public class RTSPRequestDecoder {
 		String[] requestLineTokens = requestLineAsText.split(RTSPProtocol.SP);
 		if(requestLineTokens.length < minRequestLineTokensNumber){
 			String errorMessage = String.format(
-					"Request line should contains %d tokens: Method Request-URI RTSP-Version, separated by '%s'", 
+					"Request line should contains %d parts: Method Request-URI RTSP-Version, separated by '%s'",
 					minRequestLineTokensNumber, RTSPProtocol.SP); 
 			throw new RTSP4xxClientRequestError(StatusCode.BAD_REQUEST, errorMessage);
 		}
@@ -101,76 +101,5 @@ public class RTSPRequestDecoder {
 		}
 		requestLine.version = version;
 		return requestLine;
-	}
-	
-	private static Header decodeRequestHeader(String [] requestRepresentaionAsTextLines) 
-			throws RTSP4xxClientRequestError {
-		
-		String CSeqAsText = requestRepresentaionAsTextLines[POS_OF_HEADER_LINE];
-		HeaderField CSeqHeaderField  = null;
-		
-		try {
-			CSeqHeaderField = decodeHeaderField(CSeqAsText);
-		} catch (RTSP4xxClientRequestError error) {
-			throw new RTSP4xxClientRequestError(StatusCode.BAD_REQUEST, 
-					"Bad CSeq header field: "+CSeqAsText);
-		} 
-		
-		if(!CSeqHeaderField.getName().contains("CSeq")){
-			throw new RTSP4xxClientRequestError(StatusCode.BAD_REQUEST, 
-					"Bad CSeq header name: "+CSeqHeaderField.getName());
-		}
-		
-		int CSeq = 0;
-		try{
-			CSeq = Integer.parseInt(CSeqHeaderField.getValue());
-		}
-		catch (NumberFormatException error) {
-			throw new RTSP4xxClientRequestError(StatusCode.BAD_REQUEST, 
-					"Bad format of CSeq header value: "+CSeqHeaderField.getValue());
-		}
-		
-		HeaderFields headerFields = new HeaderFields();
-		for(int lineIndex = (POS_OF_HEADER_LINE+1); lineIndex<requestRepresentaionAsTextLines.length; lineIndex++){
-			
-			try{
-				String headerFieldAsTextLine = requestRepresentaionAsTextLines[lineIndex];
-				boolean emptyLine = headerFieldAsTextLine.length()==0;
-				boolean lineSeparator = headerFieldAsTextLine.startsWith(RTSPProtocol.LINE_SEPARATOR); 
-				if(!(emptyLine||lineSeparator)){
-				
-					HeaderField headerField = decodeHeaderField(headerFieldAsTextLine);
-					headerFields.add(headerField);
-				}
-			}
-			catch(RTSP4xxClientRequestError error_){
-				
-				error_.printStackTrace();
-			}
-		}
-		
-		Header header = new Header(CSeq, headerFields);
-		return header;
-	}
-	
-	private static HeaderField decodeHeaderField(String headerFieldAsTextLine) throws RTSP4xxClientRequestError{
-		
-		int notFound = -1; int begIndex = 0; int endIndex = headerFieldAsTextLine.length()-1;
-		int [] forbiddenIndexValues = new int[]{notFound, begIndex, endIndex};
-		
-		int indexOfColon = headerFieldAsTextLine.indexOf(':');
-		if(Arrays.asList(forbiddenIndexValues).contains(indexOfColon)){
-			throw new RTSP4xxClientRequestError(StatusCode.BAD_REQUEST, "Bad header field: "+headerFieldAsTextLine);
-		}
-		
-		String name = "";
-		String value = "";
-		if(indexOfColon > -1){
-		
-			name = headerFieldAsTextLine.substring(0, indexOfColon).trim();
-			value = headerFieldAsTextLine.substring(indexOfColon+1, headerFieldAsTextLine.length()).trim();
-		}
-		
-		return new HeaderField(name, value); 
 	}
 }

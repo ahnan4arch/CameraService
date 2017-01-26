@@ -2,6 +2,7 @@ package com.example.zebul.cameraservice.av_streaming.rtsp.message;
 
 
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Header;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderField;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.Version;
 
 public class RTSPMessage {
@@ -28,5 +29,13 @@ public class RTSPMessage {
 
 	public void setHeader(Header RTSPRequestHeader) {
 		this.header = RTSPRequestHeader;
+	}
+
+	public HeaderField findHeaderField(HeaderField.KnownName headerFieldKnownName) {
+		return header.findHeaderField(headerFieldKnownName);
+	}
+
+	public String getHeaderFieldValue(HeaderField.KnownName knownName) {
+		return header.getHeaderFieldValue(knownName);
 	}
 }

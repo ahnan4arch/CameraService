@@ -25,7 +25,7 @@ package com.example.zebul.cameraservice.av_streaming.rtsp;
 |     "412"      ; Precondition Failed
 |     "413"      ; Request Entity Too Large
 |     "414"      ; Request-URI Too Large
-|     "415"      ; Unsupported Media Type
+|     "415"      ; Unsupported Media KnownName
 |     "451"      ; Parameter Not Understood
 |     "452"      ; Conference Not Found
 |     "453"      ; Not Enough Bandwidth
@@ -98,7 +98,7 @@ public class StatusCode {
 	public static final StatusCode PRECONDITION_FAILED = new StatusCode(412,"Precondition Failed");
 	public static final StatusCode REQUEST_ENTITY_TOO_LARGE = new StatusCode(413,"Request Entity Too Large");
 	public static final StatusCode REQUEST_URI_TOO_LARGE = new StatusCode(414,"Request URI Too Large");
-	public static final StatusCode UNSUPPORTED_MEDIA_TYPE = new StatusCode(415,"Unsupported Media Type");
+	public static final StatusCode UNSUPPORTED_MEDIA_TYPE = new StatusCode(415,"Unsupported Media KnownName");
 	public static final StatusCode PARAMETER_NOT_UNDERSTOOD = new StatusCode(451,"Parameter Not Understood");
 	public static final StatusCode CONFERENCE_NOT_FOUND = new StatusCode(452,"Conference Not Found");
 	public static final StatusCode NOT_ENOUGH_BANDWIDTH = new StatusCode(453,"Not Enough Bandwidth");

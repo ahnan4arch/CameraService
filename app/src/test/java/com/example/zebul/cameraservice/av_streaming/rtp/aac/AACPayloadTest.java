@@ -25,7 +25,7 @@ public class AACPayloadTest {
         ...0 .... = Extension: False
         .... 0000 = Contributing source identifiers count: 0
         1... .... = Marker: True
-        Payload type: DynamicRTP-Type-96 (96)
+        Payload type: DynamicRTP-KnownName-96 (96)
         Sequence number: 55504
         [Extended sequence number: 55504]
         Timestamp: 134671883

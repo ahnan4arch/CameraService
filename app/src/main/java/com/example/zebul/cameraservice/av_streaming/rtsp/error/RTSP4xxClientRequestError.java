@@ -3,7 +3,7 @@ package com.example.zebul.cameraservice.av_streaming.rtsp.error;
 
 import com.example.zebul.cameraservice.av_streaming.rtsp.StatusCode;
 
-public class RTSP4xxClientRequestError extends RTSPRequestError{
+public class RTSP4xxClientRequestError extends RTSPError {
 
 	/**
 	 * 

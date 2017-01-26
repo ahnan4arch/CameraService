@@ -26,6 +26,40 @@ Real Time Streaming Protocol
 //--------END OF OPTIONS--------
 
 //--------BEG OF DESCRIBE--------
+
+RTSP/1.0 200 OK\r\n
+    Server: VLC/2.2.2\r\n
+    Date: Wed, 25 Jan 2017 16:28:29 GMT\r\n
+    Content-type: application/sdp
+    Content-Base: rtsp://192.168.1.106:8554/s1\r\n
+    Content-length: 691
+    Cache-Control: no-cache\r\n
+    Cseq: 3\r\n
+    \r\n
+v=0\r\n
+o=- 15867114619150279987 15867114619150279987 IN IP4 zebul-NV78\r\n
+s=Unnamed\r\n
+i=N/A\r\n
+c=IN IP4 0.0.0.0\r\n
+t=0 0\r\n
+a=tool:vlc 2.2.2\r\n
+a=recvonly\r\n
+a=type:broadcast\r\n
+a=charset:UTF-8\r\n
+a=control:rtsp://192.168.1.106:8554/s1\r\n
+m=audio 0 RTP/AVP 96\r\n
+b=RR:0\r\n
+a=rtpmap:96 mpeg4-generic/44100/2\r\n
+a=fmtp:96 streamtype=5; profile-level-id=15; mode=AAC-hbr; config=1210; SizeLength=13; IndexLength=3; IndexDeltaLength=3; Profile=1;\r\n
+a=control:rtsp://192.168.1.106:8554/s1/trackID=4\r\n
+m=video 0 RTP/AVP 96\r\n
+b=RR:0\r\n
+a=rtpmap:96 H264/90000\r\n
+a=fmtp:96 packetization-mode=1;profile-level-id=42e00d;sprop-parameter-sets=J0LgDakYKD9gDUGAQa23oC8B6XvfAQ==,KM4JiA==;\r\n
+a=control:rtsp://192.168.1.106:8554/s1/trackID=5\r\n
+
+
+--- VERSION 2 --paresd dump
 Frame 1026: 218 bytes on wire (1744 bits), 218 bytes captured (1744 bits) on interface 0
 Ethernet II, Src: SamsungE_53:fe:eb (5c:0a:5b:53:fe:eb), Dst: IntelCor_a4:9c:a8 (00:1e:65:a4:9c:a8)
 Internet Protocol Version 4, Src: 192.168.1.22, Dst: 192.168.1.106
@@ -59,14 +93,14 @@ Real Time Streaming Protocol
             Owner Username: -
             Session ID: 15850026581053542000
             Session Version: 15850026581053542000
-            Owner Network Type: IN
-            Owner Address Type: IP4
+            Owner Network KnownName: IN
+            Owner Address KnownName: IP4
             Owner Address: zebul-NV78
         Session Name (s): Unnamed
         Session Information (i): N/A
         Connection Information (c): IN IP4 0.0.0.0
-            Connection Network Type: IN
-            Connection Address Type: IP4
+            Connection Network KnownName: IN
+            Connection Address KnownName: IP4
             Connection Address: 0.0.0.0
         Time Description, active time (t): 0 0
             Session Start Time: 0
@@ -85,17 +119,17 @@ Real Time Streaming Protocol
             Session Attribute Fieldname: control
             Session Attribute Value: rtsp://192.168.1.106:8554/s1
         Media Description, name and address (m): audio 0 RTP/AVP 96
-            Media Type: audio
+            Media KnownName: audio
             Media Port: 0
             Media Protocol: RTP/AVP
-            Media Format: DynamicRTP-Type-96
+            Media Format: DynamicRTP-KnownName-96
         Bandwidth Information (b): RR:0
             Bandwidth Modifier: RR
             Bandwidth Value: 0
         Media Attribute (a): rtpmap:96 mpeg4-generic/44100
             Media Attribute Fieldname: rtpmap
             Media Format: 96
-            MIME Type: mpeg4-generic
+            MIME KnownName: mpeg4-generic
             Sample Rate: 44100
         Media Attribute (a): fmtp:96 streamtype=5; profile-level-id=15; mode=AAC-hbr; config=1208; SizeLength=13; IndexLength=3; IndexDeltaLength=3; Profile=1;
             Media Attribute Fieldname: fmtp
@@ -113,17 +147,17 @@ Real Time Streaming Protocol
             Media Attribute Fieldname: control
             Media Attribute Value: rtsp://192.168.1.106:8554/s1/trackID=6
         Media Description, name and address (m): video 0 RTP/AVP 96
-            Media Type: video
+            Media KnownName: video
             Media Port: 0
             Media Protocol: RTP/AVP
-            Media Format: DynamicRTP-Type-96
+            Media Format: DynamicRTP-KnownName-96
         Bandwidth Information (b): RR:0
             Bandwidth Modifier: RR
             Bandwidth Value: 0
         Media Attribute (a): rtpmap:96 H264/90000
             Media Attribute Fieldname: rtpmap
             Media Format: 96
-            MIME Type: H264
+            MIME KnownName: H264
             Sample Rate: 90000
         Media Attribute (a): fmtp:96 packetization-mode=1;profile-level-id=42802a;sprop-parameter-sets=Z0KAKpWgHgCJeVA=,aM48gA==;
             Media Attribute Fieldname: fmtp
@@ -204,7 +238,7 @@ Real Time Streaming Protocol
 RTSP/1.0 200 OK
 Server: VLC/2.2.2
 Date: Sat, 10 Dec 2016 15:18:10 GMT
-Content-Type: application/sdp
+Content-KnownName: application/sdp
 Content-Base: rtsp://192.168.1.106:8554/s1
 Content-Length: 673
 Cache-Control: no-cache

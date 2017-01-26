@@ -29,7 +29,7 @@ public class RTSPResponseEncoder {
 		Header header = response.getHeader();
 		for(HeaderField headerField: header.getHeaderFields()){
 			
-			String headerLine = String.format("%s: %s", headerField.getName(), headerField.getValue()); 
+			String headerLine = String.format("%s: %s", headerField.getKnownType(), headerField.getValue());
 			responseTextBuilder.append(headerLine+RTSPProtocol.LINE_SEPARATOR);
 		}
 		

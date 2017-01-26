@@ -36,7 +36,7 @@ import java.nio.FloatBuffer;
 //20140123: correct error checks on glGet*Location() and program creation (they don't set error)
 
 /**
- * Record video from the camera preview and encode it as an MP4 file.  Demonstrates the use
+ * Record video from the camera preview and decode it as an MP4 file.  Demonstrates the use
  * of MediaMuxer and MediaCodec with Camera input.  Does not record audio.
  * <p>
  * Generally speaking, it's better to use MediaRecorder for this sort of thing.  This example

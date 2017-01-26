@@ -13,18 +13,18 @@ public class AACPacketTest {
     audio rtp samples
 
     No      time
-    51689	*REF*		192.168.1.106	192.168.1.22	RTP	425	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53722, Time=39580386, Mark
-    51690	0.023279601	192.168.1.106	192.168.1.22	RTP	401	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53723, Time=39581410, Mark
-    51691	0.046517996	192.168.1.106	192.168.1.22	RTP	433	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53724, Time=39582434, Mark
-    51692	0.069636827	192.168.1.106	192.168.1.22	RTP	428	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53725, Time=39583458, Mark
-    51693	0.092865585	192.168.1.106	192.168.1.22	RTP	428	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53726, Time=39584482, Mark
-    51694	0.116065988	192.168.1.106	192.168.1.22	RTP	444	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53727, Time=39585506, Mark
-    51713	0.557258321	192.168.1.106	192.168.1.22	RTP	559	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53746, Time=39604962, Mark
-    51714	0.580504888	192.168.1.106	192.168.1.22	RTP	549	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53747, Time=39605986, Mark
+    51689	*REF*		192.168.1.106	192.168.1.22	RTP	425	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53722, Time=39580386, Mark
+    51690	0.023279601	192.168.1.106	192.168.1.22	RTP	401	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53723, Time=39581410, Mark
+    51691	0.046517996	192.168.1.106	192.168.1.22	RTP	433	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53724, Time=39582434, Mark
+    51692	0.069636827	192.168.1.106	192.168.1.22	RTP	428	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53725, Time=39583458, Mark
+    51693	0.092865585	192.168.1.106	192.168.1.22	RTP	428	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53726, Time=39584482, Mark
+    51694	0.116065988	192.168.1.106	192.168.1.22	RTP	444	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53727, Time=39585506, Mark
+    51713	0.557258321	192.168.1.106	192.168.1.22	RTP	559	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53746, Time=39604962, Mark
+    51714	0.580504888	192.168.1.106	192.168.1.22	RTP	549	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53747, Time=39605986, Mark
 
-    51736	1.021674314	192.168.1.106	192.168.1.22	RTP	466	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53766, Time=39625442, Mark
-    51737	1.044861098	192.168.1.106	192.168.1.22	RTP	512	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53767, Time=39626466, Mark
-    51738	1.068068066	192.168.1.106	192.168.1.22	RTP	433	PT=DynamicRTP-Type-96, SSRC=0x859F1D00, Seq=53768, Time=39627490, Mark
+    51736	1.021674314	192.168.1.106	192.168.1.22	RTP	466	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53766, Time=39625442, Mark
+    51737	1.044861098	192.168.1.106	192.168.1.22	RTP	512	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53767, Time=39626466, Mark
+    51738	1.068068066	192.168.1.106	192.168.1.22	RTP	433	PT=DynamicRTP-KnownName-96, SSRC=0x859F1D00, Seq=53768, Time=39627490, Mark
 
     51738 <-> 51737
     39627490-39626466 = 1024
@@ -94,7 +94,7 @@ public class AACPacketTest {
         ...0 .... = Extension: False
         .... 0000 = Contributing source identifiers count: 0
         1... .... = Marker: True
-        Payload type: DynamicRTP-Type-96 (96)
+        Payload type: DynamicRTP-KnownName-96 (96)
         Sequence number: 55487
         [Extended sequence number: 55487]
         Timestamp: 134654475
@@ -177,7 +177,7 @@ public class AACPacketTest {
         ...0 .... = Extension: False
         .... 0000 = Contributing source identifiers count: 0
         1... .... = Marker: True
-        Payload type: DynamicRTP-Type-96 (96)
+        Payload type: DynamicRTP-KnownName-96 (96)
         Sequence number: 55504
         [Extended sequence number: 55504]
         Timestamp: 134671883
@@ -261,7 +261,7 @@ public class AACPacketTest {
         ...0 .... = Extension: False
         .... 0000 = Contributing source identifiers count: 0
         1... .... = Marker: True
-        Payload type: DynamicRTP-Type-96 (96)
+        Payload type: DynamicRTP-KnownName-96 (96)
         Sequence number: 59056
         [Extended sequence number: 59056]
         Timestamp: 408230870

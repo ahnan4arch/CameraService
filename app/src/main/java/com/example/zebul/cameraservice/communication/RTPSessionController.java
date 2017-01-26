@@ -17,10 +17,6 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.transport.TransportDeco
 import com.example.zebul.cameraservice.av_streaming.rtsp.transport.TransportEncoder;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.Resolution;
 import com.example.zebul.cameraservice.av_streaming.rtsp.video.VideoSettings;
-import com.example.zebul.cameraservice.communication.tcp.RTSPSessionCreatedEvent;
-import com.example.zebul.cameraservice.communication.tcp.RTSPSessionDestroyedEvent;
-import com.example.zebul.cameraservice.communication.tcp.RTSPSessionEvent;
-import com.example.zebul.cameraservice.communication.tcp.RTSPSessionEventListener;
 import com.example.zebul.cameraservice.communication.udp.RTPSession;
 import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneSettings;
 import com.example.zebul.cameraservice.packet_producers.video.camera.CameraSettings;
@@ -30,6 +26,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+
+
 
 /**
  * Created by zebul on 1/1/17.
@@ -58,7 +56,8 @@ public class RTPSessionController implements RTSPRequestListener {
 
         int CSeq = request.getHeader().getCSeq();
         HeaderFields headerFields = new HeaderFields();
-        Header header = new Header(CSeq, headerFields);
+        headerFields.add(new HeaderField(HeaderField.KnownName.CSeq, CSeq+""));
+        Header header = new Header(headerFields);
 
         SessionVideoInfo sessionVideoInfo = new SessionVideoInfo(1, videoSettings);
         session.setSessionVideoInfo(sessionVideoInfo);
@@ -83,8 +82,9 @@ public class RTPSessionController implements RTSPRequestListener {
 
         int CSeq = request.getHeader().getCSeq();
         HeaderFields headerFields = new HeaderFields();
-        headerFields.add(new HeaderField("Public", "DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE"));
-        Header header = new Header(CSeq, headerFields);
+        headerFields.add(new HeaderField(HeaderField.KnownName.CSeq, CSeq));
+        headerFields.add(new HeaderField(HeaderField.KnownName.Public, "DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE"));
+        Header header = new Header(headerFields);
         return new RTSPResponse(StatusCode.OK, request.getVersion(), header);
     }
 
@@ -99,10 +99,11 @@ public class RTPSessionController implements RTSPRequestListener {
         HeaderFields headerFields = new HeaderFields();
 
         String rtpInfo = "url=rtsp://" + clientSocket.getLocalAddress().getHostAddress() + ":" + clientSocket.getLocalPort() + "/trackID=" + 0 + ";seq=0,";
-        headerFields.add(new HeaderField("RTP-Info", rtpInfo));
-        headerFields.add(new HeaderField("Session", session.getIdentifier()));
         int CSeq = request.getHeader().getCSeq();
-        Header header = new Header(CSeq, headerFields);
+        headerFields.add(new HeaderField(HeaderField.KnownName.CSeq, CSeq+""));
+        headerFields.add(new HeaderField(HeaderField.KnownName.RTP_Info, rtpInfo));
+        headerFields.add(new HeaderField(HeaderField.KnownName.Session, session.getIdentifier()));
+        Header header = new Header(headerFields);
         SocketAddress socketAddress = clientSocket.getRemoteSocketAddress();
         String clientIp = "127.0.0.1";
         String [] addressElems = socketAddress.toString().split(":");
@@ -137,10 +138,18 @@ public class RTPSessionController implements RTSPRequestListener {
     @Override
     public RTSPResponse onSetup(RTSPRequest request) throws RTSP4xxClientRequestError {
 
-        HeaderField transportHeaderField = request.getHeader().getHeaderFields().find("Transport");
+        HeaderField transportHeaderField = request.findHeaderField(HeaderField.KnownName.Transport);
+        Transport transport = null;
+        if(transportHeaderField == null){
+            transport = TransportDecoder.decode(transportHeaderField.getValue());
+        }
+        else{
+            transport = new Transport();
+        }
         int trackId = request.getRequestUri().getTrackId();
-        Transport transport = TransportDecoder.decode(transportHeaderField.getValue());
-        if(!transportHeaderField.isEmpty()) {
+
+
+        if(transportHeaderField != null) {
 
             if(session.isVideoTrackId(trackId)){
 
@@ -164,11 +173,12 @@ public class RTPSessionController implements RTSPRequestListener {
 
         transport.setMode(Transport.Mode.PLAY);
 
-        headerFields.add(new HeaderField("Transport", TransportEncoder.encode(transport)));
-        headerFields.add(new HeaderField("Session", session.getIdentifier()));
-        headerFields.add(new HeaderField("Cache-Control", "no-cache"));
+        headerFields.add(new HeaderField(HeaderField.KnownName.CSeq, CSeq));
+        headerFields.add(new HeaderField(HeaderField.KnownName.Transport, TransportEncoder.encode(transport)));
+        headerFields.add(new HeaderField(HeaderField.KnownName.Session, session.getIdentifier()));
+        headerFields.add(new HeaderField(HeaderField.KnownName.Cache_Control, "no-cache"));
+        Header header = new Header(headerFields);
 
-        Header header = new Header(CSeq, headerFields);
         return new RTSPResponse(StatusCode.OK, request.getVersion(), header);
     }
 
@@ -183,7 +193,8 @@ public class RTPSessionController implements RTSPRequestListener {
         stop();
         int CSeq = request.getHeader().getCSeq();
         HeaderFields headerFields = new HeaderFields();
-        Header header = new Header(CSeq, headerFields);
+        headerFields.add(new HeaderField(HeaderField.KnownName.CSeq, CSeq));
+        Header header = new Header(headerFields);
         return new RTSPResponse(StatusCode.OK, request.getVersion(), header);
     }
 

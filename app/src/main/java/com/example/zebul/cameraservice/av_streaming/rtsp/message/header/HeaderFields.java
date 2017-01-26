@@ -19,15 +19,18 @@ public class HeaderFields implements Iterable<HeaderField>{
 		return headerFields.iterator();
 	}
 
-	public HeaderField find(String fieldName) {
+	public HeaderField find(HeaderField.KnownName fieldKnownName) {
 		
-		String lowerCasedFieldName = fieldName.toLowerCase();
 		for(HeaderField headerField: headerFields){
 			
-			if(headerField.getName().toLowerCase().equals(lowerCasedFieldName)){
+			if(headerField.getKnownType().equals(fieldKnownName)){
 				return headerField; 
 			}
 		}
-		return new HeaderField("", "");
+		return null;
+	}
+
+	public int getNumberOfFields() {
+		return headerFields.size();
 	}
 }

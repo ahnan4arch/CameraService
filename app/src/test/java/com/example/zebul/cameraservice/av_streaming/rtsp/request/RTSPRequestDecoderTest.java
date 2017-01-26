@@ -3,7 +3,7 @@ package com.example.zebul.cameraservice.av_streaming.rtsp.request;
 import com.example.zebul.cameraservice.av_streaming.rtsp.Method;
 import com.example.zebul.cameraservice.av_streaming.rtsp.RTSPProtocol;
 import com.example.zebul.cameraservice.av_streaming.rtsp.error.RTSP4xxClientRequestError;
-import com.example.zebul.cameraservice.av_streaming.rtsp.error.RTSPRequestError;
+import com.example.zebul.cameraservice.av_streaming.rtsp.error.RTSPError;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,7 +14,7 @@ public class RTSPRequestDecoderTest {
 	private static final String SEP = RTSPProtocol.LINE_SEPARATOR;
 	
 	@Test
-	public void test_when_text_contains_valid_request_then_text_is_decodeable_to_RTSPRequest() throws RTSPRequestError {
+	public void test_when_text_contains_valid_request_then_text_is_decodeable_to_RTSPRequest() throws RTSPError {
 		
 		StringBuilder requestTextBuilder = new StringBuilder();
 		requestTextBuilder.append("OPTIONS rtsp://192.168.1.106:6880 RTSP/1.0"+SEP);
@@ -27,7 +27,7 @@ public class RTSPRequestDecoderTest {
 	}
 	
 	@Test
-	public void test_when_text_contains_valid_request_then_text_is_decodeable2() throws RTSPRequestError{
+	public void test_when_text_contains_valid_request_then_text_is_decodeable2() throws RTSPError {
 		
 		StringBuilder requestTextBuilder = new StringBuilder();
 		requestTextBuilder.append("OPTIONS rtsp://192.168.1.106:6880 RTSP/1.0"+SEP);

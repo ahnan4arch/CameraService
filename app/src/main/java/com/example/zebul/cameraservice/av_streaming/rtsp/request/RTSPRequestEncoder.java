@@ -19,9 +19,9 @@ public class RTSPRequestEncoder {
 		final URI requestUri = request.getRequestUri();
 		final Version version = request.getVersion();
 
-		StringBuilder requestTextBuilder = new StringBuilder();
-		String versionAsText = VersionEncoder.encode(version);
-		String requestUriAsText = requestUri.toString();
+		final StringBuilder requestTextBuilder = new StringBuilder();
+		final String versionAsText = VersionEncoder.encode(version);
+		final String requestUriAsText = requestUri.toString();
 		requestTextBuilder.append(method+" "+requestUriAsText+" "+versionAsText+SEP);
 
 		final Header header = request.getHeader();
@@ -29,7 +29,7 @@ public class RTSPRequestEncoder {
 		final HeaderFields headerFields = header.getHeaderFields();
 		for(HeaderField headerField: headerFields){
 
-			requestTextBuilder.append(headerField.getName()+": "+headerField.getValue()+SEP);
+			requestTextBuilder.append(headerField.toString()+SEP);
 		}
 		requestTextBuilder.append(SEP);
 		return requestTextBuilder.toString();
