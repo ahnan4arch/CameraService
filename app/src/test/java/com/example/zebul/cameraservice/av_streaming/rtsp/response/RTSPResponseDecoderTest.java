@@ -54,28 +54,29 @@ public class RTSPResponseDecoderTest {
                 "Cache-Control: no-cache\r\n"+
                 "Cseq: 3\r\n"+
                 "\r\n"+
-                    "Session Description Protocol\r\n"+
-                    "Session Description Protocol Version (v): 0\r\n"+
-                    "Owner/Creator, Session Id (o): - 15867114619150279987 15867114619150279987 IN IP4 zebul-NV78\r\n"+
-                    "Session Name (s): Unnamed\r\n"+
-                    "Session Information (i): N/A\r\n"+
-                    "Connection Information (c): IN IP4 0.0.0.0\r\n"+
-                    "Time Description, active time (t): 0 0\r\n"+
-                    "Session Attribute (a): tool:vlc 2.2.2\r\n"+
-                    "Session Attribute (a): recvonly\r\n"+
-                    "Session Attribute (a): type:broadcast\r\n"+
-                    "Session Attribute (a): charset:UTF-8\r\n"+
-                    "Session Attribute (a): control:rtsp://192.168.1.106:8554/s1\r\n"+
-                    "Media Description, name and address (m): audio 0 RTP/AVP 96\r\n"+
-                    "Bandwidth Information (b): RR:0\r\n"+
-                    "Media Attribute (a): rtpmap:96 mpeg4-generic/44100/2\r\n"+
-                    "Media Attribute (a): fmtp:96 streamtype=5; profile-level-id=15; mode=AAC-hbr; config=1210; SizeLength=13; IndexLength=3; IndexDeltaLength=3; Profile=1;\r\n"+
-                    "Media Attribute (a): control:rtsp://192.168.1.106:8554/s1/trackID=4\r\n"+
-                    "Media Description, name and address (m): video 0 RTP/AVP 96\r\n"+
-                    "Bandwidth Information (b): RR:0\r\n"+
-                    "Media Attribute (a): rtpmap:96 H264/90000\r\n"+
-                    "Media Attribute (a): fmtp:96 packetization-mode=1;profile-level-id=42e00d;sprop-parameter-sets=J0LgDakYKD9gDUGAQa23oC8B6XvfAQ==,KM4JiA==;\r\n"+
-                    "Media Attribute (a): control:rtsp://192.168.1.106:8554/s1/trackID=5\r\n";
+                    "v=0\r\n"+
+                    "o=- 15867114619150279987 15867114619150279987 IN IP4 zebul-NV78\r\n"+
+                    "s=Unnamed\r\n"+
+                    "i=N/A\r\n"+
+                    "c=IN IP4 0.0.0.0\r\n"+
+                    "t=0 0\r\n"+
+                    "a=tool:vlc 2.2.2\r\n"+
+                    "a=recvonly\r\n"+
+                    "a=type:broadcast\r\n"+
+                    "a=charset:UTF-8\r\n"+
+                    "a=control:rtsp://192.168.1.106:8554/s1\r\n"+
+
+                    "m=audio 0 RTP/AVP 96\r\n"+
+                    "b=RR:0\r\n"+
+                    "a=rtpmap:96 mpeg4-generic/44100/2\r\n"+
+                    "a=fmtp:96 streamtype=5; profile-level-id=15; mode=AAC-hbr; config=1210; SizeLength=13; IndexLength=3; IndexDeltaLength=3; Profile=1;\r\n"+
+                    "a=control:rtsp://192.168.1.106:8554/s1/trackID=4\r\n"+
+
+                    "m=video 0 RTP/AVP 96\r\n"+
+                    "b=RR:0\r\n"+
+                    "a=rtpmap:96 H264/90000\r\n"+
+                    "a=fmtp:96 packetization-mode=1;profile-level-id=42e00d;sprop-parameter-sets=J0LgDakYKD9gDUGAQa23oC8B6XvfAQ==,KM4JiA==;\r\n"+
+                    "a=control:rtsp://192.168.1.106:8554/s1/trackID=5\r\n";
 
         //when
         final RTSPResponse rtspResponse = RTSPResponseDecoder.decode(responseRepresentaionAsText);

@@ -1,7 +1,7 @@
 package com.example.zebul.cameraservice.communication;
 
 import com.example.zebul.cameraservice.av_streaming.rtsp.StatusCode;
-import com.example.zebul.cameraservice.av_streaming.rtsp.audio.AudioSettings;
+import com.example.zebul.cameraservice.av_streaming.AudioSettings;
 import com.example.zebul.cameraservice.av_streaming.rtsp.error.RTSP4xxClientRequestError;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.body.Body;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Header;
@@ -9,14 +9,14 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderFi
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderFields;
 import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequest;
 import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponse;
-import com.example.zebul.cameraservice.av_streaming.rtsp.session.Session;
-import com.example.zebul.cameraservice.av_streaming.rtsp.session.SessionAudioInfo;
-import com.example.zebul.cameraservice.av_streaming.rtsp.session.SessionVideoInfo;
-import com.example.zebul.cameraservice.av_streaming.rtsp.transport.Transport;
-import com.example.zebul.cameraservice.av_streaming.rtsp.transport.TransportDecoder;
-import com.example.zebul.cameraservice.av_streaming.rtsp.transport.TransportEncoder;
-import com.example.zebul.cameraservice.av_streaming.rtsp.video.Resolution;
-import com.example.zebul.cameraservice.av_streaming.rtsp.video.VideoSettings;
+import com.example.zebul.cameraservice.av_streaming.sdp.Attribute;
+import com.example.zebul.cameraservice.av_streaming.sdp.MediaDescription;
+import com.example.zebul.cameraservice.av_streaming.sdp.SessionDescription;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Transport;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.TransportDecoder;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.TransportEncoder;
+import com.example.zebul.cameraservice.av_streaming.Resolution;
+import com.example.zebul.cameraservice.av_streaming.VideoSettings;
 import com.example.zebul.cameraservice.communication.udp.RTPSession;
 import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneSettings;
 import com.example.zebul.cameraservice.packet_producers.video.camera.CameraSettings;
@@ -33,7 +33,10 @@ import java.net.UnknownHostException;
  * Created by zebul on 1/1/17.
  */
 
-public class RTPSessionController implements RTSPRequestListener {
+public class RTPServerSessionController implements RTSPRequestListener {
+
+    private Transport videoTransport;
+    private Transport audioTransport;
 
     private Socket clientSocket;
     private RTPSession rtpSession;
@@ -44,11 +47,23 @@ public class RTPSessionController implements RTSPRequestListener {
     private AudioSettings audioSettings = AudioSettings.DEFAULT;
 
     private int port = 5001;
-    private Session session = new Session(port);
+    private SessionDescription sessionDescription = new SessionDescription(port);
 
-    public RTPSessionController(Socket clientSocket){
+    public RTPServerSessionController(Socket clientSocket){
 
         this.clientSocket = clientSocket;
+
+        MediaDescription videoMediaDescription = new MediaDescription(MediaDescription.MediaType.Video, 0, "RTP/AVP", "96");
+        videoMediaDescription.addAttribute(new Attribute("rtpmap","96 H264/90000"));
+        videoMediaDescription.addAttribute(new Attribute("fmtp","96 packetization-mode=1;profile-level-id=42e00d;"));
+        videoMediaDescription.addAttribute(new Attribute("control","trackID=1"));
+        sessionDescription.addMediaDescription(videoMediaDescription);
+
+        MediaDescription audioMediaDescription = new MediaDescription(MediaDescription.MediaType.Audio, 0, "RTP/AVP", "96");
+        audioMediaDescription.addAttribute(new Attribute("rtpmap","96 mpeg4-generic/8000"));
+        audioMediaDescription.addAttribute(new Attribute("fmtp","96 streamtype=5; profile-level-id=15; mode=AAC-hbr; config=1210; SizeLength=13; IndexLength=3; IndexDeltaLength=3; Profile=1;"));
+        audioMediaDescription.addAttribute(new Attribute("control","trackID=2"));
+        sessionDescription.addMediaDescription(audioMediaDescription);
     }
 
     @Override
@@ -59,11 +74,7 @@ public class RTPSessionController implements RTSPRequestListener {
         headerFields.add(new HeaderField(HeaderField.KnownName.CSeq, CSeq+""));
         Header header = new Header(headerFields);
 
-        SessionVideoInfo sessionVideoInfo = new SessionVideoInfo(1, videoSettings);
-        session.setSessionVideoInfo(sessionVideoInfo);
-        SessionAudioInfo sessionAudioInfo = new SessionAudioInfo(2, audioSettings);
-        session.setSessionAudioInfo(sessionAudioInfo);
-        Body body = new Body(session.getDescription());
+        Body body = new Body(sessionDescription.getDescription());
         return new RTSPResponse(StatusCode.OK, request.getVersion(), header, body);
     }
 
@@ -102,7 +113,7 @@ public class RTPSessionController implements RTSPRequestListener {
         int CSeq = request.getHeader().getCSeq();
         headerFields.add(new HeaderField(HeaderField.KnownName.CSeq, CSeq+""));
         headerFields.add(new HeaderField(HeaderField.KnownName.RTP_Info, rtpInfo));
-        headerFields.add(new HeaderField(HeaderField.KnownName.Session, session.getIdentifier()));
+        headerFields.add(new HeaderField(HeaderField.KnownName.Session, sessionDescription.getIdentifier()));
         Header header = new Header(headerFields);
         SocketAddress socketAddress = clientSocket.getRemoteSocketAddress();
         String clientIp = "127.0.0.1";
@@ -110,12 +121,18 @@ public class RTPSessionController implements RTSPRequestListener {
         if(1<addressElems.length){
             clientIp = addressElems[0].replaceAll("/", "");
         }
-        Transport videoTransport = session.getVideoTransport();
-        Transport audioTransport = session.getAudioTransport();
-        InetSocketAddress videoSocketAddress = new InetSocketAddress(
-                clientIp, videoTransport.getMinClientPort());
-        InetSocketAddress audioSocketAddress = new InetSocketAddress(
-                clientIp, audioTransport.getMinClientPort());
+
+        InetSocketAddress videoSocketAddress = null;
+        if(videoTransport != null){
+            videoSocketAddress = new InetSocketAddress(
+                    clientIp, videoTransport.getMinClientPort());
+        }
+
+        InetSocketAddress audioSocketAddress = null;
+        if(audioTransport != null) {
+            audioSocketAddress = new InetSocketAddress(
+                    clientIp, audioTransport.getMinClientPort());
+        }
 
         CameraSettings cameraSettings = new CameraSettings(videoSettings);
         MicrophoneSettings microphoneSettings =  new MicrophoneSettings(AudioSettings.DEFAULT);
@@ -140,26 +157,24 @@ public class RTPSessionController implements RTSPRequestListener {
 
         HeaderField transportHeaderField = request.findHeaderField(HeaderField.KnownName.Transport);
         Transport transport = null;
-        if(transportHeaderField == null){
+        if(transportHeaderField != null){
             transport = TransportDecoder.decode(transportHeaderField.getValue());
         }
         else{
             transport = new Transport();
         }
-        int trackId = request.getRequestUri().getTrackId();
-
-
+        String controlTrack = request.getRequestUri().getFileWithoutSpecialLeadingChars();
         if(transportHeaderField != null) {
 
-            if(session.isVideoTrackId(trackId)){
+            if(sessionDescription.videoMediaHasValueOfAttribute("control", controlTrack)){
 
                 transport.setSsrc("11221A87");
-                session.setVideoTransport(transport);
+                videoTransport = transport;
             }
-            else if(session.isAudioTrackId(trackId)){
+            else if(sessionDescription.audioMediaHasValueOfAttribute("control", controlTrack)){
 
                 transport.setSsrc("9E7D1A87");
-                session.setAudioTransport(transport);
+                audioTransport = transport;
             }
         }
 
@@ -175,7 +190,7 @@ public class RTPSessionController implements RTSPRequestListener {
 
         headerFields.add(new HeaderField(HeaderField.KnownName.CSeq, CSeq));
         headerFields.add(new HeaderField(HeaderField.KnownName.Transport, TransportEncoder.encode(transport)));
-        headerFields.add(new HeaderField(HeaderField.KnownName.Session, session.getIdentifier()));
+        headerFields.add(new HeaderField(HeaderField.KnownName.Session, sessionDescription.getIdentifier()));
         headerFields.add(new HeaderField(HeaderField.KnownName.Cache_Control, "no-cache"));
         Header header = new Header(headerFields);
 

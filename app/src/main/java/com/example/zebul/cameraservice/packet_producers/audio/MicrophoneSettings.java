@@ -1,6 +1,6 @@
 package com.example.zebul.cameraservice.packet_producers.audio;
 
-import com.example.zebul.cameraservice.av_streaming.rtsp.audio.AudioSettings;
+import com.example.zebul.cameraservice.av_streaming.AudioSettings;
 
 /**
  * Created by zebul on 12/31/16.

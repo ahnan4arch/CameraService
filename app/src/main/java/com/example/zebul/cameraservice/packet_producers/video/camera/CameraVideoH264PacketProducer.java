@@ -14,8 +14,8 @@ import com.example.zebul.cameraservice.av_streaming.rtp.Clock;
 import com.example.zebul.cameraservice.av_streaming.rtp.Timestamp;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.NALUnit;
 import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
-import com.example.zebul.cameraservice.av_streaming.rtsp.video.Resolution;
-import com.example.zebul.cameraservice.av_streaming.rtsp.video.VideoSettings;
+import com.example.zebul.cameraservice.av_streaming.Resolution;
+import com.example.zebul.cameraservice.av_streaming.VideoSettings;
 import com.example.zebul.cameraservice.packet_producers.MediaCodecPacketProducer;
 
 import java.io.IOException;

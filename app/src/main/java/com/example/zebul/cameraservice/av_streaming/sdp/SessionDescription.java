@@ -1,42 +1,55 @@
-package com.example.zebul.cameraservice.av_streaming.rtsp.session;
+package com.example.zebul.cameraservice.av_streaming.sdp;
 
 
 import com.example.zebul.cameraservice.av_streaming.rtsp.RTSPProtocol;
-import com.example.zebul.cameraservice.av_streaming.rtsp.transport.Transport;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Transport;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 
-public class Session {
+public class SessionDescription {
 
-	enum Media{
-		Audio,
-		Video
-	}
 	private long timestamp;
 	private int destinationPort;
 	private int mediaFormatDescription = 96;
 	
-	private Transport videoTransport;
-    private Transport audioTransport;
 	private String identifier;
 
-    private SessionAudioInfo sessionAudioInfo;
-    private SessionVideoInfo sessionVideoInfo;
-	
-	public Session(int destinationPort){
+	private List<MediaDescription> mediaDescriptions = new LinkedList<MediaDescription>();
+	private List<Attribute> attributes = new LinkedList<Attribute>();
+	public int version;
+
+	public String name;
+
+	public SessionDescription(int destinationPort){
 		
 		long uptime = System.currentTimeMillis();
 		timestamp = (uptime/1000)<<32 & (((uptime-((uptime/1000)*1000))>>32)/1000); // NTP timestamp
 		this.destinationPort = destinationPort;
-		
 		identifier = generateIdentifier();
 	}
 
-	/*
-	Session Identifiers
+	public SessionDescription(){
 
-	Session identifiers are opaque strings of arbitrary length. Linear
+	}
+
+	public List<MediaDescription> getMediaDescriptions() {
+
+		return mediaDescriptions;
+	}
+
+	public void addMediaDescription(MediaDescription mediaDescription){
+
+		mediaDescriptions.add(mediaDescription);
+	}
+
+
+	/*
+	SessionDescription Identifiers
+
+	SessionDescription identifiers are opaque strings of arbitrary length. Linear
 	white space must be URL-escaped. A session identifier MUST be chosen
 	randomly and MUST be at least eight octets long to make guessing it
 	more difficult.
@@ -53,90 +66,49 @@ public class Session {
 		
 		return identifier;
 	}
-
-	public boolean isVideoTrackId(int trackId) {
-
-		if(sessionVideoInfo == null){
-			return false;
-		}
-		return sessionVideoInfo.getVideoTrackId()==trackId;
-	}
-
-	public boolean isAudioTrackId(int trackId) {
-
-		if(sessionAudioInfo == null){
-			return false;
-		}
-		return sessionAudioInfo.getAudioTrackId()==trackId;
-	}
-
-    public SessionAudioInfo getSessionAudioInfo(){
-
-        return sessionAudioInfo;
-    }
-
-    public void setSessionAudioInfo(SessionAudioInfo sessionAudioInfo){
-
-        this.sessionAudioInfo = sessionAudioInfo;
-    }
-
-    public SessionVideoInfo getSessionVideoInfo(){
-
-        return sessionVideoInfo;
-    }
-
-    public void setSessionVideoInfo(SessionVideoInfo sessionVideoInfo){
-
-        this.sessionVideoInfo = sessionVideoInfo;
-    }
-	
 	
 	public String getDescription(){
 		
 		StringBuilder descriptionBuilder = new StringBuilder();
 		
-		descriptionBuilder.append(v_formatVersion()				+RTSPProtocol.LINE_SEPARATOR);
-		descriptionBuilder.append(o_formatOrigin()				+RTSPProtocol.LINE_SEPARATOR);
-		descriptionBuilder.append(s_formatSessionName()			+RTSPProtocol.LINE_SEPARATOR);
+		descriptionBuilder.append(SessionDescriptionProtocol.encode(this));
 		descriptionBuilder.append(i_formatSessionDescription()	+RTSPProtocol.LINE_SEPARATOR);
 		descriptionBuilder.append(c_formatConnectionData()		+RTSPProtocol.LINE_SEPARATOR);
 		descriptionBuilder.append(t_formatTime()				+RTSPProtocol.LINE_SEPARATOR);
 
-		// ---- BEG OF VIDEO SECTION
-        if(sessionVideoInfo != null){
+        final String SP = SessionDescriptionProtocol.SP;
+        for(MediaDescription md: mediaDescriptions){
 
-            descriptionBuilder.append(m_formatMediaDescriptions(Media.Video)
-                    +RTSPProtocol.LINE_SEPARATOR);
-            descriptionBuilder.append("a=rtpmap:96 H264/90000"+RTSPProtocol.LINE_SEPARATOR);
-            descriptionBuilder.append("a=fmtp:96 packetization-mode=1;profile-level-id=42e00d;"+RTSPProtocol.LINE_SEPARATOR);
-            descriptionBuilder.append("a=control:trackID=1"+RTSPProtocol.LINE_SEPARATOR);
-        }
-		//descriptionBuilder.append("a=fmtp:96 packetization-mode=1;profile-level-id=42e00d;sprop-parameter-sets=J0LgDakYKD9gDUGAQa23oC8B6XvfAQ==,KM4JiA==;"+RTSPProtocol.LINE_SEPARATOR);//sample_iPod.m4v
-        // ---- END OF VIDEO SECTION
+            final String mediaType = md.getMediaType().toString().toLowerCase();
+            final String mediaDescription = mediaType+SP+md.getPort()+SP+md.getProtocol()+SP+md.getFormat();
+            final String desc = "m="+mediaDescription+SessionDescriptionProtocol.LINE_SEPARATOR;
+            descriptionBuilder.append(desc);
+            for(Attribute attribute: md.getAttributes()){
 
-
-        // ---- BEG OF AUDIO SECTION
-        if(sessionAudioInfo != null){
-
-            descriptionBuilder.append(m_formatMediaDescriptions(Media.Audio)
-                    +RTSPProtocol.LINE_SEPARATOR);
-			/*
-            descriptionBuilder.append("a=rtpmap:96 mpeg4-generic/44100"+RTSPProtocol.LINE_SEPARATOR);
-            descriptionBuilder.append("a=fmtp:96 streamtype=5; profile-level-id=15; mode=AAC-hbr; config=1210; SizeLength=13; IndexLength=3; IndexDeltaLength=3; Profile=1;"+RTSPProtocol.LINE_SEPARATOR);
-            descriptionBuilder.append("a=control:trackID=2"+RTSPProtocol.LINE_SEPARATOR);
+                String type = attribute.getType();
+                String value = attribute.getValue();
+                if(value.length()>0){
+                    descriptionBuilder.append("a="+type+":"+value+SessionDescriptionProtocol.LINE_SEPARATOR);
+                }
+                else{
+                    descriptionBuilder.append("a="+type+SessionDescriptionProtocol.LINE_SEPARATOR);
+                }
+            }
+            /*
+            final MediaDescription.MediaType mediaType = findMediaTypeFor(mediaCandidate);
+            int port = Integer.parseInt(mValues[1]);
+            final MediaDescription mediaDescription =
+            new MediaDescription(mediaType, port, mValues[2], mValues[3]);
             */
-			descriptionBuilder.append("a=rtpmap:96 mpeg4-generic/8000"+RTSPProtocol.LINE_SEPARATOR);
-			descriptionBuilder.append("a=fmtp:96 streamtype=5; profile-level-id=15; mode=AAC-hbr; config=1210; SizeLength=13; IndexLength=3; IndexDeltaLength=3; Profile=1;"+RTSPProtocol.LINE_SEPARATOR);
-			descriptionBuilder.append("a=control:trackID=2"+RTSPProtocol.LINE_SEPARATOR);
-        }
-        // ---- END OF AUDIO SECTION
 
+            //mediaDescription.SP
+        }
 		
 		String description = descriptionBuilder.toString();
 		return description;
 	}
 	
-	private String m_formatMediaDescriptions(Media media) {
+	private String m_formatMediaDescriptions(MediaDescription.MediaType media) {
 		/*
 		m=<media> <port> <proto> <fmt> ...
 
@@ -386,121 +358,44 @@ public class Session {
 		return sessionDescription;
 	}
 
-	private String s_formatSessionName(){
-		
-		/*
-		s=<session name>
-		The "s=" field is the session name.  There must be one and only one
-		"s=" field per session description, and it must contain ISO 10646
-		characters (but see also the `charset' attribute below).
-		 */
-		String sessionName = String.format("s=%s", "Some name");
-		return sessionName;
-	}
-	
-	private String v_formatVersion(){
-		
-		/*
-		Protocol Version		
-		The "v=" field gives the version of the Session Description Protocol.
-		There is no minor version number.
-		*/ 
-		String version = String.format("v=%d", 0);
-		return version;
-	}
-	
-	private String o_formatOrigin(){
-		
-		/*
-		Origin
-   		o=<username> <session id> <version> <network type> <address type> <address>
-   		
-		The "o=" field gives the originator of the session (their username
-		and the address of the user's host) plus a session id and session
-		version number.
-		
-		<username> is the user's login on the originating host, or it is "-"
-		if the originating host does not support the concept of user ids.
-		<username> must not contain spaces.  <session id> is a numeric string
-		such that the tuple of <username>, <session id>, <network type>,
-		<address type> and <address> form a globally unique identifier for
-		the session.
-		
-		The method of <session id> allocation is up to the creating tool, but
-		it has been suggested that a Network Time Protocol (NTP) timestamp be
-		used to ensure uniqueness [1].
-		
-		<version> is a version number for this announcement.  It is needed
-		for proxy announcements to detect which of several announcements for
-		the same session is the most recent.  Again its usage is up to the
-		
-		creating tool, so long as <version> is increased when a modification
-		is made to the session data.  Again, it is recommended (but not
-		mandatory) that an NTP timestamp is used.
-		
-		<network type> is a text string giving the type of network.
-		Initially "IN" is defined to have the meaning "Internet".  <address
-		type> is a text string giving the type of the address that follows.
-		Initially "IP4" and "IP6" are defined.  <address> is the globally
-		unique address of the machine from which the session was created.
-		For an address type of IP4, this is either the fully-qualified domain
-		name of the machine, or the dotted-decimal representation of the IP
-		version 4 address of the machine.  For an address type of IP6, this
-		is either the fully-qualified domain name of the machine, or the
-		compressed textual representation of the IP version 6 address of the
-		machine.  For both IP4 and IP6, the fully-qualified domain name is
-		the form that SHOULD be given unless this is unavailable, in which
-		case the globally unique address may be substituted.  A local IP
-		address MUST NOT be used in any context where the SDP description
-		might leave the scope in which the address is meaningful.
-		
-		In general, the "o=" field serves as a globally unique identifier for
-		this version of this session description, and the subfields excepting
-		the version taken together identify the session irrespective of any
-		modifications.
-		
-		Origin
-   		o=<username> <session id> <version> <network type> <address type> <address>
-		*/
-		String userName = isConceptOfUserIdsSupported()?getUserName():"-";
-		String sessionId = ""+timestamp;
-		String version = ""+timestamp; 
-		String networkType = "IN";
-		String addressType = "IP4";
-		String address = "127.0.0.1";
-		String origin = String.format("o=%s %s %s %s %s %s", userName, sessionId, version, networkType, addressType, address);
-		return origin;
-	}
-	
-	
 
-	private String getUserName() {
+    public String getUserName() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	private boolean isConceptOfUserIdsSupported() {
+	public boolean isConceptOfUserIdsSupported() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	public Transport getVideoTransport() {
-		
-		return videoTransport;
+	public void addAttribute(Attribute attribute) {
+
+		attributes.add(attribute);
 	}
 
-	public void setVideoTransport(Transport videoTransport) {
-		
-		this.videoTransport = videoTransport;
+	public boolean videoMediaHasValueOfAttribute(String attributeType, String value) {
+
+		return mediaHasValueOfAttribute(MediaDescription.MediaType.Video, attributeType, value);
 	}
 
-    public Transport getAudioTransport() {
+	public boolean audioMediaHasValueOfAttribute(String attributeType, String value) {
 
-        return audioTransport;
-    }
+		return mediaHasValueOfAttribute(MediaDescription.MediaType.Audio, attributeType, value);
+	}
 
-    public void setAudioTransport(Transport audioTransport) {
+	public boolean mediaHasValueOfAttribute(
+			MediaDescription.MediaType mediaType, String attributeType, String value) {
 
-        this.audioTransport = audioTransport;
-    }
+		for(MediaDescription md: mediaDescriptions){
+			if(md.getMediaType().equals(mediaType)){
+				for(Attribute attribute: md.getAttributes()){
+					if(attribute.getType().compareToIgnoreCase(attributeType) == 0){
+						return attribute.getValue().compareToIgnoreCase(value) == 0;
+					}
+				}
+			}
+		}
+		return false;
+	}
 }

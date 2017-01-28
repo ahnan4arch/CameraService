@@ -34,18 +34,6 @@ public class URI {
         return url.toString().replace("http", "rtsp");
     }
 
-    public int getTrackId() {
-
-        if(url == null){
-            return -1;
-        }
-        String paramValue = getParameterValue("trackid");
-        if(paramValue != null){
-            return Integer.parseInt(paramValue);
-        }
-        return -1;
-    }
-
     private String getParameterValue(String parameterName) {
 
         String [] pathTokens = url.getPath().split("&");
@@ -61,5 +49,21 @@ public class URI {
             }
         }
         return null;
+    }
+
+    public String getFile() {
+        return url.getFile();
+    }
+
+    public String getFileWithoutSpecialLeadingChars() {
+        String file = getFile();
+        if(file == null){
+            return null;
+        }
+        if(file.startsWith("/")){
+
+            return file.substring(1);
+        }
+        return file;
     }
 }

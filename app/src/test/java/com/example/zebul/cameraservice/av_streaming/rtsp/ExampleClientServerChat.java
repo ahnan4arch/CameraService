@@ -87,37 +87,37 @@ Real Time Streaming Protocol
     Cache-Control: no-cache\r\n
     Cseq: 3\r\n
     \r\n
-    Session Description Protocol
-        Session Description Protocol Version (v): 0
-        Owner/Creator, Session Id (o): - 15850026581053542000 15850026581053542000 IN IP4 zebul-NV78
+    SessionDescription Description Protocol
+        SessionDescription Description Protocol Version (v): 0
+        Owner/Creator, SessionDescription Id (o): - 15850026581053542000 15850026581053542000 IN IP4 zebul-NV78
             Owner Username: -
-            Session ID: 15850026581053542000
-            Session Version: 15850026581053542000
+            SessionDescription ID: 15850026581053542000
+            SessionDescription Version: 15850026581053542000
             Owner Network KnownName: IN
             Owner Address KnownName: IP4
             Owner Address: zebul-NV78
-        Session Name (s): Unnamed
-        Session Information (i): N/A
+        SessionDescription Name (s): Unnamed
+        SessionDescription Information (i): N/A
         Connection Information (c): IN IP4 0.0.0.0
             Connection Network KnownName: IN
             Connection Address KnownName: IP4
             Connection Address: 0.0.0.0
         Time Description, active time (t): 0 0
-            Session Start Time: 0
-            Session Stop Time: 0
-        Session Attribute (a): tool:vlc 2.2.2
-            Session Attribute Fieldname: tool
-            Session Attribute Value: vlc 2.2.2
-        Session Attribute (a): recvonly
-        Session Attribute (a): type:broadcast
-            Session Attribute Fieldname: type
-            Session Attribute Value: broadcast
-        Session Attribute (a): charset:UTF-8
-            Session Attribute Fieldname: charset
-            Session Attribute Value: UTF-8
-        Session Attribute (a): control:rtsp://192.168.1.106:8554/s1
-            Session Attribute Fieldname: control
-            Session Attribute Value: rtsp://192.168.1.106:8554/s1
+            SessionDescription Start Time: 0
+            SessionDescription Stop Time: 0
+        SessionDescription Attribute (a): tool:vlc 2.2.2
+            SessionDescription Attribute Fieldname: tool
+            SessionDescription Attribute Value: vlc 2.2.2
+        SessionDescription Attribute (a): recvonly
+        SessionDescription Attribute (a): type:broadcast
+            SessionDescription Attribute Fieldname: type
+            SessionDescription Attribute Value: broadcast
+        SessionDescription Attribute (a): charset:UTF-8
+            SessionDescription Attribute Fieldname: charset
+            SessionDescription Attribute Value: UTF-8
+        SessionDescription Attribute (a): control:rtsp://192.168.1.106:8554/s1
+            SessionDescription Attribute Fieldname: control
+            SessionDescription Attribute Value: rtsp://192.168.1.106:8554/s1
         Media Description, name and address (m): audio 0 RTP/AVP 96
             Media KnownName: audio
             Media Port: 0
@@ -293,7 +293,7 @@ Real Time Streaming Protocol
     Server: VLC/2.2.2\r\n
     Date: Sat, 10 Dec 2016 15:18:10 GMT\r\n
     Transport: RTP/AVP/UDP;unicast;client_port=60842-60843;server_port=44573-44574;ssrc=785BF592;mode=play
-    Session: 57327121a50863c8;timeout=60
+    SessionDescription: 57327121a50863c8;timeout=60
     Content-length: 0
     Cache-Control: no-cache\r\n
     Cseq: 4\r\n
@@ -313,7 +313,7 @@ Real Time Streaming Protocol
     CSeq: 5\r\n
     User-Agent: LibVLC/3.0.0-git (LIVE555 Streaming Media v2016.02.22)\r\n
     Transport: RTP/AVP;unicast;client_port=48858-48859
-    Session: 57327121a50863c8
+    SessionDescription: 57327121a50863c8
     \r\n
 
 Frame 1034: 336 bytes on wire (2688 bits), 336 bytes captured (2688 bits) on interface 0
@@ -326,7 +326,7 @@ Real Time Streaming Protocol
     Server: VLC/2.2.2\r\n
     Date: Sat, 10 Dec 2016 15:18:10 GMT\r\n
     Transport: RTP/AVP/UDP;unicast;client_port=48858-48859;server_port=49232-49233;ssrc=25ED8B41;mode=play
-    Session: 57327121a50863c8;timeout=60
+    SessionDescription: 57327121a50863c8;timeout=60
     Content-length: 0
     Cache-Control: no-cache\r\n
     Cseq: 5\r\n
@@ -345,7 +345,7 @@ Real Time Streaming Protocol
         URL: rtsp://192.168.1.106:8554/s1
     CSeq: 6\r\n
     User-Agent: LibVLC/3.0.0-git (LIVE555 Streaming Media v2016.02.22)\r\n
-    Session: 57327121a50863c8
+    SessionDescription: 57327121a50863c8
     Range: npt=0.000-\r\n
     \r\n
 
@@ -360,7 +360,7 @@ Real Time Streaming Protocol
     Date: Sat, 10 Dec 2016 15:18:10 GMT\r\n
     RTP-Info: url=rtsp://192.168.1.106:8554/s1/trackID=6;seq=21321;rtptime=88848738, url=rtsp://192.168.1.106:8554/s1/trackID=7;seq=516;rtptime=181323956\r\n
     Range: npt=316.360772-\r\n
-    Session: 57327121a50863c8;timeout=60
+    SessionDescription: 57327121a50863c8;timeout=60
     Content-length: 0
     Cache-Control: no-cache\r\n
     Cseq: 6\r\n

@@ -74,7 +74,7 @@ public class RTSPRequestDecoderTest {
 	PLAY rtsp://192.168.1.106:6880 RTSP/1.0
 	CSeq: 5
 	User-Agent: LibVLC/2.2.2 (LIVE555 Streaming Media v2016.02.09)
-	Session: 1185d20035702ca
+	SessionDescription: 1185d20035702ca
 	Range: npt=0.000- 
 	 */
 	

@@ -78,7 +78,7 @@ public class ProjectStructure {
         }
     }
 
-    class RTPSessionController{
+    class RTPServerSessionController{
 
 
         public RTSPResponse onDescribeRequest(RTSPRequest rtspRequest){

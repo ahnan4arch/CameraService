@@ -110,6 +110,9 @@ public class HeaderField {
 	public void setValue(String value) {
 		this.value = value;
 	}
+	public void setValue(int value) {
+		this.value = value+"";
+	}
 
 	@Override
 	public String toString(){

@@ -26,6 +26,18 @@ public class Header {
 		}
 	}
 
+	public void setCSeq(int cSeq){
+
+		HeaderField headerField = headerFields.find(CSeq);
+		if(headerField != null){
+			headerField.setValue(cSeq);
+		}
+		else{
+			headerField = new HeaderField(CSeq, cSeq);
+			headerFields.add(headerField);
+		}
+	}
+
 	public void setHeaderFields(HeaderFields headerFields) {
 		this.headerFields = headerFields;
 	}

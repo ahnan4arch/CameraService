@@ -1,5 +1,6 @@
 package com.example.zebul.cameraservice.communication.udp;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.zebul.cameraservice.packet_producers.PacketProductionExceptionListener;
@@ -40,8 +41,8 @@ public class RTPSession {
     private AudioSession audioSession = new AudioSession();
 
     public RTPSession(
-            InetSocketAddress videoSocketAddress,
-            InetSocketAddress audioSocketAddress,
+            @Nullable InetSocketAddress videoSocketAddress,
+            @Nullable InetSocketAddress audioSocketAddress,
             CameraSettings cameraSettings,
             MicrophoneSettings microphoneSettings){
 
@@ -51,43 +52,61 @@ public class RTPSession {
         this.cameraSettings = cameraSettings;
         this.microphoneSettings = microphoneSettings;
 
-        videoSocketEngine = new SocketEngine(videoSocketAddress.getPort(),
-                new SocketMessageReceptionListener() {
-                    @Override
-                    public void onSocketMessageReceived(Message message_) {
+        if(videoSocketAddress != null){
 
-                        int foo = 1;
-                        int bar = foo;
-                    }
-        });
+            videoSocketEngine = new SocketEngine(videoSocketAddress.getPort(),
+                    new SocketMessageReceptionListener() {
+                        @Override
+                        public void onSocketMessageReceived(Message message_) {
 
-        audioSocketEngine = new SocketEngine(audioSocketAddress.getPort(),
-                new SocketMessageReceptionListener() {
-                    @Override
-                    public void onSocketMessageReceived(Message message_) {
+                            int foo = 1;
+                            int bar = foo;
+                        }
+                    });
+        }
 
-                        int foo = 1;
-                        int bar = foo;
-                    }
-                });
+        if(audioSocketAddress != null){
+
+            audioSocketEngine = new SocketEngine(audioSocketAddress.getPort(),
+                    new SocketMessageReceptionListener() {
+                        @Override
+                        public void onSocketMessageReceived(Message message_) {
+
+                            int foo = 1;
+                            int bar = foo;
+                        }
+                    });
+        }
     }
 
     public void start(){
 
-        videoSocketEngine.start();
-        videoSession.start();
+        if(videoSocketEngine != null){
 
-        audioSocketEngine.start();
-        audioSession.start();
+            videoSocketEngine.start();
+            videoSession.start();
+        }
+
+        if(audioSocketEngine != null){
+
+            audioSocketEngine.start();
+            audioSession.start();
+        }
     }
 
     public void stop(){
 
-        videoSocketEngine.stop();
-        videoSession.stop();
+        if(videoSocketEngine != null){
 
-        audioSocketEngine.stop();
-        audioSession.stop();
+            videoSocketEngine.stop();
+            videoSession.stop();
+        }
+
+        if(audioSocketEngine != null){
+
+            audioSocketEngine.stop();
+            audioSession.stop();
+        }
     }
 
     class AudioSession implements AACPacketListener, PacketProductionExceptionListener {

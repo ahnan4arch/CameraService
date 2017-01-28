@@ -164,7 +164,7 @@ public class CameraService extends Service implements RTSPSessionEventListener {
     public void onRTSPSessionCreatedEvent(RTSPSessionCreatedEvent rtspSessionCreatedEvent) {
 
         final SocketAddress remoteSocketAddress = rtspSessionCreatedEvent.getRemoteSocketAddress();
-        String textMessage = "Session created by: "+remoteSocketAddress.toString();
+        String textMessage = "SessionDescription created by: "+remoteSocketAddress.toString();
         showTextMessageAsToast(textMessage);
         updateNotification(textMessage, R.mipmap.ic_remove_red_eye_white_18dp);
     }
@@ -173,7 +173,7 @@ public class CameraService extends Service implements RTSPSessionEventListener {
     public void onRTSPSessionDestroyedEvent(RTSPSessionDestroyedEvent rtspSessionDestroyedEvent) {
 
         final SocketAddress remoteSocketAddress = rtspSessionDestroyedEvent.getRemoteSocketAddress();
-        String textMessage = "Session destroyed by: "+remoteSocketAddress.toString();
+        String textMessage = "SessionDescription destroyed by: "+remoteSocketAddress.toString();
         showTextMessageAsToast(textMessage);
         updateNotification(textMessage, R.mipmap.ic_videocam_white_18dp);
     }

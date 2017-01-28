@@ -29,7 +29,7 @@ package com.example.zebul.cameraservice.av_streaming.rtsp;
 |     "451"      ; Parameter Not Understood
 |     "452"      ; Conference Not Found
 |     "453"      ; Not Enough Bandwidth
-|     "454"      ; Session Not Found
+|     "454"      ; SessionDescription Not Found
 |     "455"      ; Method Not Valid in This State
 |     "456"      ; Header Field Not Valid for Resource
 |     "457"      ; Invalid Range
@@ -102,7 +102,7 @@ public class StatusCode {
 	public static final StatusCode PARAMETER_NOT_UNDERSTOOD = new StatusCode(451,"Parameter Not Understood");
 	public static final StatusCode CONFERENCE_NOT_FOUND = new StatusCode(452,"Conference Not Found");
 	public static final StatusCode NOT_ENOUGH_BANDWIDTH = new StatusCode(453,"Not Enough Bandwidth");
-	public static final StatusCode SESSION_NOT_FOUND = new StatusCode(454,"Session Not Found");
+	public static final StatusCode SESSION_NOT_FOUND = new StatusCode(454,"SessionDescription Not Found");
 	public static final StatusCode METHOD_NOT_VALID_IN_THIS_STATE = new StatusCode(455,"Method Not Valid in This State");
 	public static final StatusCode HEADER_FIELD_NOT_VALID_FOR_RESOURCE = new StatusCode(456,"Header Field Not Valid for Resource");
 	public static final StatusCode INVALID_RANGE = new StatusCode(457,"Invalid Range");

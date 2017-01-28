@@ -5,15 +5,14 @@ import android.util.Log;
 
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
 import com.example.zebul.cameraservice.packet_producers.video.H264PacketListener;
-import com.example.zebul.cameraservice.av_streaming.rtsp.video.Resolution;
-import com.example.zebul.cameraservice.av_streaming.rtsp.video.VideoSettings;
+import com.example.zebul.cameraservice.av_streaming.Resolution;
+import com.example.zebul.cameraservice.av_streaming.VideoSettings;
 import com.example.zebul.cameraservice.packet_producers.video.camera.CameraSettings;
 import com.example.zebul.cameraservice.packet_producers.video.camera.CameraVideoH264PacketProducer;
 import com.example.zebul.cameraservice.utils.Timeout;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by zebul on 12/28/16.

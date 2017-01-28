@@ -50,18 +50,18 @@ public class AACPacketTest {
         Cache-Control: no-cache\r\n
         Cseq: 3\r\n
         \r\n
-        Session Description Protocol
-        Session Description Protocol Version (v): 0
-        Owner/Creator, Session Id (o): - 15851538726191655449 15851538726191655449 IN IP4 zebul-NV78
-        Session Name (s): Unnamed
-        Session Information (i): N/A
+        SessionDescription Description Protocol
+        SessionDescription Description Protocol Version (v): 0
+        Owner/Creator, SessionDescription Id (o): - 15851538726191655449 15851538726191655449 IN IP4 zebul-NV78
+        SessionDescription Name (s): Unnamed
+        SessionDescription Information (i): N/A
         Connection Information (c): IN IP4 0.0.0.0
         Time Description, active time (t): 0 0
-        Session Attribute (a): tool:vlc 2.2.2
-        Session Attribute (a): recvonly
-        Session Attribute (a): type:broadcast
-        Session Attribute (a): charset:UTF-8
-        Session Attribute (a): control:rtsp://192.168.1.106:8554/s1
+        SessionDescription Attribute (a): tool:vlc 2.2.2
+        SessionDescription Attribute (a): recvonly
+        SessionDescription Attribute (a): type:broadcast
+        SessionDescription Attribute (a): charset:UTF-8
+        SessionDescription Attribute (a): control:rtsp://192.168.1.106:8554/s1
         Media Description, name and address (m): audio 0 RTP/AVP 96
         Bandwidth Information (b): RR:0
         Media Attribute (a): rtpmap:96 mpeg4-generic/44100/2
