@@ -44,7 +44,7 @@ public class NALUnitReader {
 		moveEnd();
 		byte [] nalUnitData = new byte[endExclusive-begInclusive];
 		System.arraycopy(data, begInclusive, nalUnitData, 0, nalUnitData.length);
-		return new NALUnit(begInclusive, nalUnitData);
+		return new NALUnit(nalUnitData);
 	}
 
 	private void moveEnd(){

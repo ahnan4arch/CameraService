@@ -21,7 +21,7 @@ public class H264PacketizerTest {
     public void test_when_rtpPackets_are_created_from_valid_H264Packets_then_rtpPackets_contains_packets() {
 
         //given
-        NALUnit nalUnit = new NALUnit(0, new byte[]{0,1,2,3,4});
+        NALUnit nalUnit = new NALUnit(new byte[]{0,1,2,3,4});
         Timestamp timestamp = new Timestamp(0);
         H264Packet h264Packet = new H264Packet(nalUnit, timestamp);
         H264Packets h264Packets = new H264Packets();
@@ -44,7 +44,7 @@ public class H264PacketizerTest {
         System.arraycopy(NALUnit.START_CODES, 0, nalUnitPayloadWithStartCodes, 0, NALUnit.START_CODES.length);
         System.arraycopy(nalUnitPayload, 0, nalUnitPayloadWithStartCodes, NALUnit.START_CODES.length, nalUnitPayload.length);
 
-        NALUnit nalUnit = new NALUnit(0, nalUnitPayloadWithStartCodes);
+        NALUnit nalUnit = new NALUnit(nalUnitPayloadWithStartCodes);
         Timestamp timestamp = new Timestamp(0);
         H264Packet h264Packet = new H264Packet(nalUnit, timestamp);
         H264Packets h264Packets = new H264Packets();

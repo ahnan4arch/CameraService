@@ -165,7 +165,7 @@ public class CameraVideoH264PacketProducer extends MediaCodecPacketProducer {
             outputBuffer.get(data, bufferInfo.offset, data.length);
             //return bufferInfo.presentationTimeUs;
 
-            NALUnit nalUnit = new NALUnit(0, data);
+            NALUnit nalUnit = new NALUnit(data);
             //long timestampInMillis = bufferInfo.presentationTimeUs/1000;
             Timestamp timestamp = clock.getTimestamp(); /*new Timestamp(timestampInMillis);*/
             H264Packet h264Packet = new H264Packet(nalUnit, timestamp);
