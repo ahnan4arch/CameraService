@@ -1,6 +1,6 @@
 package com.example.zebul.cameraservice.communication.tcp;
 
-import com.example.zebul.cameraservice.communication.RTPServerSessionController;
+import com.example.zebul.cameraservice.communication.RTSPServerSessionController;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -98,7 +98,7 @@ public class RTSPServer implements Runnable{
             while(!Thread.interrupted()){
 
                 Socket clientSocket = serverSocket.accept();
-                final RTPServerSessionController rtpSessionController = new RTPServerSessionController(clientSocket);
+                final RTSPServerSessionController rtpSessionController = new RTSPServerSessionController(clientSocket);
 
                 RTSPSessionEventListener rtspSessionEventListener = new RTSPSessionEventListener(){
 

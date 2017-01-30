@@ -33,7 +33,7 @@ import java.net.UnknownHostException;
  * Created by zebul on 1/1/17.
  */
 
-public class RTPServerSessionController implements RTSPRequestListener {
+public class RTSPServerSessionController implements RTSPRequestListener {
 
     private Transport videoTransport;
     private Transport audioTransport;
@@ -49,7 +49,7 @@ public class RTPServerSessionController implements RTSPRequestListener {
     private int port = 5001;
     private SessionDescription sessionDescription = new SessionDescription(port);
 
-    public RTPServerSessionController(Socket clientSocket){
+    public RTSPServerSessionController(Socket clientSocket){
 
         this.clientSocket = clientSocket;
 
@@ -168,12 +168,12 @@ public class RTPServerSessionController implements RTSPRequestListener {
 
             if(sessionDescription.videoMediaHasValueOfAttribute("control", controlTrack)){
 
-                transport.setSsrc("11221A87");
+                transport.setSsrc(0x11221A87);
                 videoTransport = transport;
             }
             else if(sessionDescription.audioMediaHasValueOfAttribute("control", controlTrack)){
 
-                transport.setSsrc("9E7D1A87");
+                transport.setSsrc(0x9E7D1A87);
                 audioTransport = transport;
             }
         }

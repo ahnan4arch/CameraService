@@ -20,11 +20,13 @@ public class TransportEncoderTest {
 		transport.setClientPortRange(1111, 2222);
 		transport.setServerPortRange(3333, 4444);
 		transport.setMode(Transport.Mode.PLAY);
+		transport.setSsrc(0xDEADBEEF);
 		String transportAsText = TransportEncoder.encode(transport);
 		assertTrue(transportAsText.contains("RTP/AVP/UDP"));
 		assertTrue(transportAsText.contains("unicast"));
 		assertTrue(transportAsText.contains("client_port=1111-2222"));
 		assertTrue(transportAsText.contains("server_port=3333-4444"));
+		assertTrue(transportAsText.contains("ssrc=DEADBEEF"));
 		assertTrue(transportAsText.contains("PLAY"));
 	}
 }

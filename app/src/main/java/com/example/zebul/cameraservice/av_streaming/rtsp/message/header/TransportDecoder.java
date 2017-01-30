@@ -130,8 +130,8 @@ public class TransportDecoder {
 			}
 			else if(transportToken.startsWith("ssrc=")){
 				
-				String ssrc = transportToken.substring("ssrc=".length(), transportToken.length()).toLowerCase();
-				transport.setSsrc(ssrc);
+				String ssrc = transportToken.substring("ssrc=".length(), transportToken.length()).toUpperCase();
+				transport.setSsrc((int)Long.parseLong(ssrc, 16));
 			}
 			else if(transportToken.startsWith("ttl=")){
 				

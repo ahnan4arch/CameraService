@@ -18,22 +18,25 @@ import static org.junit.Assert.assertTrue;
 public class H264PacketizerTest {
 
     @Test
-    public void test1() {
+    public void test_when_rtpPackets_are_created_from_valid_H264Packets_then_rtpPackets_contains_packets() {
 
+        //given
         NALUnit nalUnit = new NALUnit(0, new byte[]{0,1,2,3,4});
         Timestamp timestamp = new Timestamp(0);
         H264Packet h264Packet = new H264Packet(nalUnit, timestamp);
         H264Packets h264Packets = new H264Packets();
         h264Packets.addPacket(h264Packet);
 
+        //when
         H264Packetizer rtpPacketizationSession = new H264Packetizer();
         RTPPackets rtpPackets = rtpPacketizationSession.createRTPPackets(h264Packets);
+
+        //then
         assertTrue(rtpPackets.getNumberOfPackets() > 0);
     }
 
     @Test
-    public void test_when_NALUnit_has_grater_length_than_MTU_then_make_fragmentation_units() {
-
+    public void test_when_NALUnit_has_grater_length_than_MTU_then_packetizer_creates_fragmentation_units() {
 
         byte NALUnitHeader = 0x01;
         byte [] nalUnitPayload = new byte[]{NALUnitHeader, 0x11, 0x22, 0x33, 0x44, 0x55};

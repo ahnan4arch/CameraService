@@ -5,7 +5,13 @@ import static com.example.zebul.cameraservice.av_streaming.rtsp.message.header.H
 public class Header {
 
 	private HeaderFields headerFields;
-	
+
+	public Header(int CSeq) {
+
+		headerFields = new HeaderFields();
+		setCSeq(CSeq);
+	}
+
 	public Header(HeaderFields headerFields) {
 		this.headerFields = headerFields;
 	}
@@ -60,5 +66,10 @@ public class Header {
 
 	public int getNumberOfFields() {
 		return headerFields.getNumberOfFields();
+	}
+
+	public void addHeaderField(HeaderField headerField) {
+
+		headerFields.add(headerField);
 	}
 }

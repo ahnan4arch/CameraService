@@ -36,8 +36,9 @@ public class TransportEncoder {
 			serverPort = String.format("server_port=%d-%d", transport.getMinServerPort(), transport.getMaxServerPort());
 		}
 		transportTextBuilder.append(serverPort+";");
-		
-		String ssrc = String.format("ssrc=%s", transport.getSsrc());
+
+		String ssrcValue = Integer.toHexString(transport.getSsrc()).toUpperCase();
+		String ssrc = String.format("ssrc=%s", ssrcValue);
 		transportTextBuilder.append(ssrc+";");
 		
 		String mode = String.format("mode=\"%s\"", transport.getMode().toString());

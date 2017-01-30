@@ -38,4 +38,8 @@ public class RTSPMessage {
 	public String getHeaderFieldValue(HeaderField.KnownName knownName) {
 		return header.getHeaderFieldValue(knownName);
 	}
+
+	public int getCSeq() {
+		return header.getCSeq();
+	}
 }

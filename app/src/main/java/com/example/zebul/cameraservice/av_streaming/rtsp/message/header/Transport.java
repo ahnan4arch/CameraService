@@ -46,7 +46,7 @@ public class Transport {
 	private int maxClientPort;
 	private int minServerPort;
 	private int maxServerPort;
-	private String ssrc;
+	private int ssrc;
 	private int timeToLive;
 	
 	public TransmissionType getTransmissionType() {
@@ -116,10 +116,10 @@ public class Transport {
 	public void setProfile(Profile profile) {
 		this.profile = profile;
 	}
-	public String getSsrc() {
+	public int getSsrc() {
 		return ssrc;
 	}
-	public void setSsrc(String ssrc) {
+	public void setSsrc(int ssrc) {
 		this.ssrc = ssrc;
 	}
 
