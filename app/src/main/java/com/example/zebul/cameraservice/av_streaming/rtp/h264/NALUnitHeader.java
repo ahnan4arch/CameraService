@@ -11,11 +11,18 @@ package com.example.zebul.cameraservice.av_streaming.rtp.h264;
 
 public class NALUnitHeader {
 
+    public static final boolean FORBIDDEN_ZERO_BIT = false;
+
     public static final int LENGTH = 1;
     private boolean forbiddenZeroBit;
     private byte nalReferenceIndicator;
     private NALUnitType nalUnitType;
 
+    public NALUnitHeader(byte nalReferenceIndicator,
+                         NALUnitType nalUnitType){
+
+        this(FORBIDDEN_ZERO_BIT, nalReferenceIndicator, nalUnitType);
+    }
     public NALUnitHeader(boolean forbiddenZeroBit,
                          byte nalReferenceIndicator,
                          NALUnitType nalUnitType){

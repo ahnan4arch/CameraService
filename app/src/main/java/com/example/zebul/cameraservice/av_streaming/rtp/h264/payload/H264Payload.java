@@ -23,4 +23,8 @@ public abstract class H264Payload implements RTPPayload {
         toBytes(rtpPayloadBytes, 0);
         return rtpPayloadBytes;
     }
+
+    public H264PayloadType getH264PayloadType() {
+        return h264PayloadType;
+    }
 }

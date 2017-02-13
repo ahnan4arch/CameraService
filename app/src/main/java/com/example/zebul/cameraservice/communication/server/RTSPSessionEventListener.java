@@ -1,4 +1,4 @@
-package com.example.zebul.cameraservice.communication.tcp;
+package com.example.zebul.cameraservice.communication.server;
 
 /**
  * Created by zebul on 1/5/17.

@@ -7,14 +7,13 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     tools:context="com.example.zebul.cameraservice.MainActivity">
 
     <Button
         android:id="@+id/startCameraServiceButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0.34"
         android:text="Start Cam Service!" />
 
 
@@ -22,13 +21,17 @@
         android:id="@+id/startDisplayVideoActivityButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0.33"
-        android:text="Play Movie 1!" />
+        android:text="Display video from file!" />
+
+    <Button
+        android:id="@+id/startDisplayVideoFromRemoteSourceActivityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Display video from remote source!" />
 
     <Button
         android:id="@+id/playMovieActivityButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0.33"
         android:text="Play Movie 2" />
 </LinearLayout>

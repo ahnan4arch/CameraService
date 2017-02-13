@@ -32,7 +32,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                startDisplayVideoActivity();
+                startDisplayVideoFromFileActivity();
+            }
+        });
+
+        Button startDisplayVideoFromRemoteSourceActivityButton = (Button) findViewById(R.id.startDisplayVideoFromRemoteSourceActivityButton);
+        startDisplayVideoFromRemoteSourceActivityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                startDisplayVideoFromRemoteSourceActivity();
             }
         });
 
@@ -52,9 +61,15 @@ public class MainActivity extends AppCompatActivity {
         startService(intent);
     }
 
-    private void startDisplayVideoActivity() {
+    private void startDisplayVideoFromFileActivity() {
 
-        Intent intent = new Intent(this, DisplayVideoActivity.class);
+        Intent intent = new Intent(this, DisplayVideoFromFileActivity.class);
+        startActivity(intent);
+    }
+
+    private void startDisplayVideoFromRemoteSourceActivity() {
+
+        Intent intent = new Intent(this, DisplayVideoFromRemoteSourceActivity.class);
         startActivity(intent);
     }
 

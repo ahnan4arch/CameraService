@@ -27,14 +27,14 @@ public class ProjectStructure {
 
                 Socket socket = listen();
                 RTSPSessionsController rtspSessionsController = new RTSPSessionsController();
-                RTSPSession rtspSession = new RTSPSession(socket, rtspSessionsController);
+                RTSPServerSession rtspSession = new RTSPServerSession(socket, rtspSessionsController);
                 rtspSessions.add(rtspSession);
                 rtspSession.start();
             }
         }
     }
 
-    class RTSPSession{
+    class RTSPServerSession{
 
         RTPSessionsController rtpSessionsController;
         Socket socket;

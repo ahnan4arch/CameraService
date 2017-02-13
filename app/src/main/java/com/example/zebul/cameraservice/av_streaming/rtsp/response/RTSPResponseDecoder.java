@@ -10,6 +10,8 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequestDeco
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.Version;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.VersionDecodeException;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.VersionDecoder;
+import com.example.zebul.cameraservice.av_streaming.sdp.SessionDescription;
+import com.example.zebul.cameraservice.av_streaming.sdp.SessionDescriptionProtocol;
 
 /**
  * Created by zebul on 1/15/17.
@@ -154,14 +156,14 @@ public class RTSPResponseDecoder {
                                    int numberOfHeaderFieldsInResponse) {
 
         int lineOffset = numberOfHeaderFieldsInResponse + POS_OF_HEADER_LINE;
-        for(int pos=lineOffset; pos<responseRepresentationAsTextLines.length; pos++){
-
-            String value = responseRepresentationAsTextLines[pos];
-
-            int foo = 1;
-            int bar = foo;
+        if(lineOffset<responseRepresentationAsTextLines.length){
+            if(responseRepresentationAsTextLines[lineOffset].length()<=RTSPProtocol.LINE_SEPARATOR.length()){
+                lineOffset++;
+            }
         }
 
-        return null;
+        final SessionDescription sessionDescription =
+                SessionDescriptionProtocol.decode(responseRepresentationAsTextLines, lineOffset );
+        return new Body(sessionDescription);
     }
 }

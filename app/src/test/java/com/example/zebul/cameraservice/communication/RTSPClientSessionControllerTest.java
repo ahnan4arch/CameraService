@@ -3,6 +3,7 @@ package com.example.zebul.cameraservice.communication;
 import com.example.zebul.cameraservice.av_streaming.rtsp.Method;
 import com.example.zebul.cameraservice.av_streaming.rtsp.StatusCode;
 import com.example.zebul.cameraservice.av_streaming.rtsp.URI;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.body.Body;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Header;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderField;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Transport;
@@ -11,6 +12,11 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Transpor
 import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequest;
 import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponse;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.Version;
+import com.example.zebul.cameraservice.av_streaming.sdp.SessionDescription;
+import com.example.zebul.cameraservice.av_streaming.sdp.SessionDescriptionProtocol;
+import com.example.zebul.cameraservice.communication.client.RTPSessionLifecycleListener;
+import com.example.zebul.cameraservice.communication.client.RTSPClientSessionController;
+import com.example.zebul.cameraservice.communication.client.ClientSessionSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,14 +40,36 @@ public class RTSPClientSessionControllerTest {
     public void setUp() throws MalformedURLException {
 
         String userAgent = "Camera Service";
-        URI requestUri = URI.decodeFromString("rtsp://192.168.1.106:8554/s1");
-        controller = new RTSPClientSessionController(userAgent, requestUri);
+        URI requestUri = URI.fromString("rtsp://192.168.1.106:8554/s1");
+        ClientSessionSettings sessionSettings = new ClientSessionSettings("CameraService", requestUri, 12331, 12332);
+        controller = new RTSPClientSessionController(sessionSettings, new RTPSessionLifecycleListener(){
+
+            @Override
+            public void onRTPSetupAudioSession() {
+
+            }
+
+            @Override
+            public void onRTPSetupVideoSession() {
+
+            }
+
+            @Override
+            public void onRTPPlay() {
+
+            }
+
+            @Override
+            public void onRTPTearDownSession() {
+
+            }
+        });
     }
 
     @Test
     public void test_controller_generates_expected_requests(){
 
-        controller.setUp();
+        controller.begin();
 
         //--- OPTION
         final RTSPRequest rtspRequest_option = controller.produceRTSPRequest();
@@ -61,6 +89,11 @@ public class RTSPClientSessionControllerTest {
         CSeq++;
         final RTSPRequest rtspRequest_setup = controller.produceRTSPRequest();
         assertEquals(Method.SETUP, rtspRequest_setup.getMethod());
+
+        final URI requestUri = rtspRequest_setup.getRequestUri();
+        final String file = requestUri.getFile();
+        assertTrue(file.length()>0);
+
         assertEquals(CSeq, rtspRequest_setup.getCSeq());
         final HeaderField headerFieldTransport = rtspRequest_setup.findHeaderField(HeaderField.KnownName.Transport);
         final String transportAsText = headerFieldTransport.getValue();
@@ -78,24 +111,50 @@ public class RTSPClientSessionControllerTest {
         assertNotNull(headerFieldRange);
 
 
-        controller.tearDown();
+        controller.end();
     }
 
     private RTSPResponse createRTSPResponseOption(int CSeq) {
 
-        Header headerResponse_option = new Header(CSeq);
+        Header header = new Header(CSeq);
         final HeaderField headerField_optionPublic = new HeaderField(HeaderField.KnownName.Public, "DESCRIBE,SETUP,TEARDOWN,PLAY,PAUSE,GET_PARAMETER");
-        headerResponse_option.addHeaderField(headerField_optionPublic);
+        header.addHeaderField(headerField_optionPublic);
         final HeaderField headerField_optionContentLenght = new HeaderField(HeaderField.KnownName.Content_Length, 0);
-        headerResponse_option.addHeaderField(headerField_optionContentLenght);
-        return new RTSPResponse(StatusCode.OK, version, headerResponse_option);
+        header.addHeaderField(headerField_optionContentLenght);
+        return new RTSPResponse(StatusCode.OK, version, header);
     }
 
     private RTSPResponse createRTSPResponseDescribe(int CSeq) {
 
         Header header = new Header(CSeq);
         final HeaderField headerFieldContentType = new HeaderField(HeaderField.KnownName.Content_Type, "application/sdp");
-        return new RTSPResponse(StatusCode.OK, version, header);
+        String sessionDescriptionAsText =
+                "v=0\r\n"+
+                        "o=- 15867114619150279987 15867114619150279987 IN IP4 zebul-NV78\r\n"+
+                        "s=Unnamed\r\n"+
+                        "i=N/A\r\n"+
+                        "c=IN IP4 0.0.0.0\r\n"+
+                        "t=0 0\r\n"+
+                        "a=tool:vlc 2.2.2\r\n"+
+                        "a=recvonly\r\n"+
+                        "a=type:broadcast\r\n"+
+                        "a=charset:UTF-8\r\n"+
+                        "a=control:rtsp://192.168.1.106:8554/s1\r\n"+
+
+                        "m=audio 0 RTP/AVP 96\r\n"+
+                        "b=RR:0\r\n"+
+                        "a=rtpmap:96 mpeg4-generic/44100/2\r\n"+
+                        "a=fmtp:96 streamtype=5; profile-level-id=15; mode=AAC-hbr; config=1210; SizeLength=13; IndexLength=3; IndexDeltaLength=3; Profile=1;\r\n"+
+                        "a=control:rtsp://192.168.1.106:8554/s1/trackID=4\r\n"+
+
+                        "m=video 0 RTP/AVP 96\r\n"+
+                        "b=RR:0\r\n"+
+                        "a=rtpmap:96 H264/90000\r\n"+
+                        "a=fmtp:96 packetization-mode=1;profile-level-id=42e00d;sprop-parameter-sets=J0LgDakYKD9gDUGAQa23oC8B6XvfAQ==,KM4JiA==;\r\n"+
+                        "a=control:rtsp://192.168.1.106:8554/s1/trackID=5\r\n";
+        final SessionDescription sessionDescription = SessionDescriptionProtocol.decode(sessionDescriptionAsText);
+        final Body body = new Body(sessionDescription);
+        return new RTSPResponse(StatusCode.OK, version, header, body);
     }
 
     private RTSPResponse createRTSPResponseSetUp(int CSeq, Transport clientTransport) {

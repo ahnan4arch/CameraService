@@ -133,8 +133,7 @@ public class AACPacketTest {
 
         /*0010*/,(byte)0x21, (byte)0x0C, (byte)0x14, (byte)0x5D, (byte)0xDE, (byte)0x8B, (byte)0x61, (byte)0xA2
                 ,(byte)0xB8, (byte)0x60, (byte)0x2A, (byte)0x10, (byte)0x18, (byte)0x84, (byte)0x0E, (byte)0xA1};
-        RTPHeader rtpHeader1 = new RTPHeader();
-        rtpHeader1.fromBytes(rtpData1);
+        RTPHeader rtpHeader1 = RTPHeader.fromBytes(rtpData1);
 
         assertEquals(134654475, rtpHeader1.getTimestamp());
         assertEquals(55487, rtpHeader1.getSequenceNumber());
@@ -222,8 +221,7 @@ public class AACPacketTest {
                 ,(byte)0x0B, (byte)0x40, (byte)0x7E, (byte)0x7E, (byte)0xA5, (byte)0x00, (byte)0x10
                 ,(byte)0x0C, (byte)0x60, (byte)0x21, (byte)0x0C, (byte)0x14, (byte)0x4D, (byte)0xEA};
 
-        RTPHeader rtpHeader2 = new RTPHeader();
-        rtpHeader2.fromBytes(rtpData2);
+        RTPHeader rtpHeader2 = RTPHeader.fromBytes(rtpData2);
 
         assertEquals(134671883, rtpHeader2.getTimestamp());
         assertEquals(55504, rtpHeader2.getSequenceNumber());
@@ -312,8 +310,7 @@ public class AACPacketTest {
                 ,(byte)0x35, (byte)0xE3, (byte)0xA3, (byte)0x41, (byte)0x00, (byte)0x10, (byte)0x0F, (byte)0xB8
                 ,(byte)0x21, (byte)0x0C, (byte)0x14, (byte)0x3D, (byte)0xFC, (byte)0x54};
 
-        RTPHeader rtpHeader3 = new RTPHeader();
-        rtpHeader3.fromBytes(rtpData3);
+        RTPHeader rtpHeader3 = RTPHeader.fromBytes(rtpData3);
 
         assertEquals(408230870, rtpHeader3.getTimestamp());
         assertEquals(59056, rtpHeader3.getSequenceNumber());
@@ -372,8 +369,7 @@ public class AACPacketTest {
                 {(byte)0x80, (byte)0xE0, (byte)0x00, (byte)0x60, (byte)0x00, (byte)0x29, (byte)0xEA, (byte)0xBE
                 ,(byte)0x81, (byte)0xD9, (byte)0x13, (byte)0xE8, (byte)0x00, (byte)0x10, (byte)0x0F, (byte)0xE8};
 
-        RTPHeader rtpHeader4 = new RTPHeader();
-        rtpHeader4.fromBytes(rtpData4);
+        RTPHeader rtpHeader4 = RTPHeader.fromBytes(rtpData4);
 
         int rtpLen4 = (16*(0x20))+13;
 

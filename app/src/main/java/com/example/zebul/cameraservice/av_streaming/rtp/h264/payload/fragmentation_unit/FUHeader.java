@@ -23,6 +23,18 @@ public class FUHeader {
         this.nalUnitType= nalUnitType;
     }
 
+    public boolean isStart() {
+        return isStart;
+    }
+
+    public boolean isEnd() {
+        return isEnd;
+    }
+
+    public NALUnitType getNalUnitType() {
+        return nalUnitType;
+    }
+
     public void toByte(byte[] rtpPayloadBytes, int position){
 
         rtpPayloadBytes[position] = toByte();
@@ -49,5 +61,12 @@ public class FUHeader {
         }
         byte type = (byte)nalUnitType.ordinal();
         return (byte)(S|E|R|type);
+    }
+
+    public static FUHeader fromByte(byte rtpPayloadByte) {
+        boolean isStart = (rtpPayloadByte&0b10000000)==0b10000000;
+        boolean isEnd   = (rtpPayloadByte&0b01000000)==0b01000000;
+        NALUnitType nalUnitType = NALUnitType.fromByte((byte)(rtpPayloadByte&0b00111111));
+        return new FUHeader(isStart, isEnd, nalUnitType);
     }
 }

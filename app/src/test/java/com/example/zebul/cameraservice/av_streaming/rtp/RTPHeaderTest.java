@@ -20,8 +20,7 @@ public class RTPHeaderTest {
                 (byte)0x80, (byte)0xe0, (byte)0x6e, (byte)0xfe, (byte)0x04, (byte)0x4c, (byte)0x7a, (byte)0x04,
                 (byte)0xeb, (byte)0xcf, (byte)0x56, (byte)0x03, (byte)0x00, (byte)0x10, (byte)0x09, (byte)0xb0};
 
-        RTPHeader rtpHeader = new RTPHeader();
-        rtpHeader.fromBytes(dataFromWireshark);
+        RTPHeader rtpHeader = RTPHeader.fromBytes(dataFromWireshark);
 
         int wiresharkSSRC = 0xEBCF5603;
         assertEquals(wiresharkSSRC, rtpHeader.getSSRC());
@@ -43,7 +42,7 @@ public class RTPHeaderTest {
                 (byte)0x80, (byte)0x60, (byte)0x01, (byte)0x60, (byte)0x08, (byte)0xc5, (byte)0xe1, (byte)0x41,
                 (byte)0x4b, (byte)0x8b, (byte)0x2d, (byte)0xf3, (byte)0x7c, (byte)0x81, (byte)0xe2, (byte)0x23};
 
-        RTPHeader rtpHeader = new RTPHeader(dataFromWireshark);
+        RTPHeader rtpHeader = RTPHeader.fromBytes(dataFromWireshark);
 
         int wiresharkSSRC = 0x4B8B2DF3;
         assertEquals(wiresharkSSRC, rtpHeader.getSSRC());
@@ -80,8 +79,7 @@ public class RTPHeaderTest {
         byte[] resultEncodedRTPHeader = rtpHeader1.toBytes();
         assertArrayEquals(expectedEncodedRTPHeader, resultEncodedRTPHeader);
 
-        RTPHeader rtpHeader2 = new RTPHeader();
-        rtpHeader2.fromBytes(resultEncodedRTPHeader);
+        RTPHeader rtpHeader2 = RTPHeader.fromBytes(resultEncodedRTPHeader);
         assertEquals(rtpHeader1, rtpHeader2);
     }
 

@@ -34,7 +34,7 @@ public class RTSPRequestEncoderTest {
                 "LibVLC/3.0.0-git (LIVE555 Streaming Media v2016.02.22)"));
         final Header header = new Header(headerFields);
         final Method method = Method.OPTIONS;
-        final URI requestUri = URI.decodeFromString("rtsp://192.168.1.106:8554/s1");
+        final URI requestUri = URI.fromString("rtsp://192.168.1.106:8554/s1");
         final RTSPRequest rtspRequest = new RTSPRequest(requestUri, version, header, method);
 
         String expectedRequest =

@@ -14,7 +14,7 @@ public class RTSPResponse extends RTSPMessage {
 	private Body body;
 	
 	public RTSPResponse(StatusCode statusCode, Version version, Header header) {
-		this(statusCode, version, header, new Body(""));
+		this(statusCode, version, header, new Body(null));
 	}
 	
 	public RTSPResponse(StatusCode statusCode, Version version, Header header, Body body) {
@@ -46,6 +46,6 @@ public class RTSPResponse extends RTSPMessage {
 
 	private static Body createEmptyBody() {
 		
-		return new Body("");
+		return new Body(null);
 	}
 }

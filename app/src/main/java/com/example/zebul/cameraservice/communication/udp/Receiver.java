@@ -23,7 +23,7 @@ public class Receiver extends SocketCommunicator {
     @Override
     public void communicate() throws IOException {
 
-        byte[] buffer = new byte[512];
+        byte[] buffer = new byte[1024*64];
         DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
         datagramSocket.receive(datagramPacket);
 

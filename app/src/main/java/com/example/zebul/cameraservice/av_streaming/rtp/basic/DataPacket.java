@@ -21,4 +21,16 @@ public abstract class DataPacket<DATA_UNIT extends DataUnit> {
     public Timestamp getTimestamp() {
         return timestamp;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DataPacket<?> that = (DataPacket<?>) o;
+
+        if (!dataUnit.equals(that.dataUnit)) return false;
+        return timestamp.equals(that.timestamp);
+
+    }
 }

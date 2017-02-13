@@ -19,7 +19,7 @@ public class URITest {
     public void test_whether_uri_fromString_equals_uri_toString() throws MalformedURLException {
 
         String expectedUriString = "rtsp:192.168.1.21:9999/trackID=5";
-        URI uri = URI.decodeFromString(expectedUriString);
+        URI uri = URI.fromString(expectedUriString);
         String actualUriString = uri.toString();
         Assert.assertEquals(expectedUriString, expectedUriString);
     }
@@ -29,7 +29,7 @@ public class URITest {
 
         String expectedFile = "trackID=5";
         String expectedUriString = "rtsp://192.168.1.21:9999/"+expectedFile;
-        URI uri = URI.decodeFromString(expectedUriString);
+        URI uri = URI.fromString(expectedUriString);
         Assert.assertEquals(expectedFile, uri.getFileWithoutSpecialLeadingChars());
     }
 }

@@ -16,16 +16,25 @@ public class URI {
     public URI(){
     }
 
-    public static URI decodeFromString(String uriString) throws MalformedURLException {
+    private URI(URL url){
 
-        URI uri = new URI();
-        uri.fromString(uriString);
-        return uri;
+        this.url = url;
     }
 
-    public void fromString(String uriString) throws MalformedURLException {
+    public static URI fromString(String uriString) throws MalformedURLException {
 
-        url = new URL(uriString.replace("rtsp", "http"));
+        URL url = new URL(uriString.replace("rtsp", "http"));
+        return new URI(url);
+    }
+
+    public String getHost(){
+
+        return url.getHost();
+    }
+
+    public int getPort(){
+
+        return url.getPort();
     }
 
     @Override

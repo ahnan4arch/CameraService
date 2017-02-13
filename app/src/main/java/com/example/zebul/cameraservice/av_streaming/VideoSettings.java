@@ -7,9 +7,9 @@ package com.example.zebul.cameraservice.av_streaming;
 public class VideoSettings {
 
     public static final int DEFAULT_FRAME_RATE = 30;// 30fps
-
+    public static final int DEFAULT_BIT_RATE = 1000000;
     private Resolution resolution;
-    private int bitRate;
+    private int bitRate = DEFAULT_BIT_RATE;
     private int frameRate = DEFAULT_FRAME_RATE;
 
     public VideoSettings(Resolution resolution, int bitRate, int frameRate){

@@ -17,11 +17,12 @@ public class SessionDescriptionProtocol {
         return decode(sessionDescriptionAsText.split(LINE_SEPARATOR));
     }
 
-    public static SessionDescription decode(String [] sessionDescriptionAsLines){
+    public static SessionDescription decode(String[] sessionDescriptionAsLines, int lineOffset) {
 
         SessionDescription sessionDescription = new SessionDescription();
-        for(String sdpLine: sessionDescriptionAsLines){
+        for(int i=lineOffset; i<sessionDescriptionAsLines.length; i++){
 
+            String sdpLine = sessionDescriptionAsLines[i];
             /*
             An SDP session description consists of a number of lines of text of the form:
             <type>=<value>
@@ -51,6 +52,11 @@ public class SessionDescriptionProtocol {
             }
         }
         return sessionDescription;
+    }
+
+    public static SessionDescription decode(String [] sessionDescriptionAsLines){
+
+        return decode(sessionDescriptionAsLines, 0);
     }
 
     public static String encode(SessionDescription sd){

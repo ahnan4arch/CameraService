@@ -58,5 +58,8 @@ public class SessionDescriptionProtocolTest {
             }
         }
 
+        final String valueOfControlAttribute = sessionDescription.findVideoMediaValueOfAttribute("control");
+        assertEquals("rtsp://192.168.1.106:8554/s1/trackID=5", valueOfControlAttribute);
+
     }
 }

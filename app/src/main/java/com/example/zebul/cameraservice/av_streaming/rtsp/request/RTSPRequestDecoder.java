@@ -95,7 +95,7 @@ public class RTSPRequestDecoder {
 		RequestLine requestLine = new RequestLine();
 		requestLine.method = method;
 		try {
-			requestLine.requestUri = URI.decodeFromString(requestLineTokens[POS_OF_REQUEST_URI_IN_REQUEST_LINE]);
+			requestLine.requestUri = URI.fromString(requestLineTokens[POS_OF_REQUEST_URI_IN_REQUEST_LINE]);
 		} catch (MalformedURLException e) {
 			throw new RTSP4xxClientRequestError(StatusCode.BAD_REQUEST, e.getMessage());
 		}

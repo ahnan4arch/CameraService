@@ -3,7 +3,6 @@ package com.example.zebul.cameraservice;
 import android.graphics.SurfaceTexture;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
-import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,8 +12,11 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.zebul.cameraservice.av_streaming.rtp.BytesOfRTPPackets;
 import com.example.zebul.cameraservice.av_streaming.rtp.Timestamp;
+import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Depacketizer;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
+import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packetizer;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packets;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.NALUnit;
 import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
@@ -23,10 +25,11 @@ import com.example.zebul.cameraservice.packet_producers.video.file.AssetFileAVPa
 
 import java.nio.ByteBuffer;
 
-public class DisplayVideoActivity extends AppCompatActivity
+public class DisplayVideoFromFileActivity extends AppCompatActivity
 implements Runnable, TextureView.SurfaceTextureListener, MoviePlayer.PlayerFeedback {
 
-    private static final String TAG = DisplayVideoActivity.class.getSimpleName();
+    private static final String TAG = DisplayVideoFromFileActivity.class.getSimpleName();
+    private MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
     private TextureView textureView;
     private Button stopPlayingButton;
     private Button startPlayingButton;
@@ -36,7 +39,7 @@ implements Runnable, TextureView.SurfaceTextureListener, MoviePlayer.PlayerFeedb
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_display_video);
+        setContentView(R.layout.activity_display_video_from_file);
 
         startPlayingButton = (Button)findViewById(R.id.startPlayingButton);
         stopPlayingButton = (Button)findViewById(R.id.stopPlayingButton);
@@ -113,28 +116,32 @@ implements Runnable, TextureView.SurfaceTextureListener, MoviePlayer.PlayerFeedb
         }
     }
 
-    private MediaCodec.BufferInfo mBufferInfo = new MediaCodec.BufferInfo();
+    H264Packetizer packetizer = new H264Packetizer();
+    H264Depacketizer depacketizer = new H264Depacketizer();
 
     private void pumpDataFromFileToSurface(
             AssetFileAVPacketProducer filePacketProducer,
-            MediaCodec decoder) throws PacketProductionException {
+            MediaCodec mediaCodec) throws PacketProductionException {
 
         final int TIMEOUT_USEC = 10000;
-        final H264Packets h264Packets = filePacketProducer.produceH264Packets();
-        for(H264Packet h264Packet: h264Packets){
+        final H264Packets inputH264Packets = filePacketProducer.produceH264Packets();
+        final BytesOfRTPPackets bytesOfRTPPackets = packetizer.createBytesOfRTPPackets(inputH264Packets);
+        final H264Packets outputH264Packets = depacketizer.createH264Packets(bytesOfRTPPackets);
+
+        for(H264Packet h264Packet: outputH264Packets){
 
             final NALUnit nalUnit = h264Packet.getNALUnit();
             byte [] nalUnitData = nalUnit.getData();
 
-            int inputBufIndex = decoder.dequeueInputBuffer(TIMEOUT_USEC);
+            int inputBufIndex = mediaCodec.dequeueInputBuffer(TIMEOUT_USEC);
             if (inputBufIndex >= 0) {
 
-                ByteBuffer[] decoderInputBuffers = decoder.getInputBuffers();
+                ByteBuffer[] decoderInputBuffers = mediaCodec.getInputBuffers();
                 ByteBuffer inputBuf = decoderInputBuffers[inputBufIndex];
                 inputBuf.put(nalUnitData, 0, nalUnitData.length);
 
                 final Timestamp timestamp = h264Packet.getTimestamp();
-                decoder.queueInputBuffer(inputBufIndex, 0, nalUnitData.length,
+                mediaCodec.queueInputBuffer(inputBufIndex, 0, nalUnitData.length,
                         timestamp.getTimestampInMillis(), 0 /*flags*/);
             }
             else{
@@ -144,29 +151,29 @@ implements Runnable, TextureView.SurfaceTextureListener, MoviePlayer.PlayerFeedb
             }
         }
 
-        int decoderStatus = decoder.dequeueOutputBuffer(mBufferInfo, TIMEOUT_USEC);
+        int decoderStatus = mediaCodec.dequeueOutputBuffer(bufferInfo, TIMEOUT_USEC);
         if (decoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
             // no output available yet
-            Log.d(TAG, "no output from decoder available");
+            Log.d(TAG, "no output from mediaCodec available");
         } else if (decoderStatus == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
             // not important for us, since we're using Surface
-            Log.d(TAG, "decoder output buffers changed");
+            Log.d(TAG, "mediaCodec output buffers changed");
         } else if (decoderStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-            MediaFormat newFormat = decoder.getOutputFormat();
-            Log.d(TAG, "decoder output format changed: " + newFormat);
+            MediaFormat newFormat = mediaCodec.getOutputFormat();
+            Log.d(TAG, "mediaCodec output format changed: " + newFormat);
         } else if (decoderStatus < 0) {
             throw new RuntimeException(
-                    "unexpected result from decoder.dequeueOutputBuffer: " +
+                    "unexpected result from mediaCodec.dequeueOutputBuffer: " +
                             decoderStatus);
         } else { // decoderStatus >= 0
 
-            Log.d(TAG, "surface decoder given buffer " + decoderStatus +
-                    " (size=" + mBufferInfo.size + ")");
-            if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+            Log.d(TAG, "surface mediaCodec given buffer " + decoderStatus +
+                    " (size=" + bufferInfo.size + ")");
+            if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                 Log.d(TAG, "output EOS");
             }
 
-            boolean doRender = (mBufferInfo.size != 0);
+            boolean doRender = (bufferInfo.size != 0);
 
             // As soon as we call releaseOutputBuffer, the buffer will be forwarded
             // to SurfaceTexture to convert to a texture.  We can't control when it
@@ -174,10 +181,10 @@ implements Runnable, TextureView.SurfaceTextureListener, MoviePlayer.PlayerFeedb
             // the buffers.
             /*
             if (doRender && frameCallback != null) {
-                frameCallback.preRender(mBufferInfo.presentationTimeUs);
+                frameCallback.preRender(bufferInfo.presentationTimeUs);
             }*/
 
-            decoder.releaseOutputBuffer(decoderStatus, doRender);
+            mediaCodec.releaseOutputBuffer(decoderStatus, doRender);
 
             /*
             if (doRender && frameCallback != null) {
@@ -188,7 +195,7 @@ implements Runnable, TextureView.SurfaceTextureListener, MoviePlayer.PlayerFeedb
                 Log.d(TAG, "Reached EOS, looping");
                 extractor.seekTo(0, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
                 inputDone = false;
-                decoder.flush();    // reset decoder state
+                mediaCodec.flush();    // reset mediaCodec state
                 frameCallback.loopReset();
             }*/
         }

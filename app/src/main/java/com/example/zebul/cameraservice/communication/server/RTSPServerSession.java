@@ -1,4 +1,4 @@
-package com.example.zebul.cameraservice.communication.tcp;
+package com.example.zebul.cameraservice.communication.server;
 
 import com.example.zebul.cameraservice.av_streaming.rtsp.Method;
 import com.example.zebul.cameraservice.av_streaming.rtsp.StatusCode;
@@ -10,7 +10,6 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequestDeco
 import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponse;
 import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponseEncoder;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.Version;
-import com.example.zebul.cameraservice.communication.RTSPRequestListener;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -24,52 +23,46 @@ import java.net.SocketAddress;
  * Created by zebul on 10/22/16.
  */
 
-@Deprecated //apply composition over inheritance
-public class RTSPSession extends Thread {
+public class RTSPServerSession implements Runnable {
 
-    private DataInputStream input;
-    private DataOutputStream output;
     private Socket clientSocket;
     private RTSPRequestListener rtspRequestListener;
     private RTSPSessionEventListener rtspSessionLifecycleListener;
+    private Thread thread;
 
-    public RTSPSession(Socket clientSocket,
-                       RTSPSessionEventListener rtspSessionLifecycleListener,
-                       RTSPRequestListener rtspRequestListener) {
-        try {
+    public RTSPServerSession(Socket clientSocket,
+                             RTSPSessionEventListener rtspSessionLifecycleListener,
+                             RTSPRequestListener rtspRequestListener) {
 
-            this.clientSocket = clientSocket;
-            this.rtspSessionLifecycleListener = rtspSessionLifecycleListener;
-            this.rtspRequestListener = rtspRequestListener;
+        this.clientSocket = clientSocket;
+        this.rtspSessionLifecycleListener = rtspSessionLifecycleListener;
+        this.rtspRequestListener = rtspRequestListener;
+    }
 
-            input = new DataInputStream( this.clientSocket.getInputStream());
-            output =new DataOutputStream( this.clientSocket.getOutputStream());
-        }
-        catch(IOException e) {
-            System.out.println("Connection:"+e.getMessage());
-        }
+    public void start(){
+
+        thread = new Thread(this);
+        thread.start();
     }
 
     @Override
-    public void start(){
-
-        super.start();
-    }
-
     public void run() {
         try {
 
             onSessionCreated();
+            DataInputStream input = new DataInputStream( clientSocket.getInputStream());
+            DataOutputStream output = new DataOutputStream( clientSocket.getOutputStream());
+
             while(true){
 
-                byte[] messageBytes = new byte[1000];
-                StringBuilder sb = new StringBuilder();
+                byte[] messageBytes = new byte[1024*4];
+                StringBuilder clientRequestStringBuilder = new StringBuilder();
                 boolean dataAvailable = true;
                 while(dataAvailable)
                 {
                     int bytesRead = input.read(messageBytes);
                     if(0<bytesRead){
-                        sb.append(new String(messageBytes, 0, bytesRead));
+                        clientRequestStringBuilder.append(new String(messageBytes, 0, bytesRead));
                         dataAvailable = (0<input.available());
                     }
                     else{
@@ -81,7 +74,7 @@ public class RTSPSession extends Thread {
                 RTSPResponse response = null;
                 try{
 
-                    String requestRepresentaionAsText = sb.toString();
+                    String requestRepresentaionAsText = clientRequestStringBuilder.toString();
                     System.out.println(requestRepresentaionAsText+"\n");
                     RTSPRequest request = RTSPRequestDecoder.decode(requestRepresentaionAsText);
                     response = processRequest(request);

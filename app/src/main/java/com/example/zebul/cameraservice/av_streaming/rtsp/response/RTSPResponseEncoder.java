@@ -7,6 +7,7 @@ import com.example.zebul.cameraservice.av_streaming.rtsp.message.body.Body;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Header;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderField;
 import com.example.zebul.cameraservice.av_streaming.rtsp.version.VersionEncoder;
+import com.example.zebul.cameraservice.av_streaming.sdp.SessionDescription;
 
 public class RTSPResponseEncoder {
 
@@ -33,12 +34,19 @@ public class RTSPResponseEncoder {
 			responseTextBuilder.append(headerLine+RTSPProtocol.LINE_SEPARATOR);
 		}
 		
-		Body body = response.getBody();
-		String contentLengthLine = String.format("Content-Length: %d", body.getContentLengthInBytes());
+		final Body body = response.getBody();
+		final SessionDescription sessionDescription = body.getSessionDescription();
+		String content = "";
+		if(sessionDescription != null){
+			content = sessionDescription.getDescription();
+		}
+		String contentLengthLine = String.format("Content-Length: %d", content.length());
 		responseTextBuilder.append(contentLengthLine+RTSPProtocol.LINE_SEPARATOR);
 		responseTextBuilder.append(RTSPProtocol.LINE_SEPARATOR);
-		
-		responseTextBuilder.append(body.getContent());
+
+		if(content.length()>0){
+			responseTextBuilder.append(content);
+		}
 		//add line separator at the end of resopnse
 		responseTextBuilder.append(RTSPProtocol.LINE_SEPARATOR);
 		return responseTextBuilder.toString();

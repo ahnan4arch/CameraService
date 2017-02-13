@@ -28,13 +28,8 @@ public class RTPHeader {
     private int timestamp;
     private int SSRC;
 
-    public RTPHeader(){
+    private RTPHeader(){
 
-    }
-
-    public RTPHeader(byte [] rtpHeaderBytes){
-
-        fromBytes(rtpHeaderBytes);
     }
 
     public RTPHeader(boolean markerBit, byte payloadType, int sequenceNumber,
@@ -89,11 +84,6 @@ public class RTPHeader {
         return rtpHeaderBytes;
     }
 
-    public void fromBytes(byte [] rtpHeaderBytes) {
-
-        fromBytes(rtpHeaderBytes, 0);
-    }
-
     public void toBytes(byte[] rtpHeaderBytes, int position) {
 
         int offset = position;
@@ -116,28 +106,36 @@ public class RTPHeader {
         rtpHeaderBytes[++offset] = (byte)(SSRC>>0);
     }
 
-    public void fromBytes(byte [] rtpHeaderBytes, int position) {
+    public static RTPHeader fromBytes(byte [] rtpHeaderBytes) {
+
+        return fromBytes(rtpHeaderBytes, 0);
+    }
+
+    public static RTPHeader fromBytes(byte [] rtpHeaderBytes, int position) {
+
+        RTPHeader rtpHeader = new RTPHeader();
 
         int offset = position+1;
-        markerBit   = ((rtpHeaderBytes[offset]&0x80)==0x80);
-        payloadType = (byte)(rtpHeaderBytes[offset]&0x7F);
+        rtpHeader.markerBit   = ((rtpHeaderBytes[offset]&0x80)==0x80);
+        rtpHeader.payloadType = (byte)(rtpHeaderBytes[offset]&0x7F);
 
-        sequenceNumber =
+        rtpHeader.sequenceNumber =
 
                 (0x0000FF00&(rtpHeaderBytes[++offset]<<8))|
                 (0x000000FF&(rtpHeaderBytes[++offset]<<0));
 
-        timestamp =
+        rtpHeader.timestamp =
                 (0xFF000000&(rtpHeaderBytes[++offset]<<24))|
                 (0x00FF0000&(rtpHeaderBytes[++offset]<<16))|
                 (0x0000FF00&(rtpHeaderBytes[++offset]<< 8))|
                 (0x000000FF&(rtpHeaderBytes[++offset]<< 0));
 
-        SSRC =
+        rtpHeader.SSRC =
                 (0xFF000000&(rtpHeaderBytes[++offset]<<24))|
                 (0x00FF0000&(rtpHeaderBytes[++offset]<<16))|
                 (0x0000FF00&(rtpHeaderBytes[++offset]<< 8))|
                 (0x000000FF&(rtpHeaderBytes[++offset]<< 0));
+        return rtpHeader;
     }
 
     /*

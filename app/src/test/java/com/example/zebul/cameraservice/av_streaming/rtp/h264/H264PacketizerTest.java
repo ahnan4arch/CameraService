@@ -35,11 +35,11 @@ public class H264PacketizerTest {
         assertTrue(rtpPackets.getNumberOfPackets() > 0);
     }
 
-    @Test
-    public void test_when_NALUnit_has_grater_length_than_MTU_then_packetizer_creates_fragmentation_units() {
+    static H264Packets createExampleH264Packets(){
 
-        byte NALUnitHeader = 0x01;
-        byte [] nalUnitPayload = new byte[]{NALUnitHeader, 0x11, 0x22, 0x33, 0x44, 0x55};
+        NALUnitHeader nalUnitHeader = new NALUnitHeader(false, (byte)0, NALUnitType.SequenceParameterSet);
+        byte nalUnitHeaderByte = nalUnitHeader.toByte();
+        byte [] nalUnitPayload = new byte[]{nalUnitHeaderByte, 0x11, 0x22, 0x33, 0x44, 0x55};
         byte [] nalUnitPayloadWithStartCodes = new byte[NALUnit.START_CODES.length+nalUnitPayload.length];
         System.arraycopy(NALUnit.START_CODES, 0, nalUnitPayloadWithStartCodes, 0, NALUnit.START_CODES.length);
         System.arraycopy(nalUnitPayload, 0, nalUnitPayloadWithStartCodes, NALUnit.START_CODES.length, nalUnitPayload.length);
@@ -49,11 +49,21 @@ public class H264PacketizerTest {
         H264Packet h264Packet = new H264Packet(nalUnit, timestamp);
         H264Packets h264Packets = new H264Packets();
         h264Packets.addPacket(h264Packet);
+        return h264Packets;
+    }
 
+    @Test
+    public void test_when_NALUnit_has_grater_length_than_MTU_then_packetizer_creates_fragmentation_units() {
+
+        //given
+        H264Packets h264Packets = createExampleH264Packets();
+
+        //when
         H264Packetizer packetizer = new H264Packetizer();
         int maxLengthOfPacket = 2;
         packetizer.setMaxPayloadLength(maxLengthOfPacket);
 
+        //then
         RTPPackets rtpPackets = packetizer.createRTPPackets(h264Packets);
         assertEquals(3, rtpPackets.getNumberOfPackets());
 

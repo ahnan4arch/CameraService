@@ -1,5 +1,6 @@
 package com.example.zebul.cameraservice.av_streaming.rtp.h264;
 
+import com.example.zebul.cameraservice.av_streaming.rtp.BytesOfRTPPackets;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPPacket;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPPackets;
 import com.example.zebul.cameraservice.av_streaming.rtp.RTPHeader;
@@ -9,7 +10,7 @@ import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.H264Payload
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.fragmentation_unit.FUHeader;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.fragmentation_unit.FUIndicator;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.fragmentation_unit.FU_A_RTPPayload;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.single_time.STAP_A_RTPPayload;
+import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.single_time.SingleNALUnit_RTPPayload;
 import com.example.zebul.cameraservice.av_streaming.rtp.basic.DataPacket;
 
 /**
@@ -33,6 +34,16 @@ public class H264Packetizer extends RTPPacketizer {
         super(sequenceNumber, SSRC);
     }
 
+    public BytesOfRTPPackets createBytesOfRTPPackets(H264Packets h264packets){
+
+        BytesOfRTPPackets bytesOfRTPPackets = new BytesOfRTPPackets();
+        for(RTPPacket rtpPacket: createRTPPackets(h264packets)){
+
+            bytesOfRTPPackets.addRTPPacketBytes(rtpPacket.toBytes());
+        }
+        return bytesOfRTPPackets;
+    }
+
     public RTPPackets createRTPPackets(H264Packets h264packets) {
 
         RTPPackets rtpPackets = new RTPPackets();
@@ -42,6 +53,7 @@ public class H264Packetizer extends RTPPacketizer {
         }
         return rtpPackets;
     }
+
 
     public RTPPackets createRTPPackets(H264Packet h264Packet){
 
@@ -66,7 +78,7 @@ public class H264Packetizer extends RTPPacketizer {
     private RTPPacket createSingleTimeNALUnitPacket(H264Packet h264Packet) {
 
         RTPHeader rtpHeader = createRTPHeader(h264Packet.getTimestamp(), true);
-        H264Payload rtpPayload = new STAP_A_RTPPayload(h264Packet.getNALUnit());
+        H264Payload rtpPayload = new SingleNALUnit_RTPPayload(h264Packet.getNALUnit());
         RTPPacket rtpPacket = new RTPPacket(rtpHeader, rtpPayload);
         return rtpPacket;
     }
@@ -82,7 +94,7 @@ public class H264Packetizer extends RTPPacketizer {
 
         byte [] dataWithNalUnit = h264packet.getNALUnit().getData();
         NALUnitHeader nalUnitHeader = NALUnitHeader.fromByte(dataWithNalUnit[offsetOfNALUnit]);
-        FUIndicator fuIndicator = new FUIndicator(false, nalUnitHeader.getNalReferenceIndicator());
+        FUIndicator fuIndicator = new FUIndicator(nalUnitHeader.getForbiddenZeroBit(), nalUnitHeader.getNalReferenceIndicator());
         while(true){
 
             int payloadFragmentDataLength = 0;

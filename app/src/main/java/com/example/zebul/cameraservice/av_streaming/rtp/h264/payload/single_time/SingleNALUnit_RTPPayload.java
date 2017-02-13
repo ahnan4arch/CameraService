@@ -8,10 +8,10 @@ import com.example.zebul.cameraservice.av_streaming.rtp.h264.payload.H264Payload
  * Created by zebul on 11/23/16.
  */
 
-public class STAP_A_RTPPayload extends H264Payload {
+public class SingleNALUnit_RTPPayload extends H264Payload {
 
     private NALUnit nalUnit;
-    public STAP_A_RTPPayload(NALUnit nalUnit){
+    public SingleNALUnit_RTPPayload(NALUnit nalUnit){
 
         super(H264PayloadType.NALUnit);
         this.nalUnit = nalUnit;
@@ -28,5 +28,18 @@ public class STAP_A_RTPPayload extends H264Payload {
         byte [] nalUnitData = nalUnit.getData();
         System.arraycopy(nalUnitData, NALUnit.START_CODES.length,
                 rtpPacketBytes, position, nalUnitData.length-NALUnit.START_CODES.length);
+    }
+
+    public static SingleNALUnit_RTPPayload fromBytes(byte[] rtpPacketBytes, int position, int length){
+
+        byte [] nalUnitData = new byte[NALUnit.START_CODES.length+length];
+        System.arraycopy(NALUnit.START_CODES, 0, nalUnitData, 0, NALUnit.START_CODES.length);
+        System.arraycopy(rtpPacketBytes, position, nalUnitData, NALUnit.START_CODES.length, length);
+        NALUnit nalUnit = new NALUnit(nalUnitData);
+        return new SingleNALUnit_RTPPayload(nalUnit);
+    }
+
+    public NALUnit getNalUnit() {
+        return nalUnit;
     }
 }

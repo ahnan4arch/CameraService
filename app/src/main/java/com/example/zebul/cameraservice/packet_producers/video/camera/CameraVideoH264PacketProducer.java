@@ -9,7 +9,7 @@ import android.util.Log;
 
 import com.example.zebul.cameraservice.packet_producers.PacketProductionExceptionListener;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
-import com.example.zebul.cameraservice.packet_producers.video.H264PacketListener;
+import com.example.zebul.cameraservice.packet_producers.video.H264PacketConsumer;
 import com.example.zebul.cameraservice.av_streaming.rtp.Clock;
 import com.example.zebul.cameraservice.av_streaming.rtp.Timestamp;
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.NALUnit;
@@ -35,16 +35,6 @@ public class CameraVideoH264PacketProducer extends MediaCodecPacketProducer {
     private Camera camera;
     private SurfaceTextureManager mStManager;
 
-    // Fragment shader that swaps color channels around.
-    private static final String SWAPPED_FRAGMENT_SHADER =
-            "#extension GL_OES_EGL_image_external : require\n" +
-                    "precision mediump float;\n" +
-                    "varying vec2 vTextureCoord;\n" +
-                    "uniform samplerExternalOES sTexture;\n" +
-                    "void main() {\n" +
-                    "  gl_FragColor = texture2D(sTexture, vTextureCoord).gbra;\n" +
-                    "}\n";
-
     private Clock clock = new Clock();
 
     private CodecInputSurface inputSurface;
@@ -52,14 +42,14 @@ public class CameraVideoH264PacketProducer extends MediaCodecPacketProducer {
     private SurfaceTexture surfaceTexture;
     private CameraSettings cameraSettings;
 
-    private H264PacketListener h264PacketListener;
+    private H264PacketConsumer h264PacketConsumer;
 
     public CameraVideoH264PacketProducer(
-            H264PacketListener h264PacketListener,
+            H264PacketConsumer h264PacketConsumer,
             PacketProductionExceptionListener packetProductionExceptionListener){
 
         super(packetProductionExceptionListener);
-        this.h264PacketListener = h264PacketListener;
+        this.h264PacketConsumer = h264PacketConsumer;
     }
 
     public boolean start(CameraSettings cameraSettings) {
@@ -79,26 +69,11 @@ public class CameraVideoH264PacketProducer extends MediaCodecPacketProducer {
         surfaceTexture = mStManager.getSurfaceTexture();
     }
 
-    private int frameCount = 0;
-
     @Override
     protected void produce() throws PacketProductionException, InterruptedException{
 
         // Feed any pending encoder output into the muxer.
         flushMediaCodecOutput();
-
-        // Switch up the colors every 15 frames.  Besides demonstrating the use of
-        // fragment shaders for video editing, this provides a visual indication of
-        // the frame rate: if the camera is capturing at 15fps, the colors will change
-        // once per second.
-        if ((frameCount % 15) == 0) {
-            String fragmentShader = null;
-            if ((frameCount & 0x01) != 0) {
-                fragmentShader = SWAPPED_FRAGMENT_SHADER;
-            }
-            mStManager.changeFragmentShader(fragmentShader);
-        }
-        frameCount++;
 
         // Acquire a new frame of input, and render it to the Surface.  If we had a
         // GLSurfaceView we could switch EGL contexts and call drawImage() a second
@@ -170,7 +145,7 @@ public class CameraVideoH264PacketProducer extends MediaCodecPacketProducer {
             Timestamp timestamp = clock.getTimestamp(); /*new Timestamp(timestampInMillis);*/
             H264Packet h264Packet = new H264Packet(nalUnit, timestamp);
 
-            h264PacketListener.onH264Packet(h264Packet);
+            h264PacketConsumer.consumeH264Packet(h264Packet);
         }
 
         mediaCodec.releaseOutputBuffer(outputBufferIndex, false);

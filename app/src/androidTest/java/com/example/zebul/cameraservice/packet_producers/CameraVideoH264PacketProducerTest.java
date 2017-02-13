@@ -4,7 +4,7 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 
 import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
-import com.example.zebul.cameraservice.packet_producers.video.H264PacketListener;
+import com.example.zebul.cameraservice.packet_producers.video.H264PacketConsumer;
 import com.example.zebul.cameraservice.av_streaming.Resolution;
 import com.example.zebul.cameraservice.av_streaming.VideoSettings;
 import com.example.zebul.cameraservice.packet_producers.video.camera.CameraSettings;
@@ -30,10 +30,10 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
         final AtomicBoolean packetReceived = new AtomicBoolean(false);
         final AtomicBoolean exceptionReceived = new AtomicBoolean(false);
 
-        H264PacketListener h264PacketListener = new H264PacketListener(){
+        H264PacketConsumer h264PacketConsumer = new H264PacketConsumer(){
 
             @Override
-            public void onH264Packet(H264Packet h264Packet) {
+            public void consumeH264Packet(H264Packet h264Packet) {
 
                 packetReceived.set(true);
             }
@@ -51,7 +51,7 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
                 };
 
         CameraVideoH264PacketProducer producer = new CameraVideoH264PacketProducer(
-                h264PacketListener, packetProductionExceptionListener);
+                h264PacketConsumer, packetProductionExceptionListener);
 
         for(int i=0; i<10; i++){
 
@@ -80,10 +80,10 @@ public class CameraVideoH264PacketProducerTest extends AndroidTestCase {
         }
     }
 
-    private class H264PacketListenerFake implements H264PacketListener{
+    private class H264PacketListenerFake implements H264PacketConsumer {
 
         @Override
-        public void onH264Packet(H264Packet h264Packet) {
+        public void consumeH264Packet(H264Packet h264Packet) {
 
         }
     }

@@ -13,6 +13,10 @@ public class RTSPRequestEncoder {
 
 	private static final String SEP = RTSPProtocol.LINE_SEPARATOR;
 
+	private RTSPRequestEncoder(){
+
+	}
+
 	public static String encode(RTSPRequest request){
 
 		final Method method = request.getMethod();

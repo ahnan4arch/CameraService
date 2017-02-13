@@ -13,9 +13,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
-import com.example.zebul.cameraservice.communication.tcp.RTSPSessionCreatedEvent;
-import com.example.zebul.cameraservice.communication.tcp.RTSPSessionDestroyedEvent;
-import com.example.zebul.cameraservice.communication.tcp.RTSPSessionEventListener;
+import com.example.zebul.cameraservice.communication.server.RTSPSessionCreatedEvent;
+import com.example.zebul.cameraservice.communication.server.RTSPSessionDestroyedEvent;
+import com.example.zebul.cameraservice.communication.server.RTSPSessionEventListener;
 
 import java.net.SocketAddress;
 
@@ -30,6 +30,8 @@ public class CameraService extends Service implements RTSPSessionEventListener {
 
     private static final int CAMERA_SERVICE_NOTIFICATION_ID = 1;
 
+    public static CameraService CAMERA_SERVICE;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -39,6 +41,7 @@ public class CameraService extends Service implements RTSPSessionEventListener {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        CAMERA_SERVICE = this;
         keepInForeground();
         return START_STICKY;
     }

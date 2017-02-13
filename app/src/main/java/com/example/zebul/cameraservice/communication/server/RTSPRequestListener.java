@@ -1,4 +1,4 @@
-package com.example.zebul.cameraservice.communication;
+package com.example.zebul.cameraservice.communication.server;
 
 import com.example.zebul.cameraservice.av_streaming.rtsp.error.RTSP4xxClientRequestError;
 import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequest;

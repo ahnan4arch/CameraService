@@ -2,7 +2,6 @@ package com.example.zebul.cameraservice.av_streaming.sdp;
 
 
 import com.example.zebul.cameraservice.av_streaming.rtsp.RTSPProtocol;
-import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Transport;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -387,15 +386,37 @@ public class SessionDescription {
 	public boolean mediaHasValueOfAttribute(
 			MediaDescription.MediaType mediaType, String attributeType, String value) {
 
+		String foundValue = findMediaValueOfAttribute(mediaType, attributeType);
+		if(foundValue == null) {
+
+			return false;
+		}
+		return (foundValue.compareToIgnoreCase(value) == 0);
+	}
+
+	public String findVideoMediaValueOfAttribute(String attributeType){
+
+		return findMediaValueOfAttribute(MediaDescription.MediaType.Video, attributeType);
+	}
+
+	public String findAudioMediaValueOfAttribute(String attributeType){
+
+		return findMediaValueOfAttribute(MediaDescription.MediaType.Audio, attributeType);
+	}
+
+	public String findMediaValueOfAttribute(
+			MediaDescription.MediaType mediaType, String attributeType) {
+
 		for(MediaDescription md: mediaDescriptions){
 			if(md.getMediaType().equals(mediaType)){
 				for(Attribute attribute: md.getAttributes()){
 					if(attribute.getType().compareToIgnoreCase(attributeType) == 0){
-						return attribute.getValue().compareToIgnoreCase(value) == 0;
+						return attribute.getValue();
 					}
 				}
 			}
 		}
-		return false;
+		return null;
 	}
+
 }

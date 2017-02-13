@@ -1,6 +1,4 @@
-package com.example.zebul.cameraservice.communication.tcp;
-
-import com.example.zebul.cameraservice.communication.RTSPServerSessionController;
+package com.example.zebul.cameraservice.communication.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -98,7 +96,7 @@ public class RTSPServer implements Runnable{
             while(!Thread.interrupted()){
 
                 Socket clientSocket = serverSocket.accept();
-                final RTSPServerSessionController rtpSessionController = new RTSPServerSessionController(clientSocket);
+                final RTSPServerSessionController rtpServerSessionController = new RTSPServerSessionController(clientSocket);
 
                 RTSPSessionEventListener rtspSessionEventListener = new RTSPSessionEventListener(){
 
@@ -116,15 +114,16 @@ public class RTSPServer implements Runnable{
                     public void onRTSPSessionDestroyedEvent(
                             RTSPSessionDestroyedEvent rtspSessionDestroyedEvent) {
 
-                        rtpSessionController.stop();
+                        rtpServerSessionController.stop();
                         for(RTSPSessionEventListener rtspSessionEventListener: rtspSessionLifecycleListeners){
 
                             rtspSessionEventListener.onRTSPSessionDestroyedEvent(rtspSessionDestroyedEvent);
                         }
                     }
                 };
-                RTSPSession c = new RTSPSession(clientSocket, rtspSessionEventListener, rtpSessionController);
-                c.start();
+                RTSPServerSession rtspServerSession = new RTSPServerSession(
+                        clientSocket, rtspSessionEventListener, rtpServerSessionController);
+                rtspServerSession.start();
             }
         } catch (IOException e) {
             e.printStackTrace();

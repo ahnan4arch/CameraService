@@ -1,5 +1,7 @@
 package com.example.zebul.cameraservice.av_streaming.rtp.basic;
 
+import com.example.zebul.cameraservice.av_streaming.rtp.RTPPackets;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,5 +36,25 @@ public abstract class DataPackets<DATA_PACKET extends DataPacket> implements Ite
     public boolean containsPackets() {
 
         return !avPackets.isEmpty();
+    }
+
+    public DATA_PACKET getPacket(int pos) {
+
+        return avPackets.get(pos);
+    }
+
+    public void addPackets(DataPackets<DATA_PACKET> dataPackets){
+
+        avPackets.addAll(dataPackets.avPackets);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DataPackets<?> that = (DataPackets<?>) o;
+
+        return avPackets.equals(that.avPackets);
     }
 }

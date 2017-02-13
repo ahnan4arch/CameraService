@@ -2,7 +2,9 @@ package com.example.zebul.cameraservice.av_streaming.rtsp.response;
 
 import com.example.zebul.cameraservice.av_streaming.rtsp.StatusCode;
 import com.example.zebul.cameraservice.av_streaming.rtsp.error.RTSP5xxServerResponseError;
+import com.example.zebul.cameraservice.av_streaming.rtsp.message.body.Body;
 import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderField;
+import com.example.zebul.cameraservice.av_streaming.sdp.SessionDescription;
 
 import org.junit.Test;
 
@@ -92,5 +94,9 @@ public class RTSPResponseDecoderTest {
         assertEquals(rtspResponse.getHeaderFieldValue(HeaderField.KnownName.Content_Length), "691");
         assertEquals(rtspResponse.getHeaderFieldValue(HeaderField.KnownName.CSeq), "3");
 
+        final Body body = rtspResponse.getBody();
+        assertNotNull(body);
+        final SessionDescription sessionDescription = body.getSessionDescription();
+        assertNotNull(sessionDescription);
     }
 }

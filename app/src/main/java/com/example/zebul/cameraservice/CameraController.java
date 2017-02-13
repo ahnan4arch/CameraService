@@ -3,8 +3,8 @@ package com.example.zebul.cameraservice;
 import android.content.Context;
 import android.hardware.Camera;
 
-import com.example.zebul.cameraservice.communication.tcp.RTSPServer;
-import com.example.zebul.cameraservice.communication.tcp.RTSPSessionEventListener;
+import com.example.zebul.cameraservice.communication.server.RTSPServer;
+import com.example.zebul.cameraservice.communication.server.RTSPSessionEventListener;
 import com.example.zebul.cameraservice.communication.udp.SocketEngine;
 import com.example.zebul.cameraservice.communication.udp.SocketMessageReceptionListener;
 import com.example.zebul.cameraservice.message.Message;

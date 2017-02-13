@@ -27,4 +27,13 @@ public class RTPPacket {
         rtpPayload.toBytes(rtpPacketBytes, RTPHeader.LENGTH);
         return rtpPacketBytes;
     }
+
+    public RTPHeader getRtpHeader() {
+        return rtpHeader;
+    }
+
+    public RTPPayload getRtpPayload() {
+        return rtpPayload;
+    }
+
 }

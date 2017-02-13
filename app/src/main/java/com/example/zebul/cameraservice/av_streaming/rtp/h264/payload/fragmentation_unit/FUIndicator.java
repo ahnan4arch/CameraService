@@ -12,4 +12,11 @@ public class FUIndicator extends NALUnitHeader {
     public FUIndicator(boolean forbiddenZeroBit, byte nalReferenceIndicator) {
         super(forbiddenZeroBit, nalReferenceIndicator, NALUnitType.FU_A);
     }
+
+    public static FUIndicator fromByte(byte rtpPacketByte) {
+
+        NALUnitHeader nalUnitHeader = NALUnitHeader.fromByte(rtpPacketByte);
+        return new FUIndicator(nalUnitHeader.getForbiddenZeroBit(),
+                nalUnitHeader.getNalReferenceIndicator());
+    }
 }
