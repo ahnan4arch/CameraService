@@ -6,7 +6,6 @@ import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packets;
 import com.example.zebul.cameraservice.communication.udp.SocketEngine;
 import com.example.zebul.cameraservice.communication.udp.SocketMessageReceptionListener;
 import com.example.zebul.cameraservice.message.Message;
-import com.example.zebul.cameraservice.packet_producers.PacketConsumptionException;
 import com.example.zebul.cameraservice.packet_producers.video.H264PacketConsumer;
 
 /**
