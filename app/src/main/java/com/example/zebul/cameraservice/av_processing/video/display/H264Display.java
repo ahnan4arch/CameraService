@@ -3,7 +3,6 @@ package com.example.zebul.cameraservice.av_processing.video.display;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.util.Log;
 import android.view.Surface;
 
 import com.example.zebul.cameraservice.ManualResetEvent;
@@ -33,8 +32,9 @@ implements H264PacketConsumer {
 
     public static final String TAG = H264Display.class.getSimpleName();
 
-    private List<H264Packet> listOfConsumedH264Packets = Collections.synchronizedList(new LinkedList<H264Packet>());
-    private ManualResetEvent eventConsumed = new ManualResetEvent(false);
+    private List<H264Packet> listOfConsumedH264Packets =
+            Collections.synchronizedList(new LinkedList<H264Packet>());
+    private ManualResetEvent packetConsumedEvent = new ManualResetEvent(false);
     private VideoSettings videoSettings;
 
     private Surface surface;
@@ -85,7 +85,7 @@ implements H264PacketConsumer {
     public void stop() {
 
         processConsumedPacket = false;
-        eventConsumed.set();
+        packetConsumedEvent.set();
         super.stop();
     }
 
@@ -93,13 +93,13 @@ implements H264PacketConsumer {
     public void consumeH264Packet(H264Packet h264Packet){
 
         listOfConsumedH264Packets.add(h264Packet);
-        eventConsumed.set();
+        packetConsumedEvent.set();
     }
 
-    public void onInputBufferAvailable(
+    @Override
+    protected void onInputBufferAvailable(
             int inputBufferIndex,
-            ByteBuffer inputBuffer,
-            MediaCodec mediaCodec){
+            ByteBuffer inputBuffer){
 
         if(listOfConsumedH264Packets.isEmpty()){
 
@@ -123,9 +123,9 @@ implements H264PacketConsumer {
 
     private void waitForH264PacketConsumption(){
 
-        eventConsumed.reset();
+        packetConsumedEvent.reset();
         try {
-            eventConsumed.waitOne();
+            packetConsumedEvent.waitOne();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

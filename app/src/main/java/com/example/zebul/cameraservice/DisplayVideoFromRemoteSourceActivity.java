@@ -42,10 +42,9 @@ public class DisplayVideoFromRemoteSourceActivity extends AppCompatActivity
     private TextView statisticTextView;
     private TextureView textureView;
 
-    private AACSpeaker aacSpeaker = new AACSpeaker();
-
     private RTSPClientSession rtspClientSession;
 
+    private AACSpeaker aacSpeaker;
     private H264Display h264Display;
 
     /**
@@ -110,17 +109,17 @@ public class DisplayVideoFromRemoteSourceActivity extends AppCompatActivity
         int bar = foo;
     }
 
-
-
     private void connect() {
 
         try {
+
+            aacSpeaker = new AACSpeaker(this);
+            aacSpeaker.doStart();
 
             SurfaceTexture st = textureView.getSurfaceTexture();
             Surface surface = new Surface(st);
 
             h264Display = new H264Display(this, surface);
-
             Resolution resolution = Resolution._640x480;
             int bitRate = VideoSettings.DEFAULT_BIT_RATE;
             int frameRate = VideoSettings.DEFAULT_FRAME_RATE;
@@ -137,7 +136,7 @@ public class DisplayVideoFromRemoteSourceActivity extends AppCompatActivity
                     new RTSPClientSessionController(sessionSettings, rtpClientSessionController);
             rtspClientSession = new RTSPClientSession(uri, rtspClientSessionController, rtspClientSessionController);
             rtspClientSessionController.begin();
-            aacSpeaker.doStart();
+
             rtspClientSession.start();
 
         } catch (MalformedURLException e) {

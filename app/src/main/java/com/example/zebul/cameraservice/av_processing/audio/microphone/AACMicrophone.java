@@ -173,8 +173,7 @@ public class AACMicrophone extends MediaCodecPacketProcessor {
     @Override
     protected void onOutputBufferAvailable(
             int outputBufferIndex,
-            ByteBuffer outputBuffer,
-            MediaCodec mediaCodec) {
+            ByteBuffer outputBuffer) {
 
         if (bufferInfo.size != 0)
         {

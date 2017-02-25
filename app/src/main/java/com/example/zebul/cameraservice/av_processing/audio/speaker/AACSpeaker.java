@@ -20,6 +20,7 @@ import com.example.zebul.cameraservice.av_protocols.rtp.aac.AccessUnit;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,56 +28,36 @@ import java.util.List;
  * Created by zebul on 2/15/17.
  */
 
-public class AACSpeaker
-        extends MediaCodecPacketProcessor
-        implements AACPacketConsumer, Runnable {
+public class AACSpeaker extends MediaCodecPacketProcessor
+        implements AACPacketConsumer {
 
-    private static final int TIMEOUT_US = 1000;
-    private ManualResetEvent event = new ManualResetEvent(false);
-    private List<AACPacket> aacPackets = new LinkedList<>();
+    private List<AACPacket> listOfConsumedAACPackets =
+            Collections.synchronizedList(new LinkedList<AACPacket>());
+    private ManualResetEvent packetConsumedEvent = new ManualResetEvent(false);
+
     private AudioTrack audioTrack;
+    private volatile boolean processConsumedPacket = false;
 
-    protected AACSpeaker(PacketProcessingExceptionListener packetProcessingExceptionListener) {
+    public AACSpeaker(PacketProcessingExceptionListener packetProcessingExceptionListener) {
         super(packetProcessingExceptionListener);
 
         bufferInfo = new MediaCodec.BufferInfo();
-        inputBufferTimeoutInUs = TIMEOUT_US;
-        outputBufferTimeoutInUs = TIMEOUT_US;
-    }
-
-    @Override
-    public void consumeAACPacket(AACPacket aacPacket) {
-
-        synchronized (this) {
-            aacPackets.add(aacPacket);
-        }
-        event.set();
+        inputBufferTimeoutInUs = 1000;
+        outputBufferTimeoutInUs = 1000;
     }
 
     public void doStart() throws IOException {
 
+        processConsumedPacket = true;
         super.start();
     }
 
     @Override
-    public void process(){
+    public void stop() {
 
-        List<AACPacket> aacPacketsToProcess = null;
-        synchronized (this){
-            aacPacketsToProcess = aacPackets;
-            aacPackets = new LinkedList<>();
-        }
-
-        for(AACPacket aacPacket: aacPacketsToProcess){
-
-            processAACPacket(aacPacket);
-        }
-        event.reset();
-        try {
-            event.waitOne();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        processConsumedPacket = false;
+        packetConsumedEvent.set();
+        super.stop();
     }
 
     @Override
@@ -97,10 +78,6 @@ public class AACSpeaker
             mediaCodec = MediaCodec.createDecoderByType(AACMicrophone.MIME_TYPE);
             mediaCodec.configure(format, null, null, 0);
 
-            if (mediaCodec == null) {
-                return;
-            }
-
             mediaCodec.start();
 
             audioTrack = new AudioTrack(
@@ -117,41 +94,49 @@ public class AACSpeaker
         }
     }
 
-    private void processAACPacket(AACPacket aacPacket) {
+    @Override
+    public void consumeAACPacket(AACPacket aacPacket) {
 
-        int decoderInputStatus = mediaCodec.dequeueInputBuffer(TIMEOUT_US);
-        if(decoderInputStatus >= 0){
-            ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
-            ByteBuffer inputBuffer = inputBuffers[decoderInputStatus];
-            final Timestamp timestamp = aacPacket.getTimestamp();
-            final AccessUnit accessUnit = aacPacket.getAccessUnit();
-            final byte[] accessUnitData = accessUnit.getData();
-            inputBuffer.put(accessUnitData, 0, accessUnitData.length);
-            mediaCodec.queueInputBuffer(decoderInputStatus, 0, accessUnitData.length, timestamp.getTimestampInMillis()*1000, 0);
+        listOfConsumedAACPackets.add(aacPacket);
+        packetConsumedEvent.set();
+    }
+
+    @Override
+    protected void onInputBufferAvailable(
+            int inputBufferIndex,
+            ByteBuffer inputBuffer){
+
+        if(listOfConsumedAACPackets.isEmpty()){
+
+            waitForACCPacketConsumption();
         }
 
-        int decoderOutputStatus = mediaCodec.dequeueOutputBuffer(bufferInfo, TIMEOUT_US);
-        if (decoderOutputStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
-            // no output available yet
-            //Log.d(TAG, "no output from mediaCodec available");
-        } else if (decoderOutputStatus == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
-            // not important for us, since we're using Surface
-            //Log.d(TAG, "mediaCodec output buffers changed");
-        } else if (decoderOutputStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+        if(!processConsumedPacket)
+        {
+            return;
+        }
 
-        } else if (decoderOutputStatus < 0) {
-            throw new RuntimeException(
-                    "unexpected result from mediaCodec.dequeueOutputBuffer: " +
-                            decoderOutputStatus);
-        } else {
-            onFlushMediaCodecOutputSuccess(decoderOutputStatus);
+        final AACPacket aacPacket = listOfConsumedAACPackets.remove(0);
+        final Timestamp timestamp = aacPacket.getTimestamp();
+        final AccessUnit accessUnit = aacPacket.getAccessUnit();
+        final byte[] accessUnitData = accessUnit.getData();
+        inputBuffer.put(accessUnitData, 0, accessUnitData.length);
+        mediaCodec.queueInputBuffer(inputBufferIndex, 0, accessUnitData.length, timestamp.getTimestampInMillis()*1000, 0);//TODO WTF MEANS '*1000'
+    }
+
+    private void waitForACCPacketConsumption(){
+
+        packetConsumedEvent.reset();
+        try {
+            packetConsumedEvent.waitOne();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
-    protected void onFlushMediaCodecOutputSuccess(int outputBufferIndex) {
+    @Override
+    protected void onOutputBufferAvailable(int outputBufferIndex, ByteBuffer outputBuffer) {
 
-        final ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
-        ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
         outputBuffer.position(bufferInfo.offset);
         outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
 
@@ -161,6 +146,4 @@ public class AACSpeaker
         audioTrack.write(data, bufferInfo.offset, bufferInfo.offset + bufferInfo.size); // AudioTrack write data
         mediaCodec.releaseOutputBuffer(outputBufferIndex, false);
     }
-
-
 }

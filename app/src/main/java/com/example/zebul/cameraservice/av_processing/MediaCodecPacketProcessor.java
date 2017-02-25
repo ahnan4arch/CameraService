@@ -111,13 +111,12 @@ public abstract class MediaCodecPacketProcessor implements Runnable{
 
         final ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
         final ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
-        onInputBufferAvailable(inputBufferIndex, inputBuffer, mediaCodec);
+        onInputBufferAvailable(inputBufferIndex, inputBuffer);
     }
 
     protected void onInputBufferAvailable(
             int inputBufferIndex,
-            ByteBuffer inputBuffer,
-            MediaCodec mediaCodec){
+            ByteBuffer inputBuffer){
 
     }
 
@@ -128,15 +127,14 @@ public abstract class MediaCodecPacketProcessor implements Runnable{
 
     protected void onOutputBufferAvailable(int outputBufferIndex) {
 
-        final ByteBuffer[] outputBuffers = mediaCodec.getInputBuffers();
-        final ByteBuffer inputBuffer = outputBuffers[outputBufferIndex];
-        onInputBufferAvailable(outputBufferIndex, inputBuffer, mediaCodec);
+        final ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
+        final ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
+        onOutputBufferAvailable(outputBufferIndex, outputBuffer);
     }
 
     protected void onOutputBufferAvailable(
             int outputBufferIndex,
-            ByteBuffer outputBuffer,
-            MediaCodec mediaCodec){
+            ByteBuffer outputBuffer){
 
     }
 
