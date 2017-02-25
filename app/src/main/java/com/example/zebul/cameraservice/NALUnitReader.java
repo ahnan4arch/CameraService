@@ -1,7 +1,7 @@
 package com.example.zebul.cameraservice;
 
 
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.NALUnit;
+import com.example.zebul.cameraservice.av_protocols.rtp.h264.NALUnit;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -77,30 +77,6 @@ public class NALUnitReader {
 			return null;
 		}
 	}
-
-	/*
-	private byte[] readData(String fileFullPath) {
-
-		try {
-			AssetManager assetManager = context.getAssets();
-			InputStream inputStream = assetManager.open(fileFullPath);
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			int readCount = 0;
-			byte[] data = new byte[1024];
-			while ((readCount = inputStream.read(data, 0, data.length)) != -1) {
-				buffer.write(data, 0, readCount);
-			}
-			buffer.flush();
-			return buffer.toByteArray();
-
-		} catch (FileNotFoundException exc_) {
-			exc_.printStackTrace();
-			return null;
-		} catch (IOException exc_) {
-			exc_.printStackTrace();
-			return null;
-		}
-	}*/
 	
 	public static int findPosOfPattern(byte[] data_, byte[] pattern_, int offset_) {
 		

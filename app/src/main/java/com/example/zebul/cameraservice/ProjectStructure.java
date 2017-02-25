@@ -102,7 +102,7 @@ public class ProjectStructure {
 
             while(keepSession){
 
-                List<NALUnit> nalUnits = nalUnitProducer.produce();
+                List<NALUnit> nalUnits = nalUnitProducer.process();
                 List<RTPDataPacket> rtpDataPackets = rtpPacketizationSession.createRTPPackests(nalUnits);
                 rtpDataPacketsConsumer.consume(rtpDataPackets);
             }
@@ -123,7 +123,7 @@ public class ProjectStructure {
 
             while(keepSession){
 
-                NALUnit nalUnit = rtpDataPacketProducer.produce();
+                NALUnit nalUnit = rtpDataPacketProducer.process();
                 List<RTPPacketData> rtpPacketsData = rtpPacketizationSession.createRTPPacketData(nalUnit);
                 rtpPacketsDataConsumer.consume(rtpPacketsData);
             }

@@ -1,18 +1,18 @@
 package com.example.zebul.cameraservice.communication.client;
 
-import com.example.zebul.cameraservice.av_streaming.rtsp.Method;
-import com.example.zebul.cameraservice.av_streaming.rtsp.StatusCode;
-import com.example.zebul.cameraservice.av_streaming.rtsp.URI;
-import com.example.zebul.cameraservice.av_streaming.rtsp.message.body.Body;
-import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Header;
-import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.HeaderField;
-import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.Transport;
-import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.TransportDecoder;
-import com.example.zebul.cameraservice.av_streaming.rtsp.message.header.TransportEncoder;
-import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequest;
-import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponse;
-import com.example.zebul.cameraservice.av_streaming.rtsp.version.Version;
-import com.example.zebul.cameraservice.av_streaming.sdp.SessionDescription;
+import com.example.zebul.cameraservice.av_protocols.rtsp.Method;
+import com.example.zebul.cameraservice.av_protocols.rtsp.StatusCode;
+import com.example.zebul.cameraservice.av_protocols.rtsp.URI;
+import com.example.zebul.cameraservice.av_protocols.rtsp.message.body.Body;
+import com.example.zebul.cameraservice.av_protocols.rtsp.message.header.Header;
+import com.example.zebul.cameraservice.av_protocols.rtsp.message.header.HeaderField;
+import com.example.zebul.cameraservice.av_protocols.rtsp.message.header.Transport;
+import com.example.zebul.cameraservice.av_protocols.rtsp.message.header.TransportDecoder;
+import com.example.zebul.cameraservice.av_protocols.rtsp.message.header.TransportEncoder;
+import com.example.zebul.cameraservice.av_protocols.rtsp.request.RTSPRequest;
+import com.example.zebul.cameraservice.av_protocols.rtsp.response.RTSPResponse;
+import com.example.zebul.cameraservice.av_protocols.rtsp.version.Version;
+import com.example.zebul.cameraservice.av_protocols.sdp.SessionDescription;
 
 import java.net.MalformedURLException;
 import java.util.Random;
@@ -133,11 +133,34 @@ public class RTSPClientSessionController
 
             final Body body = response.getBody();
             sessionDescription = body.getSessionDescription();
-            transitionTo(new SetUpStage());
+            boolean setUpAudio = sessionDescription.hasInfoAboutAudioMedia();
+            boolean setUpVideo = sessionDescription.hasInfoAboutVideoMedia();
+            if(setUpVideo && setUpAudio){
+                transitionTo(new SetUpAudioVideoStage());
+            }
+            else if(setUpVideo){
+                transitionTo(new SetUpVideoStage());
+            }
+            else if(setUpAudio){
+                transitionTo(new SetUpAudioStage());
+            }
+            else{
+                transitionTo(new TearDownStage());
+            }
         }
     }
 
-    private class SetUpStage implements SessionStage {
+    private class SetUpAudioVideoStage extends SetUpVideoStage {
+
+        @Override
+        public void consumeResponse(RTSPResponse response) {
+
+            onResponse(response);
+            transitionTo(new SetUpAudioStage());
+        }
+    }
+
+    private class SetUpVideoStage implements SessionStage {
 
         @Override
         public RTSPRequest produceRequest() {
@@ -147,7 +170,7 @@ public class RTSPClientSessionController
             clientTransport.setTransportProtocol(Transport.TransportProtocol.RTP);
             clientTransport.setProfile(Transport.Profile.AVP);
             clientTransport.setTransmissionType(Transport.TransmissionType.unicast);
-            clientTransport.setClientPortRange(settings.MinPort, settings.MaxPort);
+            clientTransport.setClientPortRange(settings.VideoMinPort, settings.VideoMaxPort);
             final String transportAsText = TransportEncoder.encode(clientTransport);
             header.addHeaderField(new HeaderField(HeaderField.KnownName.Transport, transportAsText));
             URI requestUri = settings.RequestUri;
@@ -164,11 +187,50 @@ public class RTSPClientSessionController
         @Override
         public void consumeResponse(RTSPResponse response) {
 
+            onResponse(response);
+            transitionTo(new PlayStage());
+        }
+
+        protected void onResponse(RTSPResponse response){
+
+            final HeaderField transportHeaderField = response.findHeaderField(HeaderField.KnownName.Transport);
+            final String transportAsText = transportHeaderField.getValue();
+            Transport serverTransport = TransportDecoder.decode(transportAsText);
+            rtpSessionLifecycleListener.onRTPSetupVideoSession();
+        }
+    }
+
+    private class SetUpAudioStage implements SessionStage {
+
+        @Override
+        public RTSPRequest produceRequest() {
+
+            Header header = createHeader();
+            Transport clientTransport = new Transport();
+            clientTransport.setTransportProtocol(Transport.TransportProtocol.RTP);
+            clientTransport.setProfile(Transport.Profile.AVP);
+            clientTransport.setTransmissionType(Transport.TransmissionType.unicast);
+            clientTransport.setClientPortRange(settings.AudioMinPort, settings.AudioMaxPort);
+            final String transportAsText = TransportEncoder.encode(clientTransport);
+            header.addHeaderField(new HeaderField(HeaderField.KnownName.Transport, transportAsText));
+            URI requestUri = settings.RequestUri;
+            if(sessionDescription != null){
+                final String valueOfAttribute = sessionDescription.findAudioMediaValueOfAttribute("control");
+                try {
+                    requestUri = URI.fromString(valueOfAttribute);
+                } catch (MalformedURLException e) {
+                }
+            }
+            return new RTSPRequest(requestUri, version, header, Method.SETUP);
+        }
+
+        @Override
+        public void consumeResponse(RTSPResponse response) {
+
             final HeaderField transportHeaderField = response.findHeaderField(HeaderField.KnownName.Transport);
             final String transportAsText = transportHeaderField.getValue();
             Transport serverTransport = TransportDecoder.decode(transportAsText);
             transitionTo(new PlayStage());
-            //TODO distinguish between video and audio session
             rtpSessionLifecycleListener.onRTPSetupVideoSession();
         }
     }
