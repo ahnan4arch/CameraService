@@ -27,7 +27,7 @@ import java.util.List;
 public class AACSpeaker implements AACPacketConsumer, Runnable {
 
     private static final int TIMEOUT_US = 1000;
-    private MediaCodec mDecoder;
+    private MediaCodec mediaCodec;
     private Thread encodeThread;
     private ManualResetEvent event = new ManualResetEvent(false);
     private List<AACPacket> aacPackets = new LinkedList<>();
@@ -56,14 +56,14 @@ public class AACSpeaker implements AACPacketConsumer, Runnable {
         if (format == null)
             return;
 
-        mDecoder = MediaCodec.createDecoderByType(AACMicrophone.MIME_TYPE);
-        mDecoder.configure(format, null, null, 0);
+        mediaCodec = MediaCodec.createDecoderByType(AACMicrophone.MIME_TYPE);
+        mediaCodec.configure(format, null, null, 0);
 
-        if (mDecoder == null) {
+        if (mediaCodec == null) {
             return;
         }
 
-        mDecoder.start();
+        mediaCodec.start();
 
         audioTrack = new AudioTrack(
             AudioManager.STREAM_MUSIC, audioSettings.getSamplingRate(),
@@ -108,18 +108,18 @@ public class AACSpeaker implements AACPacketConsumer, Runnable {
 
     private void processAACPacket(AACPacket aacPacket) {
 
-        int decoderInputStatus = mDecoder.dequeueInputBuffer(TIMEOUT_US);
+        int decoderInputStatus = mediaCodec.dequeueInputBuffer(TIMEOUT_US);
         if(decoderInputStatus >= 0){
-            ByteBuffer[] inputBuffers = mDecoder.getInputBuffers();
+            ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
             ByteBuffer inputBuffer = inputBuffers[decoderInputStatus];
             final Timestamp timestamp = aacPacket.getTimestamp();
             final AccessUnit accessUnit = aacPacket.getAccessUnit();
             final byte[] accessUnitData = accessUnit.getData();
             inputBuffer.put(accessUnitData, 0, accessUnitData.length);
-            mDecoder.queueInputBuffer(decoderInputStatus, 0, accessUnitData.length, timestamp.getTimestampInMillis()*1000, 0);
+            mediaCodec.queueInputBuffer(decoderInputStatus, 0, accessUnitData.length, timestamp.getTimestampInMillis()*1000, 0);
         }
 
-        int decoderOutputStatus = mDecoder.dequeueOutputBuffer(bufferInfo, TIMEOUT_US);
+        int decoderOutputStatus = mediaCodec.dequeueOutputBuffer(bufferInfo, TIMEOUT_US);
         if (decoderOutputStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
             // no output available yet
             //Log.d(TAG, "no output from mediaCodec available");
@@ -139,7 +139,7 @@ public class AACSpeaker implements AACPacketConsumer, Runnable {
 
     protected void onFlushMediaCodecOutputSuccess(int outputBufferIndex) {
 
-        final ByteBuffer[] outputBuffers = mDecoder.getOutputBuffers();
+        final ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
         ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
         outputBuffer.position(bufferInfo.offset);
         outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
@@ -148,7 +148,7 @@ public class AACSpeaker implements AACPacketConsumer, Runnable {
         outputBuffer.get(data, bufferInfo.offset, data.length);
 
         audioTrack.write(data, bufferInfo.offset, bufferInfo.offset + bufferInfo.size); // AudioTrack write data
-        mDecoder.releaseOutputBuffer(outputBufferIndex, false);
+        mediaCodec.releaseOutputBuffer(outputBufferIndex, false);
     }
 
 
