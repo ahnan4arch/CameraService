@@ -127,7 +127,7 @@ public class AACMicrophone extends MediaCodecPacketProcessor {
         }
     }
 
-
+    /*
     @Override
     protected void onOutputBufferAvailable(int outputBufferIndex) {
 
@@ -168,5 +168,40 @@ public class AACMicrophone extends MediaCodecPacketProcessor {
             // break out of while
             Log.d(TAG, "Marked EOS");
         }
+    }*/
+
+    @Override
+    protected void onOutputBufferAvailable(
+            int outputBufferIndex,
+            ByteBuffer outputBuffer,
+            MediaCodec mediaCodec) {
+
+        if (bufferInfo.size != 0)
+        {
+            // adjust the ByteBuffer values to match BufferInfo (not needed?)
+            outputBuffer.position(bufferInfo.offset);
+            outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
+            Log.d(TAG, "Audio data out len: " + bufferInfo.size);
+            byte [] accessUnitData = new byte[bufferInfo.size];
+            outputBuffer.get(accessUnitData, 0, bufferInfo.size);
+
+            AccessUnit accessUnit = new AccessUnit(accessUnitData);
+            Timestamp timestamp = clock.getTimestamp();
+            AACPacket aacPacket = new AACPacket(accessUnit, timestamp);
+
+            aacPacketConsumer.consumeAACPacket(aacPacket);
+            Log.d(TAG, "added " + bufferInfo.size + " bytes to sent + presentation time ms"+timestamp.getTimestampInMillis());
+        }
+
+        mediaCodec.releaseOutputBuffer(outputBufferIndex, false);
+
+        /*
+        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0)
+        {
+            // Stream is marked as done,
+            // break out of while
+            Log.d(TAG, "Marked EOS");
+        }
+        */
     }
 }
