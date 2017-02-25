@@ -94,7 +94,7 @@ public class MoviePlayer {
 
         // Pop the file open and pull out the video characteristics.
         // TODO: consider leaving the extractor open.  Should be able to just seek back to
-        //       the start after each iteration of play.  Need to rearrange the API a bit --
+        //       the doStart after each iteration of play.  Need to rearrange the API a bit --
         //       currently play() is taking an all-in-one open+work+release approach.
         MediaExtractor extractor = null;
         try {
@@ -233,7 +233,7 @@ public class MoviePlayer {
         // fed.  There can be significant latency between submitting frame N to the decoder
         // and receiving frame N on the output, so we need to stay ahead of the game.
         //
-        // Many video decoders seem to want several frames of video before they start
+        // Many video decoders seem to want several frames of video before they doStart
         // producing output -- one implementation wanted four before it appeared to
         // configure itself.  We need to provide a bunch of input frames up front, and try
         // to keep the queue full as we go.
@@ -257,7 +257,7 @@ public class MoviePlayer {
         //
         // If you have tight startup latency requirements, it would probably be best to
         // "prime the pump" with a sequence of frames that aren't actually shown (e.g.
-        // grab the first 10 NAL units and shove them through, then rewind to the start of
+        // grab the first 10 NAL units and shove them through, then rewind to the doStart of
         // the first key frame).
         //
         // The actual latency seems to depend on strongly on the nature of the video (e.g.

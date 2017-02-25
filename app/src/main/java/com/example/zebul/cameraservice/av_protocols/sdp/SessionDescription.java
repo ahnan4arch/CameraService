@@ -238,7 +238,7 @@ public class SessionDescription {
 		/*
 		Time of availability 
 		Times, Repeat Times and Time Zones 
-		t=<start time>  <stop time> 
+		t=<doStart time>  <stop time>
 		*/
 		
 		String startTime = "0";

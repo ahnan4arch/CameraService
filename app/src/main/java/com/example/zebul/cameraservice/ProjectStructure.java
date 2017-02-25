@@ -10,7 +10,7 @@ public class ProjectStructure {
     class RTSPSerever{
 
         List<RTSPSessions> rtspSessions;
-        public void start(){
+        public void doStart(){
         }
 
         public void stop(){
@@ -29,7 +29,7 @@ public class ProjectStructure {
                 RTSPSessionsController rtspSessionsController = new RTSPSessionsController();
                 RTSPServerSession rtspSession = new RTSPServerSession(socket, rtspSessionsController);
                 rtspSessions.add(rtspSession);
-                rtspSession.start();
+                rtspSession.doStart();
             }
         }
     }
@@ -39,7 +39,7 @@ public class ProjectStructure {
         RTPSessionsController rtpSessionsController;
         Socket socket;
 
-        public void start(){
+        public void doStart(){
         }
 
         public void stop(){

@@ -137,7 +137,7 @@ public class DisplayVideoFromRemoteSourceActivity extends AppCompatActivity
                     new RTSPClientSessionController(sessionSettings, rtpClientSessionController);
             rtspClientSession = new RTSPClientSession(uri, rtspClientSessionController, rtspClientSessionController);
             rtspClientSessionController.begin();
-            aacSpeaker.start();
+            aacSpeaker.doStart();
             rtspClientSession.start();
 
         } catch (MalformedURLException e) {

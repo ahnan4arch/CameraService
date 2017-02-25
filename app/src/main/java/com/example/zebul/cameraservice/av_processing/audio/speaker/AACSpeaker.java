@@ -8,6 +8,9 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 
 import com.example.zebul.cameraservice.ManualResetEvent;
+import com.example.zebul.cameraservice.av_processing.MediaCodecPacketProcessor;
+import com.example.zebul.cameraservice.av_processing.PacketProcessingException;
+import com.example.zebul.cameraservice.av_processing.PacketProcessingExceptionListener;
 import com.example.zebul.cameraservice.av_processing.audio.AACPacketConsumer;
 import com.example.zebul.cameraservice.av_processing.audio.AudioSettings;
 import com.example.zebul.cameraservice.av_processing.audio.microphone.AACMicrophone;
@@ -24,15 +27,22 @@ import java.util.List;
  * Created by zebul on 2/15/17.
  */
 
-public class AACSpeaker implements AACPacketConsumer, Runnable {
+public class AACSpeaker
+        extends MediaCodecPacketProcessor
+        implements AACPacketConsumer, Runnable {
 
     private static final int TIMEOUT_US = 1000;
-    private MediaCodec mediaCodec;
-    private Thread encodeThread;
     private ManualResetEvent event = new ManualResetEvent(false);
     private List<AACPacket> aacPackets = new LinkedList<>();
-    private MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
     private AudioTrack audioTrack;
+
+    protected AACSpeaker(PacketProcessingExceptionListener packetProcessingExceptionListener) {
+        super(packetProcessingExceptionListener);
+
+        bufferInfo = new MediaCodec.BufferInfo();
+        inputBufferTimeoutInUs = TIMEOUT_US;
+        outputBufferTimeoutInUs = TIMEOUT_US;
+    }
 
     @Override
     public void consumeAACPacket(AACPacket aacPacket) {
@@ -43,66 +53,67 @@ public class AACSpeaker implements AACPacketConsumer, Runnable {
         event.set();
     }
 
-    public void start() throws IOException {
+    public void doStart() throws IOException {
 
-        AudioSettings audioSettings = AudioSettings.DEFAULT;
-
-        int bufferSize = AudioRecord.getMinBufferSize(
-                audioSettings.getSamplingRate(),
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT) * 2;
-
-        MediaFormat format = AACMicrophone.createMediaFormat(audioSettings, bufferSize);
-        if (format == null)
-            return;
-
-        mediaCodec = MediaCodec.createDecoderByType(AACMicrophone.MIME_TYPE);
-        mediaCodec.configure(format, null, null, 0);
-
-        if (mediaCodec == null) {
-            return;
-        }
-
-        mediaCodec.start();
-
-        audioTrack = new AudioTrack(
-            AudioManager.STREAM_MUSIC, audioSettings.getSamplingRate(),
-            AudioFormat.CHANNEL_OUT_MONO,//CHANNEL_OUT_STEREO,
-            AudioFormat.ENCODING_PCM_16BIT,
-            bufferSize,
-            AudioTrack.MODE_STREAM);
-        audioTrack.play();
-
-        encodeThread = new Thread(this);
-        encodeThread.start();
-    }
-
-    public void stop(){
-
-        encodeThread.interrupt();
+        super.start();
     }
 
     @Override
-    public void run(){
+    public void process(){
 
-        while(!Thread.interrupted()){
+        List<AACPacket> aacPacketsToProcess = null;
+        synchronized (this){
+            aacPacketsToProcess = aacPackets;
+            aacPackets = new LinkedList<>();
+        }
 
-            List<AACPacket> aacPacketsToProcess = null;
-            synchronized (this){
-                aacPacketsToProcess = aacPackets;
-                aacPackets = new LinkedList<>();
+        for(AACPacket aacPacket: aacPacketsToProcess){
+
+            processAACPacket(aacPacket);
+        }
+        event.reset();
+        try {
+            event.waitOne();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void open() throws PacketProcessingException {
+
+        try {
+            AudioSettings audioSettings = AudioSettings.DEFAULT;
+
+            int bufferSize = AudioRecord.getMinBufferSize(
+                    audioSettings.getSamplingRate(),
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT) * 2;
+
+            MediaFormat format = AACMicrophone.createMediaFormat(audioSettings, bufferSize);
+            if (format == null)
+                return;
+
+            mediaCodec = MediaCodec.createDecoderByType(AACMicrophone.MIME_TYPE);
+            mediaCodec.configure(format, null, null, 0);
+
+            if (mediaCodec == null) {
+                return;
             }
 
-            for(AACPacket aacPacket: aacPacketsToProcess){
+            mediaCodec.start();
 
-                processAACPacket(aacPacket);
-            }
-            event.reset();
-            try {
-                event.waitOne();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            audioTrack = new AudioTrack(
+                    AudioManager.STREAM_MUSIC, audioSettings.getSamplingRate(),
+                    AudioFormat.CHANNEL_OUT_MONO,//CHANNEL_OUT_STEREO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    bufferSize,
+                    AudioTrack.MODE_STREAM);
+            audioTrack.play();
+        }
+        catch(IOException exc){
+
+            throw new PacketProcessingException(exc);
         }
     }
 

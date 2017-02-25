@@ -79,7 +79,7 @@ public class STextureRender {
     }
 
     public void drawFrame(SurfaceTexture st) {
-        checkGlError("onDrawFrame start");
+        checkGlError("onDrawFrame doStart");
         st.getTransformMatrix(mSTMatrix);
 
         // (optional) clear to green so we can see if we're failing to set pixels
