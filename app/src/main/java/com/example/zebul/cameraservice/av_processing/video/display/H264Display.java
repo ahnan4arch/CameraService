@@ -54,8 +54,6 @@ implements H264PacketConsumer {
     protected void open() throws PacketProcessingException {
 
         try {
-            bufferInfo = new MediaCodec.BufferInfo();//find best place to init bufferInfo
-
             final Resolution res = videoSettings.getResolution();
             MediaFormat format = MediaFormat.createVideoFormat(
                     H264Camera.MIME_TYPE, res.getWidth(), res.getHeight());

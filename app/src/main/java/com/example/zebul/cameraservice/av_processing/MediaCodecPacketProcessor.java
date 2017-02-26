@@ -16,9 +16,10 @@ public abstract class MediaCodecPacketProcessor implements Runnable{
     protected long outputBufferTimeoutInUs = WAIT_INDEFINITELY;
 
     protected ProductionThread thread = new ProductionThread();
+    protected MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+
     protected PacketProcessingExceptionListener packetProcessingExceptionListener;
     protected MediaCodec mediaCodec;
-    protected MediaCodec.BufferInfo bufferInfo;
 
     protected MediaCodecPacketProcessor(
             PacketProcessingExceptionListener packetProcessingExceptionListener){

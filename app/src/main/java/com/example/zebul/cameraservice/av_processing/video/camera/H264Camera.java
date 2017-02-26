@@ -112,9 +112,8 @@ public class H264Camera extends MediaCodecPacketProcessor {
     }
 
     @Override
-    protected void onOutputBufferAvailable(int outputBufferIndex) {
+    protected void onOutputBufferAvailable(int outputBufferIndex, ByteBuffer outputBuffer) {
 
-        final ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0)
         {
             // Config Bytes means SPS and PPS
@@ -129,7 +128,6 @@ public class H264Camera extends MediaCodecPacketProcessor {
 
         if (bufferInfo.size != 0)
         {
-            ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
             outputBuffer.position(bufferInfo.offset);
             outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
             byte [] data = new byte[bufferInfo.size];
@@ -219,8 +217,6 @@ public class H264Camera extends MediaCodecPacketProcessor {
     private void prepareEncoder() throws PacketProcessingException {
 
         try {
-            bufferInfo = new MediaCodec.BufferInfo();
-
             VideoSettings videoSettings = cameraSettings.getVideoSettings();
             Resolution resolution = videoSettings.getResolution();
             MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE,

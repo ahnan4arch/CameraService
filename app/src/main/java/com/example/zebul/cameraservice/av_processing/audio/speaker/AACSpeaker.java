@@ -40,8 +40,6 @@ public class AACSpeaker extends MediaCodecPacketProcessor
 
     public AACSpeaker(PacketProcessingExceptionListener packetProcessingExceptionListener) {
         super(packetProcessingExceptionListener);
-
-        bufferInfo = new MediaCodec.BufferInfo();
         inputBufferTimeoutInUs = 1000;
         outputBufferTimeoutInUs = 1000;
     }
