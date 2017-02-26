@@ -29,7 +29,6 @@ public class RTSPRequestEncoder {
 		requestTextBuilder.append(method+" "+requestUriAsText+" "+versionAsText+SEP);
 
 		final Header header = request.getHeader();
-		requestTextBuilder.append("CSeq: "+header.getCSeq()+SEP);
 		final HeaderFields headerFields = header.getHeaderFields();
 		for(HeaderField headerField: headerFields){
 
