@@ -18,8 +18,13 @@ android {
         }
     }
 
+    /*
     lintOptions {
         checkReleaseBuilds false
+    }*/
+
+    lintOptions {
+        abortOnError false
     }
 }
 
