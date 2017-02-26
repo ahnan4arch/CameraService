@@ -110,11 +110,10 @@ public class AACMicrophone extends MediaCodecPacketProcessor {
     }
 
     @Override
-    protected void onInputBufferAvailable(int inputBufferIndex) {
+    protected void onInputBufferAvailable(int inputBufferIndex, ByteBuffer inputBuffer) {
 
-        final ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
-        inputBuffers[inputBufferIndex].clear();
-        int len = audioRecord.read(inputBuffers[inputBufferIndex], bufferSize);
+        inputBuffer.clear();
+        int len = audioRecord.read(inputBuffer, bufferSize);
         if (len ==  AudioRecord.ERROR_INVALID_OPERATION) {
             Log.e(TAG, "AudioRecord.ERROR_INVALID_OPERATION");
         }
@@ -127,49 +126,6 @@ public class AACMicrophone extends MediaCodecPacketProcessor {
         }
     }
 
-    /*
-    @Override
-    protected void onOutputBufferAvailable(int outputBufferIndex) {
-
-        final ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
-        ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
-        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0)
-        {
-            Log.d(TAG, "Got config bytes");
-        }
-
-        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) != 0)
-        {
-            Log.d(TAG, "Got Sync Frame");
-        }
-
-        if (bufferInfo.size != 0)
-        {
-            // adjust the ByteBuffer values to match BufferInfo (not needed?)
-            outputBuffer.position(bufferInfo.offset);
-            outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-            Log.d(TAG, "Audio data out len: " + bufferInfo.size);
-            byte [] accessUnitData = new byte[bufferInfo.size];
-            outputBuffer.get(accessUnitData, 0, bufferInfo.size);
-
-            AccessUnit accessUnit = new AccessUnit(accessUnitData);
-            Timestamp timestamp = clock.getTimestamp();
-            AACPacket aacPacket = new AACPacket(accessUnit, timestamp);
-
-            aacPacketConsumer.consumeAACPacket(aacPacket);
-            Log.d(TAG, "added " + bufferInfo.size + " bytes to sent + presentation time ms"+timestamp.getTimestampInMillis());
-        }
-
-        mediaCodec.releaseOutputBuffer(outputBufferIndex, false);
-
-        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0)
-        {
-            // Stream is marked as done,
-            // break out of while
-            Log.d(TAG, "Marked EOS");
-        }
-    }*/
-
     @Override
     protected void onOutputBufferAvailable(
             int outputBufferIndex,
@@ -180,27 +136,14 @@ public class AACMicrophone extends MediaCodecPacketProcessor {
             // adjust the ByteBuffer values to match BufferInfo (not needed?)
             outputBuffer.position(bufferInfo.offset);
             outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-            Log.d(TAG, "Audio data out len: " + bufferInfo.size);
             byte [] accessUnitData = new byte[bufferInfo.size];
             outputBuffer.get(accessUnitData, 0, bufferInfo.size);
 
             AccessUnit accessUnit = new AccessUnit(accessUnitData);
             Timestamp timestamp = clock.getTimestamp();
             AACPacket aacPacket = new AACPacket(accessUnit, timestamp);
-
             aacPacketConsumer.consumeAACPacket(aacPacket);
-            Log.d(TAG, "added " + bufferInfo.size + " bytes to sent + presentation time ms"+timestamp.getTimestampInMillis());
         }
-
         mediaCodec.releaseOutputBuffer(outputBufferIndex, false);
-
-        /*
-        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0)
-        {
-            // Stream is marked as done,
-            // break out of while
-            Log.d(TAG, "Marked EOS");
-        }
-        */
     }
 }
