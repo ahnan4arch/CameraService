@@ -52,6 +52,7 @@ public class Ice4jTesting {
 
             int foo = 1;
             int bar = foo;
+            
             //Logger.getLogger(SimpleStun.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
