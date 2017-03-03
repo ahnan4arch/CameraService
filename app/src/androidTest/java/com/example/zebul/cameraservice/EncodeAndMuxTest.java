@@ -145,7 +145,7 @@ public class EncodeAndMuxTest extends AndroidTestCase {
         Log.d(TAG, "output file is " + outputPath);
 
 
-        // Create a MediaMuxer.  We can't add the video track and start() the muxer here,
+        // Create a MediaMuxer.  We can't add the video track and doStart() the muxer here,
         // because our MediaFormat doesn't have the Magic Goodies.  These can only be
         // obtained from the encoder after it has started processing data.
         //
@@ -219,7 +219,7 @@ public class EncodeAndMuxTest extends AndroidTestCase {
                 MediaFormat newFormat = mEncoder.getOutputFormat();
                 Log.d(TAG, "encoder output format changed: " + newFormat);
 
-                // now that we have the Magic Goodies, start the muxer
+                // now that we have the Magic Goodies, doStart the muxer
                 mTrackIndex = mMuxer.addTrack(newFormat);
                 mMuxer.start();
                 mMuxerStarted = true;

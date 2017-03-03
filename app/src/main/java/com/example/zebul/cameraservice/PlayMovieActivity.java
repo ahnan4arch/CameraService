@@ -100,7 +100,7 @@ public class PlayMovieActivity extends Activity implements OnItemSelectedListene
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture st, int width, int height) {
-        // There's a short delay between the start of the activity and the initialization
+        // There's a short delay between the doStart of the activity and the initialization
         // of the SurfaceTexture that backs the TextureView.  We don't want to try to
         // send a video stream to the TextureView before it has initialized, so we disable
         // the "play" button until this callback fires.

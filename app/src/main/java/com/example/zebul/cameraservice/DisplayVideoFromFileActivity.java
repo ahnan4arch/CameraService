@@ -12,16 +12,16 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 
-import com.example.zebul.cameraservice.av_streaming.rtp.BytesOfRTPPackets;
-import com.example.zebul.cameraservice.av_streaming.rtp.Timestamp;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Depacketizer;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packetizer;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packets;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.NALUnit;
-import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
-import com.example.zebul.cameraservice.packet_producers.video.camera.CameraVideoH264PacketProducer;
-import com.example.zebul.cameraservice.packet_producers.video.file.AssetFileAVPacketProducer;
+import com.example.zebul.cameraservice.av_processing.video.file.FileH264PacketProducer;
+import com.example.zebul.cameraservice.av_protocols.rtp.BytesOfRTPPackets;
+import com.example.zebul.cameraservice.av_protocols.rtp.Timestamp;
+import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Depacketizer;
+import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Packet;
+import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Packetizer;
+import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Packets;
+import com.example.zebul.cameraservice.av_protocols.rtp.h264.NALUnit;
+import com.example.zebul.cameraservice.av_processing.PacketProcessingException;
+import com.example.zebul.cameraservice.av_processing.video.camera.H264Camera;
 
 import java.nio.ByteBuffer;
 
@@ -80,7 +80,7 @@ implements Runnable, TextureView.SurfaceTextureListener, MoviePlayer.PlayerFeedb
         try {
 
             MediaFormat format = MediaFormat.createVideoFormat(
-                    CameraVideoH264PacketProducer.MIME_TYPE,
+                    H264Camera.MIME_TYPE,
                     704, 400);
 
             format.setInteger(MediaFormat.KEY_BIT_RATE, 400000);
@@ -91,12 +91,12 @@ implements Runnable, TextureView.SurfaceTextureListener, MoviePlayer.PlayerFeedb
             SurfaceTexture st = textureView.getSurfaceTexture();
             Surface surface = new Surface(st);
 
-            mediaCodec = MediaCodec.createDecoderByType(CameraVideoH264PacketProducer.MIME_TYPE);
+            mediaCodec = MediaCodec.createDecoderByType(H264Camera.MIME_TYPE);
             mediaCodec.configure(format, surface, null, 0);
             mediaCodec.start();
 
-            final AssetFileAVPacketProducer filePacketProducer =
-                    new AssetFileAVPacketProducer(this, "H264_artifacts_motion.h264");
+            final FileH264PacketProducer filePacketProducer =
+                    new FileH264PacketProducer(this, "H264_artifacts_motion.h264");
             while(keepPlaying){
 
                 pumpDataFromFileToSurface(filePacketProducer, mediaCodec);
@@ -120,8 +120,8 @@ implements Runnable, TextureView.SurfaceTextureListener, MoviePlayer.PlayerFeedb
     H264Depacketizer depacketizer = new H264Depacketizer();
 
     private void pumpDataFromFileToSurface(
-            AssetFileAVPacketProducer filePacketProducer,
-            MediaCodec mediaCodec) throws PacketProductionException {
+            FileH264PacketProducer filePacketProducer,
+            MediaCodec mediaCodec) throws PacketProcessingException {
 
         final int TIMEOUT_USEC = 10000;
         final H264Packets inputH264Packets = filePacketProducer.produceH264Packets();

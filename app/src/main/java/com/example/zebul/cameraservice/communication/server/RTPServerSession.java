@@ -4,26 +4,26 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.zebul.cameraservice.CameraService;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packets;
+import com.example.zebul.cameraservice.av_processing.video.file.FileH264PacketProducer;
+import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Packets;
 import com.example.zebul.cameraservice.communication.udp.SocketEngine;
 import com.example.zebul.cameraservice.communication.udp.SocketMessageReceptionListener;
-import com.example.zebul.cameraservice.packet_producers.PacketProductionExceptionListener;
-import com.example.zebul.cameraservice.av_streaming.rtp.aac.AACPacket;
-import com.example.zebul.cameraservice.packet_producers.audio.AACPacketListener;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packet;
-import com.example.zebul.cameraservice.packet_producers.video.H264PacketConsumer;
-import com.example.zebul.cameraservice.av_streaming.rtp.aac.AACPacketizer;
-import com.example.zebul.cameraservice.av_streaming.rtp.basic.RTPPacketizer;
-import com.example.zebul.cameraservice.av_streaming.rtp.h264.H264Packetizer;
-import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneSettings;
-import com.example.zebul.cameraservice.packet_producers.video.camera.CameraSettings;
-import com.example.zebul.cameraservice.packet_producers.video.camera.CameraVideoH264PacketProducer;
-import com.example.zebul.cameraservice.av_streaming.rtp.RTPPacket;
-import com.example.zebul.cameraservice.av_streaming.rtp.RTPPackets;
+import com.example.zebul.cameraservice.av_processing.PacketProcessingExceptionListener;
+import com.example.zebul.cameraservice.av_protocols.rtp.aac.AACPacket;
+import com.example.zebul.cameraservice.av_processing.audio.AACPacketConsumer;
+import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Packet;
+import com.example.zebul.cameraservice.av_processing.video.H264PacketConsumer;
+import com.example.zebul.cameraservice.av_protocols.rtp.aac.AACPacketizer;
+import com.example.zebul.cameraservice.av_protocols.rtp.basic.RTPPacketizer;
+import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Packetizer;
+import com.example.zebul.cameraservice.av_processing.audio.MicrophoneSettings;
+import com.example.zebul.cameraservice.av_processing.video.camera.CameraSettings;
+import com.example.zebul.cameraservice.av_processing.video.camera.H264Camera;
+import com.example.zebul.cameraservice.av_protocols.rtp.RTPPacket;
+import com.example.zebul.cameraservice.av_protocols.rtp.RTPPackets;
 import com.example.zebul.cameraservice.message.Message;
-import com.example.zebul.cameraservice.packet_producers.PacketProductionException;
-import com.example.zebul.cameraservice.packet_producers.audio.MicrophoneAudioAACPacketProducer;
-import com.example.zebul.cameraservice.packet_producers.video.file.AssetFileAVPacketProducer;
+import com.example.zebul.cameraservice.av_processing.PacketProcessingException;
+import com.example.zebul.cameraservice.av_processing.audio.microphone.AACMicrophone;
 
 import java.net.InetSocketAddress;
 
@@ -114,12 +114,12 @@ public class RTPServerSession {
         }
     }
 
-    class AudioSession implements AACPacketListener, PacketProductionExceptionListener {
+    class AudioSession implements AACPacketConsumer, PacketProcessingExceptionListener {
 
         private final String TAG = AudioSession.class.getSimpleName();
 
-        private MicrophoneAudioAACPacketProducer aacPacketProducer =
-                new MicrophoneAudioAACPacketProducer(this, this);
+        private AACMicrophone aacPacketProducer =
+                new AACMicrophone(this, this);
 
         private AACPacketizer aacPacketizer = new AACPacketizer(
                 RTPPacketizer.generateRandomInt(),
@@ -132,7 +132,7 @@ public class RTPServerSession {
         }
 
         @Override
-        public void onAACPacket(AACPacket aacPacket) {
+        public void consumeAACPacket(AACPacket aacPacket) {
 
             RTPPackets rtpPackets = aacPacketizer.createRTPPackets(aacPacket);
             for (RTPPacket rtpPacket : rtpPackets) {
@@ -149,19 +149,19 @@ public class RTPServerSession {
         }
 
         @Override
-        public void onPacketProductionException(PacketProductionException exc) {
+        public void onPacketProductionException(PacketProcessingException exc) {
 
         }
     }
 
-    class VideoSession implements H264PacketConsumer, PacketProductionExceptionListener{
+    class VideoSession implements H264PacketConsumer, PacketProcessingExceptionListener {
 
         private static final String TAG = "ZZZ";
         private boolean useCameraProducer = true;
 
-        CameraVideoH264PacketProducer cameraH264PacketProducer = new CameraVideoH264PacketProducer(this, this);
-        AssetFileAVPacketProducer fileH264PacketProducer =
-                new AssetFileAVPacketProducer(CameraService.CAMERA_SERVICE, "H264_artifacts_motion.h264");
+        H264Camera cameraH264PacketProducer = new H264Camera(this, this);
+        FileH264PacketProducer fileH264PacketProducer =
+                new FileH264PacketProducer(CameraService.CAMERA_SERVICE, "H264_artifacts_motion.h264");
 
         H264Packetizer h264Packetizer = new H264Packetizer(
             500, 0xDEADBEEF
@@ -233,7 +233,7 @@ public class RTPServerSession {
         }
 
         @Override
-        public void onPacketProductionException(PacketProductionException exc) {
+        public void onPacketProductionException(PacketProcessingException exc) {
 
         }
     }

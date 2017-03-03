@@ -1,11 +1,11 @@
 package com.example.zebul.cameraservice.communication.client;
 
-import com.example.zebul.cameraservice.av_streaming.rtsp.URI;
-import com.example.zebul.cameraservice.av_streaming.rtsp.error.RTSP5xxServerResponseError;
-import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequest;
-import com.example.zebul.cameraservice.av_streaming.rtsp.request.RTSPRequestEncoder;
-import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponse;
-import com.example.zebul.cameraservice.av_streaming.rtsp.response.RTSPResponseDecoder;
+import com.example.zebul.cameraservice.av_protocols.rtsp.URI;
+import com.example.zebul.cameraservice.av_protocols.rtsp.error.RTSP5xxServerResponseError;
+import com.example.zebul.cameraservice.av_protocols.rtsp.request.RTSPRequest;
+import com.example.zebul.cameraservice.av_protocols.rtsp.request.RTSPRequestEncoder;
+import com.example.zebul.cameraservice.av_protocols.rtsp.response.RTSPResponse;
+import com.example.zebul.cameraservice.av_protocols.rtsp.response.RTSPResponseDecoder;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

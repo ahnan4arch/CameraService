@@ -38,6 +38,14 @@ android {
             applicationId "com.example.zebul.cameraservice.demo"
         }
     }
+    /*
+    lintOptions {
+        checkReleaseBuilds false
+    }*/
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
