@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CameraService.iml" filepath="$PROJECT_DIR$/CameraService.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libcommunication/libcommunication.iml" filepath="$PROJECT_DIR$/libcommunication/libcommunication.iml" />
+      <module fileurl="file://$PROJECT_DIR$/signalingserver/signalingserver.iml" filepath="$PROJECT_DIR$/signalingserver/signalingserver.iml" />
     </modules>
   </component>
 </project>

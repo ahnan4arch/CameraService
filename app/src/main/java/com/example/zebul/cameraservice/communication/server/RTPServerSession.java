@@ -6,8 +6,8 @@ import android.util.Log;
 import com.example.zebul.cameraservice.CameraService;
 import com.example.zebul.cameraservice.av_processing.video.file.FileH264PacketProducer;
 import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Packets;
-import com.example.zebul.cameraservice.communication.udp.SocketEngine;
-import com.example.zebul.cameraservice.communication.udp.SocketMessageReceptionListener;
+import com.example.udp.SocketEngine;
+import com.example.udp.SocketMessageReceptionListener;
 import com.example.zebul.cameraservice.av_processing.PacketProcessingExceptionListener;
 import com.example.zebul.cameraservice.av_protocols.rtp.aac.AACPacket;
 import com.example.zebul.cameraservice.av_processing.audio.AACPacketConsumer;
@@ -21,7 +21,7 @@ import com.example.zebul.cameraservice.av_processing.video.camera.CameraSettings
 import com.example.zebul.cameraservice.av_processing.video.camera.H264Camera;
 import com.example.zebul.cameraservice.av_protocols.rtp.RTPPacket;
 import com.example.zebul.cameraservice.av_protocols.rtp.RTPPackets;
-import com.example.zebul.cameraservice.message.Message;
+import com.example.message.Message;
 import com.example.zebul.cameraservice.av_processing.PacketProcessingException;
 import com.example.zebul.cameraservice.av_processing.audio.microphone.AACMicrophone;
 
