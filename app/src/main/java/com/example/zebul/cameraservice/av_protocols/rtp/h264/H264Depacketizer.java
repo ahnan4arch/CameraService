@@ -25,6 +25,54 @@ public class H264Depacketizer {
     private int lastSequenceNumber = -1;
     private List<RTPPacket> fuRTPPackets = new LinkedList<RTPPacket>();
 
+    public H264Packets createH264Packets(BytesOfRTPPackets bytesOfRTPPackets){
+
+        H264Packets allH264Packets = new H264Packets();
+        for(byte [] bytesOfRTPPacket: bytesOfRTPPackets){
+
+            H264Packets h264Packets = createH264Packets(bytesOfRTPPacket);
+            if(h264Packets != null){
+                allH264Packets.addPackets(h264Packets);
+            }
+        }
+        return allH264Packets;
+    }
+
+    public H264Packets createH264Packets(byte[] bytesOfRTPPacket) {
+
+        if(bytesOfRTPPacket.length < (RTPHeader.LENGTH+2)){
+            return null;
+        }
+        RTPHeader rtpHeader = RTPHeader.fromBytes(bytesOfRTPPacket);
+        byte nalUnitHeaderByte = bytesOfRTPPacket[RTPHeader.LENGTH];
+        NALUnitHeader nalUnitHeader = NALUnitHeader.fromByte(nalUnitHeaderByte);
+
+        Depacketizer depacketizer = null;
+        switch(nalUnitHeader.getNALUnitType()){
+
+            case STAP_A:
+                break;
+            case STAP_B:
+                break;
+            case MTAP16:
+                break;
+            case MTAP24:
+                break;
+            case FU_A:
+                depacketizer = new FU_A_Depacketizer();
+                break;
+            case FU_B:
+                break;
+            default:
+                depacketizer = new SingleNALUnitDepacketizer();
+                break;
+        }
+        if(depacketizer == null){
+            return null;
+        }
+        return depacketizer.depacketize(rtpHeader, bytesOfRTPPacket, RTPHeader.LENGTH);
+    }
+
     private interface Depacketizer{
 
         H264Packets depacketize(RTPHeader rtpHeader,
@@ -88,54 +136,6 @@ public class H264Depacketizer {
             }
             return null;
         }
-    }
-
-    public H264Packets createH264Packets(BytesOfRTPPackets bytesOfRTPPackets){
-
-        H264Packets allH264Packets = new H264Packets();
-        for(byte [] bytesOfRTPPacket: bytesOfRTPPackets){
-
-            H264Packets h264Packets = createH264Packets(bytesOfRTPPacket);
-            if(h264Packets != null){
-                allH264Packets.addPackets(h264Packets);
-            }
-        }
-        return allH264Packets;
-    }
-
-    public H264Packets createH264Packets(byte[] bytesOfRTPPacket) {
-
-        if(bytesOfRTPPacket.length < (RTPHeader.LENGTH+2)){
-            return null;
-        }
-        RTPHeader rtpHeader = RTPHeader.fromBytes(bytesOfRTPPacket);
-        byte nalUnitHeaderByte = bytesOfRTPPacket[RTPHeader.LENGTH];
-        NALUnitHeader nalUnitHeader = NALUnitHeader.fromByte(nalUnitHeaderByte);
-
-        Depacketizer depacketizer = null;
-        switch(nalUnitHeader.getNALUnitType()){
-
-            case STAP_A:
-                break;
-            case STAP_B:
-                break;
-            case MTAP16:
-                break;
-            case MTAP24:
-                break;
-            case FU_A:
-                depacketizer = new FU_A_Depacketizer();
-                break;
-            case FU_B:
-                break;
-            default:
-                depacketizer = new SingleNALUnitDepacketizer();
-                break;
-        }
-        if(depacketizer == null){
-            return null;
-        }
-        return depacketizer.depacketize(rtpHeader, bytesOfRTPPacket, RTPHeader.LENGTH);
     }
 
     private static void sortBySequenceNumbers(List<RTPPacket> fuRTPPackets) {
