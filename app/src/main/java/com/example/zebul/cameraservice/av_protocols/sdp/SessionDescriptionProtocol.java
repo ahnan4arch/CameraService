@@ -7,7 +7,6 @@ package com.example.zebul.cameraservice.av_protocols.sdp;
 public class SessionDescriptionProtocol {
 
     public static final String LINE_SEPARATOR = "\r\n";
-    public static final String SP = " ";
 
     public static SessionDescription decode(String sessionDescriptionAsText){
 
@@ -450,7 +449,7 @@ public class SessionDescriptionProtocol {
     private static void decodeMediaDescription(SessionDescription sessionDescription, String value) {
 
         //m=<media> <port> <proto> <fmt> ...
-        String [] mValues = value.split(SP);
+        String [] mValues = value.split(" ");
         String mediaCandidate = mValues[0];
         final MediaDescription.MediaType mediaType = findMediaTypeFor(mediaCandidate);
         int port = Integer.parseInt(mValues[1]);

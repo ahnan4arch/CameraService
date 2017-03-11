@@ -10,24 +10,15 @@ import java.util.Random;
 
 public class SessionDescription {
 
-	private long timestamp;
-	private int destinationPort;
-	private int mediaFormatDescription = 96;
-	
 	private String identifier;
-
 	private List<MediaDescription> mediaDescriptions = new LinkedList<MediaDescription>();
 	private List<Attribute> attributes = new LinkedList<Attribute>();
 	public int version;
-
 	public String name;
 	public String information;
 
 	public SessionDescription(int destinationPort){
 		
-		long uptime = System.currentTimeMillis();
-		timestamp = (uptime/1000)<<32 & (((uptime-((uptime/1000)*1000))>>32)/1000); // NTP timestamp
-		this.destinationPort = destinationPort;
 		identifier = generateIdentifier();
 	}
 
