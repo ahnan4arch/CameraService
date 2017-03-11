@@ -35,17 +35,6 @@ public class SessionDescription {
 
 		mediaDescriptions.add(mediaDescription);
 	}
-
-
-	/*
-	SessionDescription Identifiers
-
-	SessionDescription identifiers are opaque strings of arbitrary length. Linear
-	white space must be URL-escaped. A session identifier MUST be chosen
-	randomly and MUST be at least eight octets long to make guessing it
-	more difficult.
-	session-id   =   1*( ALPHA | DIGIT | safe ) 
-	*/
 	
 	public static String generateIdentifier() {
 		
