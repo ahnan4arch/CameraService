@@ -209,7 +209,7 @@ public class CameraToMpegTest extends AndroidTestCase {
     /**
      * Configures Camera for video capture.  Sets mCamera.
      * <p>
-     * Opens a Camera and sets parameters.  Does not doStart preview.
+     * Opens a Camera and sets parameters.  Does not start preview.
      */
     private void prepareCamera(int encWidth, int encHeight) {
         if (mCamera != null) {
@@ -349,7 +349,7 @@ public class CameraToMpegTest extends AndroidTestCase {
         Log.i(TAG, "Output file is " + outputPath);
 
 
-        // Create a MediaMuxer.  We can't add the video track and doStart() the muxer here,
+        // Create a MediaMuxer.  We can't add the video track and start() the muxer here,
         // because our MediaFormat doesn't have the Magic Goodies.  These can only be
         // obtained from the encoder after it has started processing data.
         //
@@ -426,7 +426,7 @@ public class CameraToMpegTest extends AndroidTestCase {
                 MediaFormat newFormat = mEncoder.getOutputFormat();
                 Log.d(TAG, "encoder output format changed: " + newFormat);
 
-                // now that we have the Magic Goodies, doStart the muxer
+                // now that we have the Magic Goodies, start the muxer
                 mTrackIndex = mMuxer.addTrack(newFormat);
                 mMuxer.start();
                 mMuxerStarted = true;
@@ -786,7 +786,7 @@ public class CameraToMpegTest extends AndroidTestCase {
         }
 
         public void drawFrame(SurfaceTexture st) {
-            checkGlError("onDrawFrame doStart");
+            checkGlError("onDrawFrame start");
             st.getTransformMatrix(mSTMatrix);
 
             // (optional) clear to green so we can see if we're failing to set pixels

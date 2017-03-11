@@ -50,7 +50,7 @@ public class FUHeader {
     */
     public byte toByte(){
 
-        byte S = 0;//doStart
+        byte S = 0;//start
         byte E = 0;//end
         byte R = 0;//reserved bit
         if(isStart){

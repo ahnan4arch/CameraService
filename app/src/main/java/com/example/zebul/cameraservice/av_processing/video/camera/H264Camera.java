@@ -48,7 +48,7 @@ public class H264Camera extends MediaCodecPacketProcessor {
 
         super(packetProcessingExceptionListener);
         this.h264PacketConsumer = h264PacketConsumer;
-        outputBufferTimeoutInUs = 500000;//configure to best possible
+        outputBufferTimeoutInMicroSeconds = 500000;//configure to best possible
     }
 
     public boolean start(CameraSettings cameraSettings) {

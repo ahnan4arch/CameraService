@@ -44,8 +44,8 @@ public class AACMicrophone extends MediaCodecPacketProcessor {
 
         super(packetProductionExceptionListener);
         this.aacPacketConsumer = aacPacketListener;
-        inputBufferTimeoutInUs = 10000;
-        outputBufferTimeoutInUs = 10000;//(1/8000)*1000000;//bez sensu???
+        inputBufferTimeoutInMicroSeconds = 10000;
+        outputBufferTimeoutInMicroSeconds = 10000;//(1/8000)*1000000;//bez sensu???
     }
 
     public boolean start(MicrophoneSettings microphoneSettings) {

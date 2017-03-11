@@ -46,8 +46,8 @@ implements H264PacketConsumer {
 
         super(packetProcessingExceptionListener);
         this.surface = surface;
-        inputBufferTimeoutInUs = 15000;
-        outputBufferTimeoutInUs = 15000;
+        inputBufferTimeoutInMicroSeconds = 15000;
+        outputBufferTimeoutInMicroSeconds = 15000;
     }
 
     @Override

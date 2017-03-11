@@ -26,7 +26,7 @@ public class ManualResetEvent {
 		}
 	}
 	
-	public void set() {//open doStart
+	public void set() {//open start
 		synchronized (monitor) {
 			open = true;
 			monitor.notifyAll();

@@ -191,7 +191,7 @@ public class H264Depacketizer {
         //create NALUnit data
         byte[] nalUnitData = new byte[nalUnitLength];
 
-        //set NALUnit doStart codes
+        //set NALUnit start codes
         System.arraycopy(NALUnit.START_CODES, 0,
                 nalUnitData, 0, NALUnit.START_CODES.length);
         int offset = NALUnit.START_CODES.length;

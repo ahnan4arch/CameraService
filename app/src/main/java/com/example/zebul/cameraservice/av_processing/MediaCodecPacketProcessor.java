@@ -12,8 +12,8 @@ import java.nio.ByteBuffer;
 public abstract class MediaCodecPacketProcessor implements Runnable{
 
     protected static final long WAIT_INDEFINITELY = -1;
-    protected long inputBufferTimeoutInUs = WAIT_INDEFINITELY;
-    protected long outputBufferTimeoutInUs = WAIT_INDEFINITELY;
+    protected long inputBufferTimeoutInMicroSeconds = WAIT_INDEFINITELY;
+    protected long outputBufferTimeoutInMicroSeconds = WAIT_INDEFINITELY;
 
     protected ProductionThread thread = new ProductionThread();
     protected MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
@@ -84,7 +84,7 @@ public abstract class MediaCodecPacketProcessor implements Runnable{
 
     protected void processMediaCodecInput(){
 
-        int inputBufferIndex = mediaCodec.dequeueInputBuffer(inputBufferTimeoutInUs);
+        int inputBufferIndex = mediaCodec.dequeueInputBuffer(inputBufferTimeoutInMicroSeconds);
         if ( inputBufferIndex>=0 ) {
 
             onInputBufferAvailable(inputBufferIndex);
@@ -97,7 +97,7 @@ public abstract class MediaCodecPacketProcessor implements Runnable{
 
     protected void processMediaCodecOutput(){
 
-        int outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, outputBufferTimeoutInUs);
+        int outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, outputBufferTimeoutInMicroSeconds);
         if ( outputBufferIndex>=0 ){
 
             onOutputBufferAvailable(outputBufferIndex);
