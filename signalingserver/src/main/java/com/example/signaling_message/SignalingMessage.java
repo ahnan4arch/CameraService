@@ -1,4 +1,4 @@
-package com.example.message;
+package com.example.signaling_message;
 
 import java.io.Serializable;
 
@@ -9,20 +9,20 @@ import java.io.Serializable;
 public abstract class SignalingMessage implements Serializable {
 
     protected MessageType messageType;
-    protected ClientAddress senderAddress;
+    protected ClientId senderId;
 
     public SignalingMessage(
-            MessageType messageType, ClientAddress senderAddress){
+            MessageType messageType, ClientId senderId){
 
         this.messageType = messageType;
-        this.senderAddress = senderAddress;
+        this.senderId = senderId;
     }
 
     public MessageType getMessageType() {
         return messageType;
     }
 
-    public ClientAddress getSenderAddress() {
-        return senderAddress;
+    public ClientId getSenderId() {
+        return senderId;
     }
 }

@@ -4,8 +4,8 @@ import android.content.Context;
 
 import com.example.zebul.cameraservice.request.ChangeCameraRequest;
 import com.example.zebul.cameraservice.request.TakePictureRequest;
-import com.example.message.Message;
-import com.example.message.MessagePipe;
+import com.example.signaling_message.Message;
+import com.example.signaling_message.MessagePipe;
 
 /**
  * Created by zebul on 9/20/16.

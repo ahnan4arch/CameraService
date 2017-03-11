@@ -1,4 +1,4 @@
-package com.example.message;
+package com.example.signaling_message;
 
 /**
  * Created by zebul on 9/18/16.

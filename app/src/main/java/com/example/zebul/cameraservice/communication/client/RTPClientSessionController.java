@@ -8,7 +8,7 @@ import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Packet;
 import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Packets;
 import com.example.udp.SocketEngine;
 import com.example.udp.SocketMessageReceptionListener;
-import com.example.message.Message;
+import com.example.signaling_message.Message;
 import com.example.zebul.cameraservice.av_processing.audio.AACPacketConsumer;
 import com.example.zebul.cameraservice.av_processing.video.H264PacketConsumer;
 

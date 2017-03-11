@@ -1,9 +1,9 @@
 package com.example.zebul.cameraservice;
 
-import com.example.message.Message;
-import com.example.message.MessagePipe;
-import com.example.message.MessagePipeline;
-import com.example.message.MessagePipelineEndpoint;
+import com.example.signaling_message.Message;
+import com.example.signaling_message.MessagePipe;
+import com.example.signaling_message.MessagePipeline;
+import com.example.signaling_message.MessagePipelineEndpoint;
 
 import junit.framework.Assert;
 

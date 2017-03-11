@@ -1,4 +1,4 @@
-package com.example.message;
+package com.example.signaling_message;
 
 import com.example.utils.GenericSerializer;
 
@@ -15,7 +15,7 @@ public class KeepAliveRequestTest {
     @Test
     public void test_KeepAliveRequest_serializability() throws IOException, ClassNotFoundException {
 
-        ClientAddress clientAddress = new ClientAddress("foo");
+        ClientId clientAddress = new ClientId("foo");
         KeepAliveRequest inputKeepAliveRequest = new KeepAliveRequest(clientAddress);
         final byte[] data = GenericSerializer.serialize(inputKeepAliveRequest);
         KeepAliveRequest outputKeepAliveRequest = GenericSerializer.deserialize(data, KeepAliveRequest.class);

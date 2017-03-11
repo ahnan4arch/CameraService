@@ -1,6 +1,6 @@
 package com.example.udp;
 
-import com.example.message.Message;
+import com.example.signaling_message.Message;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
