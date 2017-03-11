@@ -45,6 +45,7 @@ public class SessionDescriptionProtocolTest {
         assertNotNull(sessionDescription);
 
         assertEquals("Unnamed", sessionDescription.name);
+        assertEquals("N/A", sessionDescription.information);
 
         final List<MediaDescription> mediaDescriptions = sessionDescription.getMediaDescriptions();
         assertTrue(mediaDescriptions.size()>0);
