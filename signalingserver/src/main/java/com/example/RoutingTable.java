@@ -21,10 +21,11 @@ import static com.example.signaling_message.ErrorCode.RECEIVER_RECORD_NOT_EXISTS
 
 public class RoutingTable implements MessagePipelineEndpoint {
 
-    protected ConcurrentHashMap<ClientId, ClientRecord> clientAddresses =
+    protected ConcurrentHashMap<ClientId, ClientRecord> clientRecords =
             new ConcurrentHashMap<ClientId, ClientRecord>();
 
-    private MessagePipeline outgoingMessagePipeline;
+    protected MessagePipeline outgoingMessagePipeline;
+
     public RoutingTable(MessagePipeline outgoingMessagePipeline){
 
         this.outgoingMessagePipeline = outgoingMessagePipeline;
@@ -33,20 +34,29 @@ public class RoutingTable implements MessagePipelineEndpoint {
     @Override
     public void onTransmittedMessage(Message message_) {
 
-        final InetSocketAddress address = (InetSocketAddress) message_.getAddress();
+        final InetSocketAddress senderAddress = (InetSocketAddress) message_.getAddress();
         final SignalingMessage signalingMessage = (SignalingMessage)message_.getData();
         switch(signalingMessage.getMessageType()){
 
             case KEEP_ALIVE_REQUEST:
-                onKeepAliveRequest(address, (KeepAliveRequest)signalingMessage);
+                onKeepAliveRequest(senderAddress, (KeepAliveRequest)signalingMessage);
                 break;
             case EXCHANGE_SDP_REQUEST:
-                onExchangeSDPRequest(address, (ExchangeSDPRequest)signalingMessage);
+                onExchangeSDPRequest(senderAddress, (ExchangeSDPRequest)signalingMessage);
                 break;
             case EXCHANGE_SDP_RESPONSE:
-                onExchangeSDPResponse(address, (ExchangeSDPResponse)signalingMessage);
+                onExchangeSDPResponse(senderAddress, (ExchangeSDPResponse)signalingMessage);
                 break;
         }
+        //let every message be keepalive message
+        keepAlive(senderAddress, signalingMessage);
+    }
+
+    private void keepAlive(InetSocketAddress senderAddress, SignalingMessage signalingMessage) {
+
+        final ClientId senderId = signalingMessage.getSenderId();
+        final ClientRecord senderRecord = new ClientRecord(senderAddress);
+        clientRecords.put(senderId, senderRecord);
     }
 
     private void onKeepAliveRequest(
@@ -58,7 +68,7 @@ public class RoutingTable implements MessagePipelineEndpoint {
             InetSocketAddress senderAddress, ExchangeSDPRequest exchangeSDPRequest) {
 
         final ClientRecord clientRecord =
-                clientAddresses.get(exchangeSDPRequest.getReceiverId());
+                clientRecords.get(exchangeSDPRequest.getReceiverId());
 
         if(clientRecord == null){
 
@@ -68,11 +78,27 @@ public class RoutingTable implements MessagePipelineEndpoint {
         }
         else{
 
+            InetSocketAddress receiverAddress = clientRecord.getInetSocketAddress();
+            outgoingMessagePipeline.transmit(new Message(receiverAddress, exchangeSDPRequest));
         }
     }
 
     private void onExchangeSDPResponse(
             InetSocketAddress senderAddress, ExchangeSDPResponse exchangeSDPResponse) {
 
+        final ClientRecord clientRecord =
+                clientRecords.get(exchangeSDPResponse.getReceiverId());
+
+        if(clientRecord == null){
+
+            ErrorResponse errorResponse =
+                    exchangeSDPResponse.createErrorResponse(RECEIVER_RECORD_NOT_EXISTS);
+            outgoingMessagePipeline.transmit(new Message(senderAddress, errorResponse));
+        }
+        else{
+
+            InetSocketAddress receiverAddress = clientRecord.getInetSocketAddress();
+            outgoingMessagePipeline.transmit(new Message(receiverAddress, exchangeSDPResponse));
+        }
     }
 }

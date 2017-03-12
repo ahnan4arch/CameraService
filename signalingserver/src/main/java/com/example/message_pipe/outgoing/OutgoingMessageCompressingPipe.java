@@ -15,7 +15,7 @@ import java.util.zip.GZIPOutputStream;
  * Created by zebul on 3/11/17.
  */
 
-public class OutgoingMessageCompresingPipe implements MessagePipe {
+public class OutgoingMessageCompressingPipe implements MessagePipe {
 
     @Override
     public Message transmit(Message message_) throws TransmissionException {

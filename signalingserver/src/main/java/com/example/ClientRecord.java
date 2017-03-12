@@ -8,5 +8,16 @@ import java.net.InetSocketAddress;
 
 public class ClientRecord {
 
-    public InetSocketAddress inetSocketAddress;
+    private InetSocketAddress inetSocketAddress;
+
+    public ClientRecord(InetSocketAddress inetSocketAddress) {
+
+        this.inetSocketAddress = inetSocketAddress;
+    }
+
+    public InetSocketAddress getInetSocketAddress() {
+        return inetSocketAddress;
+    }
+
+
 }
