@@ -34,4 +34,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Play Movie 2" />
+
+    <Button
+        android:id="@+id/buildSdpActivityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Build SDP Button" />
 </LinearLayout>

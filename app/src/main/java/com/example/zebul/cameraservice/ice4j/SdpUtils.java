@@ -20,7 +20,6 @@ package com.example.zebul.cameraservice.ice4j;
 import java.util.*;
 import java.util.StringTokenizer;
 
-import javax.sdp.*;
 
 import org.ice4j.*;
 import org.ice4j.ice.*;
@@ -39,6 +38,7 @@ import org.ice4j.ice.sdp.*;
  */
 public class SdpUtils
 {
+
     /**
      * Creates a session description containing the streams from the specified
      * <tt>agent</tt> using dummy codecs. This method is unlikely to be of use
@@ -53,7 +53,8 @@ public class SdpUtils
      *
      * @throws Throwable on rainy days
      */
-    public static String createSDPDescription(Agent agent) throws Throwable
+    /*
+    public static String buildSDPDescription(Agent agent) throws Throwable
     {
         SdpFactory factory = SdpFactory.getInstance();
         SessionDescription sdess = factory.createSessionDescription();
@@ -61,7 +62,7 @@ public class SdpUtils
         IceSdpUtils.initSessionDescription(sdess, agent);
 
         return sdess.toString();
-    }
+    }*/
 
     /**
      * Configures <tt>localAgent</tt> the the remote peer streams, components,
@@ -73,7 +74,10 @@ public class SdpUtils
      *
      * @throws Exception for all sorts of reasons.
      */
-    @SuppressWarnings("unchecked") // jain-sdp legacy code.
+    // jain-sdp legacy code.
+
+
+    /*
     public static void parseSDP(Agent localAgent, String sdp)
         throws Exception
     {
@@ -145,7 +149,7 @@ public class SdpUtils
                 rtcpComponent.setDefaultRemoteCandidate(defaultRtcpCandidate);
             }
         }
-    }
+    }*/
 
     /**
      * Parses the <tt>attribute</tt>.
@@ -158,6 +162,8 @@ public class SdpUtils
      * content of the specified <tt>attribute</tt> or <tt>null</tt> if the
      * candidate belonged to a component we don't have.
      */
+
+    /*
     private static RemoteCandidate parseCandidate(Attribute      attribute,
                                                   IceMediaStream stream)
     {
@@ -210,7 +216,7 @@ public class SdpUtils
         component.addRemoteCandidate(cand);
 
         return cand;
-    }
+    }*/
 
 
 }

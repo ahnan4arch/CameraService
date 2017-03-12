@@ -53,6 +53,21 @@ public class MainActivity extends AppCompatActivity {
                 startMoviePlayerActivity();
             }
         });
+
+        Button buildSdpActivityButton = (Button) findViewById(R.id.buildSdpActivityButton);
+        buildSdpActivityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                startBuildSdpActivity();
+            }
+        });
+    }
+
+    private void startBuildSdpActivity() {
+
+        Intent intent = new Intent(this, SDPExchangeServiceTestActivity.class);
+        startActivity(intent);
     }
 
     private void startCameraService(){

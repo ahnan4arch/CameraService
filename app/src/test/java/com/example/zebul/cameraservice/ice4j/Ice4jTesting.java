@@ -10,8 +10,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Created by bartek on 19.02.17.
@@ -20,7 +18,7 @@ import java.util.logging.Logger;
 public class Ice4jTesting {
 
     @Test
-    public void test1(){
+    public void test_creation_of_sdp_with_candidaes(){
 
         Agent agent = new Agent();
         String[] hostnames = new String[] {"jitsi.org", "numb.viagenie.ca", "stun.ekiga.net"};
@@ -43,7 +41,8 @@ public class Ice4jTesting {
         int port = 5000;
         try {
             agent.createComponent(stream, Transport.UDP, port, port, port+100);
-            String localPeerSdpMessage = SdpUtils.createSDPDescription(agent);
+            SdpBuilder sdpBuilder = new SdpBuilder();
+            String localPeerSdpMessage = sdpBuilder.buildSDPDescription(agent);
 
             int foo = 1;
             int bar = foo;
@@ -58,4 +57,6 @@ public class Ice4jTesting {
             throwable.printStackTrace();
         }
     }
+
+
 }
