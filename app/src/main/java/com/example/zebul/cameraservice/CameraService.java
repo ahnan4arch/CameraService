@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -30,18 +31,22 @@ public class CameraService extends Service implements RTSPSessionEventListener {
 
     private static final int CAMERA_SERVICE_NOTIFICATION_ID = 1;
 
-    public static CameraService CAMERA_SERVICE;
+    private CameraServiceBinder cameraServiceBinder = new CameraServiceBinder();
 
+    public class CameraServiceBinder extends Binder {
+        CameraService getService() {
+            return CameraService.this;
+        }
+    }
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return cameraServiceBinder;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        CAMERA_SERVICE = this;
         keepInForeground();
         return START_STICKY;
     }
@@ -186,5 +191,10 @@ public class CameraService extends Service implements RTSPSessionEventListener {
         Message message = handler.obtainMessage(EXECUTE_COMMAND);
         message.obj = new ShowToastCommand(this, textMessage);
         message.sendToTarget();
+    }
+
+    public void showToast(String message) {
+
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }
