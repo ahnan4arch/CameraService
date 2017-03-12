@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.example.zebul.cameraservice.av_processing.PacketProcessingException;
 import com.example.zebul.cameraservice.av_processing.PacketProcessingExceptionListener;
+import com.example.zebul.cameraservice.av_processing.audio.AudioSettings;
 import com.example.zebul.cameraservice.av_processing.video.camera.Resolution;
 import com.example.zebul.cameraservice.av_processing.video.camera.VideoSettings;
 import com.example.zebul.cameraservice.av_processing.video.display.H264Display;
@@ -114,7 +115,8 @@ public class DisplayVideoFromRemoteSourceActivity extends AppCompatActivity
         try {
 
             aacSpeaker = new AACSpeaker(this);
-            aacSpeaker.doStart();
+            AudioSettings audioSettings = AudioSettings.DEFAULT;
+            aacSpeaker.start(audioSettings);
 
             SurfaceTexture st = textureView.getSurfaceTexture();
             Surface surface = new Surface(st);

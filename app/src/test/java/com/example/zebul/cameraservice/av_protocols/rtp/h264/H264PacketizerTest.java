@@ -77,7 +77,7 @@ public class H264PacketizerTest {
         byte encodedFUHeader = packet0[RTPHeader.LENGTH+ H264Packetizer.FU_INDICATOR_LENGTH];
         byte S = (byte)0b10000000;
         byte E = (byte)0b01000000;
-        assertTrue((encodedFUHeader&S)==S);//doStart must be set
+        assertTrue((encodedFUHeader&S)==S);//start must be set
         assertTrue((encodedFUHeader&E)==0);//end must not be set
 
         assertEquals(0x11, packet0[packet0.length-2]);
@@ -91,7 +91,7 @@ public class H264PacketizerTest {
         assertEquals(expectedLengthOfpacket1, packet1.length);
 
         encodedFUHeader = packet1[RTPHeader.LENGTH+ H264Packetizer.FU_INDICATOR_LENGTH];
-        assertTrue((encodedFUHeader&S)==0);//doStart must not be set
+        assertTrue((encodedFUHeader&S)==0);//start must not be set
         assertTrue((encodedFUHeader&E)==0);//end must not be set
 
         assertEquals(0x33, packet1[packet1.length-2]);
@@ -105,7 +105,7 @@ public class H264PacketizerTest {
         assertEquals(expectedLengthOfpacket2, packet2.length);
 
         encodedFUHeader = packet2[RTPHeader.LENGTH+ H264Packetizer.FU_INDICATOR_LENGTH];
-        assertTrue((encodedFUHeader&S)==0);//doStart must not be set
+        assertTrue((encodedFUHeader&S)==0);//start must not be set
         assertTrue((encodedFUHeader&E)==E);//end must be set
 
         assertEquals(0x55, packet2[packet2.length-1]);

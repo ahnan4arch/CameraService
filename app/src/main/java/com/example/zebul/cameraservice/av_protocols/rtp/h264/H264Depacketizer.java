@@ -25,7 +25,6 @@ public class H264Depacketizer {
     private int lastSequenceNumber = -1;
     private List<RTPPacket> fuRTPPackets = new LinkedList<RTPPacket>();
 
-
     public H264Packets createH264Packets(BytesOfRTPPackets bytesOfRTPPackets){
 
         H264Packets allH264Packets = new H264Packets();
@@ -48,7 +47,7 @@ public class H264Depacketizer {
         byte nalUnitHeaderByte = bytesOfRTPPacket[RTPHeader.LENGTH];
         NALUnitHeader nalUnitHeader = NALUnitHeader.fromByte(nalUnitHeaderByte);
 
-        RTPPayload rtpPayload = null;
+        Depacketizer depacketizer = null;
         switch(nalUnitHeader.getNALUnitType()){
 
             case STAP_A:
@@ -60,67 +59,83 @@ public class H264Depacketizer {
             case MTAP24:
                 break;
             case FU_A:
-                rtpPayload = FU_A_RTPPayload.fromBytes(bytesOfRTPPacket,
-                        RTPHeader.LENGTH, bytesOfRTPPacket.length-RTPHeader.LENGTH);
+                depacketizer = new FU_A_Depacketizer();
                 break;
             case FU_B:
                 break;
             default:
-                rtpPayload = SingleNALUnit_RTPPayload.fromBytes(bytesOfRTPPacket,
-                        RTPHeader.LENGTH, bytesOfRTPPacket.length-RTPHeader.LENGTH);
+                depacketizer = new SingleNALUnitDepacketizer();
                 break;
         }
-        if(rtpPayload == null){
+        if(depacketizer == null){
             return null;
         }
-        RTPPacket rtpPacket = new RTPPacket(rtpHeader, rtpPayload);
-        return createH264Packets(rtpPacket);
+        return depacketizer.depacketize(rtpHeader, bytesOfRTPPacket, RTPHeader.LENGTH);
     }
 
-    private H264Packets createH264Packets(RTPPacket rtpPacket) {
+    private interface Depacketizer{
 
-        final RTPHeader rtpHeader = rtpPacket.getRtpHeader();
-        final H264Payload h264Payload = (H264Payload)rtpPacket.getRtpPayload();
+        H264Packets depacketize(RTPHeader rtpHeader,
+                                byte[] bytesOfRTPPacket,
+                                int payloadStartPositionInRTPPacket);
+    }
 
-        switch(h264Payload.getH264PayloadType()){
+    private class SingleNALUnitDepacketizer implements Depacketizer {
 
-            case FU_A:
-                final FU_A_RTPPayload fragmentationUnitPayload = (FU_A_RTPPayload)rtpPacket.getRtpPayload();
-                final FUHeader fuHeader = fragmentationUnitPayload.getFuHeader();
-                if(fuHeader.isEnd()){
-                    fuRTPPackets.add(rtpPacket);
-                    sortBySequenceNumbers(fuRTPPackets);
-                    if(hasContinousSequenceNumbers(fuRTPPackets) && timestampsInEveryPacketAreEqual(fuRTPPackets)){
+        @Override
+        public H264Packets depacketize(RTPHeader rtpHeader,
+                                       byte[] bytesOfRTPPacket,
+                                       int payloadStartPositionInRTPPacket) {
 
-                        final H264Packet h264Packet = createH264PacketFromFuRtpPackets(fuRTPPackets);
-                        fuRTPPackets.clear();
-                        H264Packets h264Packets = new H264Packets();
-                        h264Packets.addPacket(h264Packet);
-                        return h264Packets;
-                    }
-                    else{
-                        fuRTPPackets.clear();
-                    }
-                }
-                else if(fuHeader.isStart()){
+            int payloadLength = bytesOfRTPPacket.length-payloadStartPositionInRTPPacket;
+            SingleNALUnit_RTPPayload singleNALUnit = SingleNALUnit_RTPPayload.fromBytes(
+                    bytesOfRTPPacket, payloadStartPositionInRTPPacket, payloadLength);
+
+            NALUnit nalUnit = singleNALUnit.getNalUnit();
+            Timestamp timestamp = new Timestamp(rtpHeader.getTimestamp());
+            H264Packets h264Packets = new H264Packets();
+            h264Packets.addPacket(new H264Packet(nalUnit, timestamp));
+            return h264Packets;
+        }
+    }
+
+    private class FU_A_Depacketizer implements Depacketizer{
+
+        @Override
+        public H264Packets depacketize(RTPHeader rtpHeader,
+                                       byte[] bytesOfRTPPacket,
+                                       int payloadStartPositionInRTPPacket) {
+
+            int payloadLength = bytesOfRTPPacket.length-payloadStartPositionInRTPPacket;
+            final FU_A_RTPPayload fragmentationUnitPayload = FU_A_RTPPayload.fromBytes(
+                    bytesOfRTPPacket, payloadStartPositionInRTPPacket, payloadLength);
+
+            RTPPacket rtpPacket = new RTPPacket(rtpHeader, fragmentationUnitPayload);
+            final FUHeader fuHeader = fragmentationUnitPayload.getFuHeader();
+            if(fuHeader.isEnd()){
+                fuRTPPackets.add(rtpPacket);
+                sortBySequenceNumbers(fuRTPPackets);
+                if(hasContinousSequenceNumbers(fuRTPPackets) && timestampsInEveryPacketAreEqual(fuRTPPackets)){
+
+                    final H264Packet h264Packet = createH264PacketFromFuRtpPackets(fuRTPPackets);
                     fuRTPPackets.clear();
-                    fuRTPPackets.add(rtpPacket);
+                    H264Packets h264Packets = new H264Packets();
+                    h264Packets.addPacket(h264Packet);
+                    return h264Packets;
                 }
                 else{
-                    fuRTPPackets.add(rtpPacket);
+                    fuRTPPackets.clear();
                 }
-                break;
-            case NALUnit:
-                SingleNALUnit_RTPPayload singleNALUnit = (SingleNALUnit_RTPPayload)h264Payload;
-                NALUnit nalUnit = singleNALUnit.getNalUnit();
-                Timestamp timestamp = new Timestamp(rtpHeader.getTimestamp());
-                H264Packets h264Packets = new H264Packets();
-                h264Packets.addPacket(new H264Packet(nalUnit, timestamp));
-                return h264Packets;
-            default:
-                break;
+            }
+            else if(fuHeader.isStart()){
+                fuRTPPackets.clear();
+                fuRTPPackets.add(rtpPacket);
+            }
+            else{
+                fuRTPPackets.add(rtpPacket);
+            }
+            return null;
         }
-        return null;
     }
 
     private static void sortBySequenceNumbers(List<RTPPacket> fuRTPPackets) {
@@ -176,7 +191,7 @@ public class H264Depacketizer {
         //create NALUnit data
         byte[] nalUnitData = new byte[nalUnitLength];
 
-        //set NALUnit doStart codes
+        //set NALUnit start codes
         System.arraycopy(NALUnit.START_CODES, 0,
                 nalUnitData, 0, NALUnit.START_CODES.length);
         int offset = NALUnit.START_CODES.length;

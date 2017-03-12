@@ -37,15 +37,17 @@ public class AACSpeaker extends MediaCodecPacketProcessor
 
     private AudioTrack audioTrack;
     private volatile boolean processConsumedPacket = false;
+    private AudioSettings audioSettings;
 
     public AACSpeaker(PacketProcessingExceptionListener packetProcessingExceptionListener) {
         super(packetProcessingExceptionListener);
-        inputBufferTimeoutInUs = 1000;
-        outputBufferTimeoutInUs = 1000;
+        inputBufferTimeoutInMicroSeconds = 1000;
+        outputBufferTimeoutInMicroSeconds = 1000;
     }
 
-    public void doStart() throws IOException {
+    public void start(AudioSettings audioSettings) throws IOException {
 
+        this.audioSettings = audioSettings;
         processConsumedPacket = true;
         super.start();
     }
@@ -62,7 +64,6 @@ public class AACSpeaker extends MediaCodecPacketProcessor
     protected void open() throws PacketProcessingException {
 
         try {
-            AudioSettings audioSettings = AudioSettings.DEFAULT;
 
             int bufferSize = AudioRecord.getMinBufferSize(
                     audioSettings.getSamplingRate(),
