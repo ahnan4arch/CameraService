@@ -53,10 +53,10 @@ public class SignalingServer implements SocketMessageReceptionListener, MessageP
         outgoingMessagePipeline = createOutgoingMessagePipeline();
         routingTable = createRoutingTable(outgoingMessagePipeline);
 
-        attachPipesToIncomingMessagePipeline();
+        attachPipesToIncomingMessagePipeline(incomingMessagePipeline);
         incomingMessagePipeline.setMessageEndpoint(routingTable);
 
-        attachPipesToOutgoingMessagePipeline();
+        attachPipesToOutgoingMessagePipeline(outgoingMessagePipeline);
         outgoingMessagePipeline.setMessageEndpoint(outgoingMessageEndpoint);
     }
 
@@ -97,14 +97,14 @@ public class SignalingServer implements SocketMessageReceptionListener, MessageP
         return new RoutingTable(outgoingMessagePipeline);
     }
 
-    protected void attachPipesToIncomingMessagePipeline(){
+    public static void attachPipesToIncomingMessagePipeline(MessagePipeline incomingMessagePipeline){
 
         for(MessagePipe messagePipe: createIncomingMessagePipes()){
             incomingMessagePipeline.addMessagePipe(messagePipe);
         }
     }
 
-    protected void attachPipesToOutgoingMessagePipeline(){
+    public static void attachPipesToOutgoingMessagePipeline(MessagePipeline outgoingMessagePipeline){
 
         for(MessagePipe messagePipe: createOutgoingMessagePipes()){
             outgoingMessagePipeline.addMessagePipe(messagePipe);
