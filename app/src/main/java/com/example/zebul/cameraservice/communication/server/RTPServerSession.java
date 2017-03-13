@@ -161,7 +161,7 @@ public class RTPServerSession {
 
         H264Camera cameraH264PacketProducer = new H264Camera(this, this);
         FileH264PacketProducer fileH264PacketProducer =
-                new FileH264PacketProducer(CameraService.CAMERA_SERVICE, "H264_artifacts_motion.h264");
+                new FileH264PacketProducer(/*CameraService.CAMERA_SERVICE*/null, "H264_artifacts_motion.h264");
 
         H264Packetizer h264Packetizer = new H264Packetizer(
             500, 0xDEADBEEF

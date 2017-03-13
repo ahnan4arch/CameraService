@@ -10,12 +10,6 @@
     android:orientation="vertical"
     tools:context="com.example.zebul.cameraservice.MainActivity">
 
-    <Button
-        android:id="@+id/startCameraServiceButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start Cam Service!" />
-
 
     <Button
         android:id="@+id/startDisplayVideoActivityButton"
@@ -40,4 +34,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Build SDP Button" />
+
+    <Button
+        android:id="@+id/showToastFromServiceButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Toast!!!" />
+
 </LinearLayout>
