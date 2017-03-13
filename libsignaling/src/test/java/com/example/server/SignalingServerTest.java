@@ -1,7 +1,8 @@
-package com.example;
+package com.example.server;
 
-import com.example.message_pipe.outgoing.OutgoingMessageCompressingPipe;
-import com.example.message_pipe.outgoing.OutgoingMessageSerializingPipe;
+import com.example.server.ClientRecord;
+import com.example.server.RoutingTable;
+import com.example.server.SignalingServer;
 import com.example.signaling_message.ClientId;
 import com.example.signaling_message.ErrorCode;
 import com.example.signaling_message.ErrorResponse;
@@ -33,7 +34,7 @@ public class SignalingServerTest {
     private InetSocketAddress senderSocketAddress = new InetSocketAddress("127.0.0.1", 5678);
     private InetSocketAddress receiverSocketAddress = new InetSocketAddress("127.0.0.1", 8678);
 
-    class TestableSignalingServer extends SignalingServer{
+    class TestableSignalingServer extends SignalingServer {
 
         TestableSignalingServer(MessagePipelineEndpoint outgoingMessageEndpoint){
 

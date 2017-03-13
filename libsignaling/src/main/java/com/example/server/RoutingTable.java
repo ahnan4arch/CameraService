@@ -1,4 +1,4 @@
-package com.example;
+package com.example.server;
 
 import com.example.signaling_message.ClientId;
 import com.example.signaling_message.ErrorResponse;

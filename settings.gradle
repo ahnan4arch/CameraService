@@ -1,1 +1,1 @@
-include ':app', ':signalingserver', ':libcommunication'
+include ':app', ':libsignaling', ':libcommunication'

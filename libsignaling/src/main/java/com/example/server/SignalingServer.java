@@ -1,24 +1,17 @@
-package com.example;
+package com.example.server;
 
 import com.example.message_pipe.incoming.IncomingMessageDecompressingPipe;
 import com.example.message_pipe.incoming.IncomingMessageDeserializingPipe;
 import com.example.message_pipe.outgoing.OutgoingMessageCompressingPipe;
 import com.example.message_pipe.outgoing.OutgoingMessageSerializingPipe;
-import com.example.signaling_message.ExchangeSDPRequest;
-import com.example.signaling_message.ExchangeSDPResponse;
-import com.example.signaling_message.KeepAliveRequest;
 import com.example.message.Message;
 import com.example.message.MessagePipe;
 import com.example.message.MessagePipeline;
 import com.example.message.MessagePipelineEndpoint;
-import com.example.signaling_message.MessageType;
-import com.example.signaling_message.SignalingMessage;
 import com.example.udp.SocketEngine;
 import com.example.udp.SocketMessageReceptionListener;
-import com.example.utils.GenericSerializer;
 
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class SignalingServer implements SocketMessageReceptionListener, MessagePipelineEndpoint {
 
