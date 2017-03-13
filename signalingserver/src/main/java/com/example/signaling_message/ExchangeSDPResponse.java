@@ -1,4 +1,4 @@
-package com.example.message;
+package com.example.signaling_message;
 
 /**
  * Created by zebul on 3/10/17.
@@ -7,8 +7,8 @@ package com.example.message;
 public class ExchangeSDPResponse extends ExchangeSDPRequest{
 
     public ExchangeSDPResponse(
-            ClientAddress senderAddress,
-            ClientAddress receiverAddress,
+            ClientId senderAddress,
+            ClientId receiverAddress,
             String ssessionDescription) {
 
         super(MessageType.EXCHANGE_SDP_RESPONSE, senderAddress, receiverAddress, ssessionDescription);

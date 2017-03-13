@@ -1,76 +1,125 @@
 package com.example;
 
-import com.example.message.ExchangeSDPRequest;
-import com.example.message.ExchangeSDPResponse;
-import com.example.message.KeepAliveRequest;
-import com.example.message.Message;
-import com.example.message.MessageType;
-import com.example.message.SignalingMessage;
+import com.example.message_pipe.incoming.IncomingMessageDecompressingPipe;
+import com.example.message_pipe.incoming.IncomingMessageDeserializingPipe;
+import com.example.message_pipe.outgoing.OutgoingMessageCompressingPipe;
+import com.example.message_pipe.outgoing.OutgoingMessageSerializingPipe;
+import com.example.signaling_message.ExchangeSDPRequest;
+import com.example.signaling_message.ExchangeSDPResponse;
+import com.example.signaling_message.KeepAliveRequest;
+import com.example.signaling_message.Message;
+import com.example.signaling_message.MessagePipe;
+import com.example.signaling_message.MessagePipeline;
+import com.example.signaling_message.MessagePipelineEndpoint;
+import com.example.signaling_message.MessageType;
+import com.example.signaling_message.SignalingMessage;
 import com.example.udp.SocketEngine;
 import com.example.udp.SocketMessageReceptionListener;
 import com.example.utils.GenericSerializer;
 
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class SignalingServer {
+public class SignalingServer implements SocketMessageReceptionListener, MessagePipelineEndpoint {
 
     public static void main(String [] args){
 
-
-        SignalingServer signalingServer = new SignalingServer(9999, new BleBle());
+        SignalingServer signalingServer = new SignalingServer(9999);
         signalingServer.start();
         Scanner sc = new Scanner(System.in);
         sc.nextLine();
         signalingServer.stop();
     }
 
-    private SocketEngine socketEngine;
-    private SignalingMessageProcessor signalingMessageProcessor;
+    protected SocketEngine socketEngine;
+    protected RoutingTable routingTable;
+    protected MessagePipeline incomingMessagePipeline;
+    protected MessagePipeline outgoingMessagePipeline;
 
-    public SignalingServer(int port, SignalingMessageProcessor signalingMessageProcessor){
+    public SignalingServer(int port){
 
-        socketEngine = new SocketEngine(port, new SocketMessageReceptionListener() {
-            @Override
-            public void onSocketMessageReceived(Message message_) {
-
-                try {
-                    final byte[] data = (byte[]) message_.getData();
-                    SignalingMessage signalingMessage = GenericSerializer.deserialize(data, SignalingMessage.class);
-                    processMessage(signalingMessage);
-                }
-                catch(Exception exc_){
-
-                }
-            }
-        });
-        this.signalingMessageProcessor = signalingMessageProcessor;
+        socketEngine = new SocketEngine(port, this);
+        setUp(this);
     }
 
-    public void start(){
+    protected SignalingServer(MessagePipelineEndpoint outgoingMessageEndpoint){
 
+        setUp(outgoingMessageEndpoint);
+    }
+
+    protected void setUp(MessagePipelineEndpoint outgoingMessageEndpoint){
+
+        incomingMessagePipeline = createIncomingMessagePipeline();
+        outgoingMessagePipeline = createOutgoingMessagePipeline();
+        routingTable = createRoutingTable(outgoingMessagePipeline);
+
+        attachPipesToIncomingMessagePipeline();
+        incomingMessagePipeline.setMessageEndpoint(routingTable);
+
+        attachPipesToOutgoingMessagePipeline();
+        outgoingMessagePipeline.setMessageEndpoint(outgoingMessageEndpoint);
+    }
+
+    private void start() {
         socketEngine.start();
     }
 
-    public void stop(){
-
+    private void stop() {
         socketEngine.stop();
     }
 
-    public void processMessage(SignalingMessage signalingMessage){
+    @Override
+    public void onSocketMessageReceived(Message message_) {
 
-        final MessageType messageType = signalingMessage.getMessageType();
-        switch(messageType){
+        // socket >>>---incoming msg pipeline--->>> routing table
+        incomingMessagePipeline.transmit(message_);
+    }
 
-            case KEEP_ALIVE_REQUEST:
-                signalingMessageProcessor.onKeepAliveRequest((KeepAliveRequest)signalingMessage);
-                break;
-            case EXCHANGE_SDP_REQUEST:
-                signalingMessageProcessor.onExchangeSDPRequest((ExchangeSDPRequest)signalingMessage);
-                break;
-            case EXCHANGE_SDP_RESPONSE:
-                signalingMessageProcessor.onExchangeSDPResponse((ExchangeSDPResponse)signalingMessage);
-                break;
+    @Override
+    public void onTransmittedMessage(Message message_) {
+
+        // socket <<<---outgoing msg pipeline---<<< routing table
+        socketEngine.post(message_);
+    }
+
+    protected MessagePipeline createIncomingMessagePipeline() {
+
+        return new MessagePipeline();
+    }
+
+    protected MessagePipeline createOutgoingMessagePipeline() {
+
+        return new MessagePipeline();
+    }
+
+    protected RoutingTable createRoutingTable(MessagePipeline outgoingMessagePipeline) {
+
+        return new RoutingTable(outgoingMessagePipeline);
+    }
+
+    protected void attachPipesToIncomingMessagePipeline(){
+
+        for(MessagePipe messagePipe: createIncomingMessagePipes()){
+            incomingMessagePipeline.addMessagePipe(messagePipe);
         }
     }
 
+    protected void attachPipesToOutgoingMessagePipeline(){
+
+        for(MessagePipe messagePipe: createOutgoingMessagePipes()){
+            outgoingMessagePipeline.addMessagePipe(messagePipe);
+        }
+    }
+
+    protected static MessagePipe[] createIncomingMessagePipes() {
+        return new MessagePipe[]{
+                new IncomingMessageDecompressingPipe(),
+                new IncomingMessageDeserializingPipe()};
+    }
+
+    protected static MessagePipe[] createOutgoingMessagePipes() {
+        return new MessagePipe[]{
+                new OutgoingMessageSerializingPipe(),
+                new OutgoingMessageCompressingPipe()};
+    }
 }

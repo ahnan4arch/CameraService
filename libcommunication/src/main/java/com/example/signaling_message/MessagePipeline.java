@@ -1,4 +1,4 @@
-package com.example.message;
+package com.example.signaling_message;
 
 import java.util.LinkedList;
 import java.util.List;
