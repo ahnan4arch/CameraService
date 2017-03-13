@@ -1,6 +1,6 @@
 package com.example.zebul.cameraservice.communication.pipes;
 
-import com.example.signaling_message.TransmissionException;
+import com.example.message.TransmissionException;
 
 /**
  * Created by zebul on 9/20/16.

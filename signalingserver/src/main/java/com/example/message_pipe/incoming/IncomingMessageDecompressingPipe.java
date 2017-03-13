@@ -1,8 +1,8 @@
 package com.example.message_pipe.incoming;
 
-import com.example.signaling_message.Message;
-import com.example.signaling_message.MessagePipe;
-import com.example.signaling_message.TransmissionException;
+import com.example.message.Message;
+import com.example.message.MessagePipe;
+import com.example.message.TransmissionException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

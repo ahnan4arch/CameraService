@@ -1,7 +1,7 @@
 package com.example.zebul.cameraservice.communication.pipes;
 
-import com.example.signaling_message.Message;
-import com.example.signaling_message.MessagePipe;
+import com.example.message.Message;
+import com.example.message.MessagePipe;
 import com.example.zebul.cameraservice.response.CameraResponse;
 
 /**

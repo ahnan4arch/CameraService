@@ -5,9 +5,9 @@ import com.example.signaling_message.ErrorResponse;
 import com.example.signaling_message.ExchangeSDPRequest;
 import com.example.signaling_message.ExchangeSDPResponse;
 import com.example.signaling_message.KeepAliveRequest;
-import com.example.signaling_message.Message;
-import com.example.signaling_message.MessagePipeline;
-import com.example.signaling_message.MessagePipelineEndpoint;
+import com.example.message.Message;
+import com.example.message.MessagePipeline;
+import com.example.message.MessagePipelineEndpoint;
 import com.example.signaling_message.SignalingMessage;
 
 import java.net.InetSocketAddress;

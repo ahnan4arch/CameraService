@@ -1,7 +1,7 @@
 package com.example;
 
-import com.example.signaling_message.Message;
-import com.example.signaling_message.MessagePipeline;
+import com.example.message.Message;
+import com.example.message.MessagePipeline;
 import com.example.signaling_message.SignalingMessage;
 import com.example.udp.SocketMessageReceptionListener;
 import com.example.utils.GenericSerializer;

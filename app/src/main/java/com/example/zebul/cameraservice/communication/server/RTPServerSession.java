@@ -21,7 +21,7 @@ import com.example.zebul.cameraservice.av_processing.video.camera.CameraSettings
 import com.example.zebul.cameraservice.av_processing.video.camera.H264Camera;
 import com.example.zebul.cameraservice.av_protocols.rtp.RTPPacket;
 import com.example.zebul.cameraservice.av_protocols.rtp.RTPPackets;
-import com.example.signaling_message.Message;
+import com.example.message.Message;
 import com.example.zebul.cameraservice.av_processing.PacketProcessingException;
 import com.example.zebul.cameraservice.av_processing.audio.microphone.AACMicrophone;
 
