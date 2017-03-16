@@ -11,6 +11,11 @@ public class TransmissionException extends Exception{
         super(message_);
     }
 
+    public TransmissionException(Exception exc_) {
+
+        super(exc_);
+    }
+
     public void setMessagePipe(MessagePipe messagePipe_){
 
         messagePipe = messagePipe_;

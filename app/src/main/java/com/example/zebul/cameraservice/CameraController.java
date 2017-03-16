@@ -3,6 +3,7 @@ package com.example.zebul.cameraservice;
 import android.content.Context;
 import android.hardware.Camera;
 
+import com.example.message.TransmissionException;
 import com.example.zebul.cameraservice.communication.server.RTSPServer;
 import com.example.zebul.cameraservice.communication.server.RTSPSessionEventListener;
 import com.example.udp.SocketEngine;
@@ -87,7 +88,11 @@ public class CameraController {
         @Override
         public void onSocketMessageReceived(Message message_) {
 
-            incomingMessagePipeline.transmit(message_);
+            try {
+                incomingMessagePipeline.transmit(message_);
+            } catch (TransmissionException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -113,13 +118,22 @@ public class CameraController {
                 CameraRequest cameraRequest = (CameraRequest) message_.getData();
                 execute(cameraRequest);
                 Message successMessage = new Message(address, new CameraResponseSuccess());
-                outgoingMessagePipeline.transmit(successMessage);
+                transmitViaOutgoingMessagePipeline(successMessage);
             }
             catch(RequestExecutionException exc_){
 
                 Message failureMessage = new Message(address, new CameraResponseFailure());
-                outgoingMessagePipeline.transmit(failureMessage);
+                transmitViaOutgoingMessagePipeline(failureMessage);
             }
+        }
+    }
+
+    private void transmitViaOutgoingMessagePipeline(Message message) {
+
+        try {
+            outgoingMessagePipeline.transmit(message);
+        } catch (TransmissionException exc) {
+            exc.printStackTrace();
         }
     }
 
@@ -127,6 +141,4 @@ public class CameraController {
 
         command.executeRequest(this);
     }
-
-
 }

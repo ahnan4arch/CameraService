@@ -86,7 +86,8 @@ dependencies {
     //compile 'com.android.support.constraint:constraint-layout:+'
     testCompile 'junit:junit:4.12'
 
-    compile project (':libcommunication')
+    compile project(path: ':libcommunication')
+    compile project(path: ':libsignaling')
 }
 
 
