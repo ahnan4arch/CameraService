@@ -1,5 +1,6 @@
 package com.example.server;
 
+import com.example.message.TransmissionException;
 import com.example.message_pipe.incoming.IncomingMessageDecompressingPipe;
 import com.example.message_pipe.incoming.IncomingMessageDeserializingPipe;
 import com.example.message_pipe.outgoing.OutgoingMessageCompressingPipe;
@@ -64,8 +65,12 @@ public class SignalingServer implements SocketMessageReceptionListener, MessageP
     @Override
     public void onSocketMessageReceived(Message message_) {
 
-        // socket >>>---incoming msg pipeline--->>> routing table
-        incomingMessagePipeline.transmit(message_);
+        try {
+            // socket >>>---incoming msg pipeline--->>> routing table
+            incomingMessagePipeline.transmit(message_);
+        } catch (TransmissionException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -25,4 +25,8 @@ public abstract class SignalingMessage implements Serializable {
     public ClientId getSenderId() {
         return senderId;
     }
+
+    public boolean comesFrom(ClientId senderCandidateId) {
+        return senderId.equals(senderCandidateId);
+    }
 }

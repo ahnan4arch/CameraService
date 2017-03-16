@@ -1,5 +1,6 @@
 package com.example.server;
 
+import com.example.message.TransmissionException;
 import com.example.signaling_message.ClientId;
 import com.example.signaling_message.ErrorResponse;
 import com.example.signaling_message.ExchangeSDPRequest;
@@ -34,22 +35,27 @@ public class RoutingTable implements MessagePipelineEndpoint {
     @Override
     public void onTransmittedMessage(Message message_) {
 
-        final InetSocketAddress senderAddress = (InetSocketAddress) message_.getAddress();
-        final SignalingMessage signalingMessage = (SignalingMessage)message_.getData();
-        switch(signalingMessage.getMessageType()){
+        try{
+            final InetSocketAddress senderAddress = (InetSocketAddress) message_.getAddress();
+            final SignalingMessage signalingMessage = (SignalingMessage)message_.getData();
+            switch(signalingMessage.getMessageType()){
 
-            case KEEP_ALIVE_REQUEST:
-                onKeepAliveRequest(senderAddress, (KeepAliveRequest)signalingMessage);
-                break;
-            case EXCHANGE_SDP_REQUEST:
-                onExchangeSDPRequest(senderAddress, (ExchangeSDPRequest)signalingMessage);
-                break;
-            case EXCHANGE_SDP_RESPONSE:
-                onExchangeSDPResponse(senderAddress, (ExchangeSDPResponse)signalingMessage);
-                break;
+                case KEEP_ALIVE_REQUEST:
+                    onKeepAliveRequest(senderAddress, (KeepAliveRequest)signalingMessage);
+                    break;
+                case EXCHANGE_SDP_REQUEST:
+                    onExchangeSDPRequest(senderAddress, (ExchangeSDPRequest)signalingMessage);
+                    break;
+                case EXCHANGE_SDP_RESPONSE:
+                    onExchangeSDPResponse(senderAddress, (ExchangeSDPResponse)signalingMessage);
+                    break;
+            }
+            //let every message be keepalive message
+            keepAlive(senderAddress, signalingMessage);
+
+        } catch (TransmissionException e) {
+            e.printStackTrace();
         }
-        //let every message be keepalive message
-        keepAlive(senderAddress, signalingMessage);
     }
 
     private void keepAlive(InetSocketAddress senderAddress, SignalingMessage signalingMessage) {
@@ -65,7 +71,8 @@ public class RoutingTable implements MessagePipelineEndpoint {
     }
 
     private void onExchangeSDPRequest(
-            InetSocketAddress senderAddress, ExchangeSDPRequest exchangeSDPRequest) {
+            InetSocketAddress senderAddress, ExchangeSDPRequest exchangeSDPRequest)
+            throws TransmissionException {
 
         final ClientRecord clientRecord =
                 clientRecords.get(exchangeSDPRequest.getReceiverId());
@@ -84,7 +91,8 @@ public class RoutingTable implements MessagePipelineEndpoint {
     }
 
     private void onExchangeSDPResponse(
-            InetSocketAddress senderAddress, ExchangeSDPResponse exchangeSDPResponse) {
+            InetSocketAddress senderAddress, ExchangeSDPResponse exchangeSDPResponse)
+            throws TransmissionException {
 
         final ClientRecord clientRecord =
                 clientRecords.get(exchangeSDPResponse.getReceiverId());

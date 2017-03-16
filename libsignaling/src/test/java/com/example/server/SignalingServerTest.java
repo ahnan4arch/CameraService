@@ -7,12 +7,12 @@ import com.example.signaling_message.ClientId;
 import com.example.signaling_message.ErrorCode;
 import com.example.signaling_message.ErrorResponse;
 import com.example.signaling_message.ExchangeSDPRequest;
-import com.example.signaling_message.Message;
-import com.example.signaling_message.MessagePipe;
-import com.example.signaling_message.MessagePipeline;
-import com.example.signaling_message.MessagePipelineEndpoint;
+import com.example.message.Message;
+import com.example.message.MessagePipe;
+import com.example.message.MessagePipeline;
+import com.example.message.MessagePipelineEndpoint;
+import com.example.message.TransmissionException;
 import com.example.signaling_message.SignalingMessage;
-import com.example.signaling_message.TransmissionException;
 
 import org.junit.Test;
 
@@ -34,7 +34,7 @@ public class SignalingServerTest {
     private InetSocketAddress senderSocketAddress = new InetSocketAddress("127.0.0.1", 5678);
     private InetSocketAddress receiverSocketAddress = new InetSocketAddress("127.0.0.1", 8678);
 
-    class TestableSignalingServer extends SignalingServer {
+    public static class TestableSignalingServer extends SignalingServer {
 
         TestableSignalingServer(MessagePipelineEndpoint outgoingMessageEndpoint){
 
@@ -47,17 +47,17 @@ public class SignalingServerTest {
             return new TestableRoutingTable(outgoingMessagePipeline);
         }
 
-        Message convertByteMessageToSignalingMessage(Message message) throws TransmissionException {
+        public static Message convertByteMessageToSignalingMessage(Message message) throws TransmissionException {
 
             return convertMessage(message, createIncomingMessagePipes());
         }
 
-        Message convertSignalingMessageToByteMessage(Message message) throws TransmissionException {
+        public static Message convertSignalingMessageToByteMessage(Message message) throws TransmissionException {
 
             return convertMessage(message, createOutgoingMessagePipes());
         }
 
-        Message convertMessage(Message message, MessagePipe[] convertingPipes)
+        public static Message convertMessage(Message message, MessagePipe[] convertingPipes)
                 throws TransmissionException {
 
             for(MessagePipe messagePipe: convertingPipes){
@@ -75,7 +75,7 @@ public class SignalingServerTest {
         }
     }
 
-    class TestableRoutingTable extends RoutingTable{
+    static class TestableRoutingTable extends RoutingTable{
 
         public TestableRoutingTable(MessagePipeline outgoingMessagePipeline) {
             super(outgoingMessagePipeline);

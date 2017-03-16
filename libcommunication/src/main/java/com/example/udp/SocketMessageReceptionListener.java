@@ -7,5 +7,5 @@ import com.example.message.Message;
  */
 public interface SocketMessageReceptionListener {
 
-    public void onSocketMessageReceived(Message message_);
+    void onSocketMessageReceived(Message message);
 }

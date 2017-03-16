@@ -28,7 +28,7 @@ public class ExchangeSDPRequest extends SignalingMessage {
         this.ssessionDescription = ssessionDescription;
     }
 
-    public String getSsessionDescription() {
+    public String getSessionDescription() {
         return ssessionDescription;
     }
 

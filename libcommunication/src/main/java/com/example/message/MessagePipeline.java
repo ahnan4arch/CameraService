@@ -21,7 +21,7 @@ public class MessagePipeline {
         messageEndpoint = messageEndpoint_;
     }
 
-    public void transmit(Message message_) {
+    public void transmit(Message message_) throws TransmissionException {
 
         for(MessagePipe messagePipe: messagePipeline){
 
@@ -32,7 +32,7 @@ public class MessagePipeline {
             catch(TransmissionException exc_){
 
                 exc_.setMessagePipe(messagePipe);
-                return;
+                throw exc_;
             }
         }
         messageEndpoint.onTransmittedMessage(message_);

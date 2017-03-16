@@ -6,7 +6,7 @@ package com.example.signaling_message;
 
 public class KeepAliveRequest extends SignalingMessage{
 
-    public KeepAliveRequest(ClientId senderAddress) {
-        super(MessageType.KEEP_ALIVE_REQUEST, senderAddress);
+    public KeepAliveRequest(ClientId senderId) {
+        super(MessageType.KEEP_ALIVE_REQUEST, senderId);
     }
 }
