@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
+import com.example.server.SignalingServer;
 import com.example.signaling_message.ClientId;
 import com.example.zebul.cameraservice.communication.server.RTSPSessionCreatedEvent;
 import com.example.zebul.cameraservice.communication.server.RTSPSessionDestroyedEvent;
@@ -37,7 +38,9 @@ public class CameraService extends Service implements RTSPSessionEventListener {
 
     private CameraServiceBinder cameraServiceBinder = new CameraServiceBinder();
     private IceSignalingClient iceSignalingClient =
-            new IceSignalingClient(new InetSocketAddress("192.168.1.106", 9999), new ClientId(Build.MANUFACTURER));
+            new IceSignalingClient(
+                    new InetSocketAddress("192.168.1.7", SignalingServer.DEFAULT_PORT)
+                    , new ClientId(Build.MANUFACTURER));
 
     public class CameraServiceBinder extends Binder {
         CameraService getService() {

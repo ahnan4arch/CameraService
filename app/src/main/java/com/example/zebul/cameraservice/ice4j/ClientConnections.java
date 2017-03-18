@@ -25,7 +25,7 @@ public class ClientConnections {
         mapOfClientStreamConnections.put(streamName, clientStreamConnection);
     }
 
-    public ClientStreamConnection getDatagramSocket(String streamName) {
+    public ClientStreamConnection getClientStreamConnection(String streamName) {
 
         return mapOfClientStreamConnections.get(streamName);
     }

@@ -18,13 +18,14 @@ public class SignalingServer implements SocketMessageReceptionListener, MessageP
 
     public static void main(String [] args){
 
-        SignalingServer signalingServer = new SignalingServer(9999);
+        SignalingServer signalingServer = new SignalingServer(DEFAULT_PORT);
         signalingServer.start();
         Scanner sc = new Scanner(System.in);
         sc.nextLine();
         signalingServer.stop();
     }
 
+    public static final int DEFAULT_PORT = 8866;
     protected SocketEngine socketEngine;
     protected RoutingTable routingTable;
     protected MessagePipeline incomingMessagePipeline;
