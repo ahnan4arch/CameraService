@@ -1,4 +1,4 @@
-package com.example.client;
+package com.example.zebul.cameraservice.ice4j.session;
 
 import com.example.message.Message;
 import com.example.signaling_message.ClientId;
@@ -11,10 +11,8 @@ public class SignalingSessionState {
 
     void update(SignalingSession signalingSession){}
 
-    void beginExchangeSDPWithRemoteClient(SignalingSession signalingSession,
-                                          SDPProducer sdpProducer,
-                                          SDPConsumer sdpConsumer,
-                                          ClientId remoteClientId){}
+    void connectWith(SignalingSession signalingSession,
+                     ClientId remoteClientId){}
 
     void onSignalingMessage(SignalingSession signalingSession,
                             Message message) {}

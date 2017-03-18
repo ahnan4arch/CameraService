@@ -18,13 +18,14 @@ public class SignalingServer implements SocketMessageReceptionListener, MessageP
 
     public static void main(String [] args){
 
-        SignalingServer signalingServer = new SignalingServer(9999);
+        SignalingServer signalingServer = new SignalingServer(DEFAULT_PORT);
         signalingServer.start();
         Scanner sc = new Scanner(System.in);
         sc.nextLine();
         signalingServer.stop();
     }
 
+    public static final int DEFAULT_PORT = 8866;
     protected SocketEngine socketEngine;
     protected RoutingTable routingTable;
     protected MessagePipeline incomingMessagePipeline;
@@ -54,11 +55,11 @@ public class SignalingServer implements SocketMessageReceptionListener, MessageP
         outgoingMessagePipeline.setMessageEndpoint(outgoingMessageEndpoint);
     }
 
-    private void start() {
+    public void start() {
         socketEngine.start();
     }
 
-    private void stop() {
+    public void stop() {
         socketEngine.stop();
     }
 
@@ -67,6 +68,7 @@ public class SignalingServer implements SocketMessageReceptionListener, MessageP
 
         try {
             // socket >>>---incoming msg pipeline--->>> routing table
+            System.out.println("Server received message");
             incomingMessagePipeline.transmit(message_);
         } catch (TransmissionException e) {
             e.printStackTrace();

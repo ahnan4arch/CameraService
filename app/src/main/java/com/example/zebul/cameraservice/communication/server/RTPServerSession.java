@@ -169,46 +169,17 @@ public class RTPServerSession {
 
         public void start() {
 
-            if(useCameraProducer){
-                if(!cameraH264PacketProducer.isWorking()){
+            if(!cameraH264PacketProducer.isWorking()){
 
-                    cameraH264PacketProducer.start(cameraSettings);
-                }
-            }
-            else {
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-
-                        try {
-
-                            while (true) {
-
-                                final H264Packets h264Packets = fileH264PacketProducer.produceH264Packets();
-                                for (H264Packet h264Packet : h264Packets) {
-                                    consumeH264Packet(h264Packet);
-                                }
-                                Thread.sleep(10);
-                            }
-                        } catch (Exception exc) {
-
-                        }
-
-                    }
-                });
-                thread.start();
+                cameraH264PacketProducer.start(cameraSettings);
             }
         }
 
         public void stop() {
 
-            if(useCameraProducer){
+            if(cameraH264PacketProducer.isWorking()){
 
-                if(cameraH264PacketProducer.isWorking()){
-
-                    cameraH264PacketProducer.stop();
-                }
+                cameraH264PacketProducer.stop();
             }
         }
 

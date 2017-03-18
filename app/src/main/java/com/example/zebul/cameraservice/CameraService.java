@@ -7,6 +7,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -14,10 +15,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
+import com.example.server.SignalingServer;
+import com.example.signaling_message.ClientId;
 import com.example.zebul.cameraservice.communication.server.RTSPSessionCreatedEvent;
 import com.example.zebul.cameraservice.communication.server.RTSPSessionDestroyedEvent;
 import com.example.zebul.cameraservice.communication.server.RTSPSessionEventListener;
+import com.example.zebul.cameraservice.ice4j.IceSignalingClient;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 /**
@@ -32,6 +37,10 @@ public class CameraService extends Service implements RTSPSessionEventListener {
     private static final int CAMERA_SERVICE_NOTIFICATION_ID = 1;
 
     private CameraServiceBinder cameraServiceBinder = new CameraServiceBinder();
+    private IceSignalingClient iceSignalingClient =
+            new IceSignalingClient(
+                    new InetSocketAddress("192.168.1.7", SignalingServer.DEFAULT_PORT)
+                    , new ClientId(Build.MANUFACTURER));
 
     public class CameraServiceBinder extends Binder {
         CameraService getService() {
@@ -88,10 +97,12 @@ public class CameraService extends Service implements RTSPSessionEventListener {
     private void setUp() {
 
         cameraController.start();
+        iceSignalingClient.start();
     }
 
     private void tearDown() {
 
+        iceSignalingClient.stop();
         cameraController.stop();
     }
 

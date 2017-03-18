@@ -36,4 +36,11 @@ public class ManualResetEvent {
 	public void reset() {//close stop
 		open = false;
 	}
+
+	public boolean isSet() {
+		synchronized (monitor) {
+
+			return open;
+		}
+	}
 }
