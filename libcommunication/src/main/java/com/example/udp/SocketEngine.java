@@ -128,7 +128,8 @@ public class SocketEngine{
 
         private DatagramSocket openSocket() throws SocketException {
 
-            DatagramSocket datagramSocket = new DatagramSocket(port);
+            DatagramSocket datagramSocket =
+                    (port>0) ? new DatagramSocket(port) : new DatagramSocket();
             return datagramSocket;
         }
 

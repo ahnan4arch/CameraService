@@ -54,11 +54,11 @@ public class SignalingServer implements SocketMessageReceptionListener, MessageP
         outgoingMessagePipeline.setMessageEndpoint(outgoingMessageEndpoint);
     }
 
-    private void start() {
+    public void start() {
         socketEngine.start();
     }
 
-    private void stop() {
+    public void stop() {
         socketEngine.stop();
     }
 
@@ -67,6 +67,7 @@ public class SignalingServer implements SocketMessageReceptionListener, MessageP
 
         try {
             // socket >>>---incoming msg pipeline--->>> routing table
+            System.out.println("Server received message");
             incomingMessagePipeline.transmit(message_);
         } catch (TransmissionException e) {
             e.printStackTrace();

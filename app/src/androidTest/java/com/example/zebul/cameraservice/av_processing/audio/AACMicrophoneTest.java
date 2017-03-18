@@ -2,11 +2,12 @@ package com.example.zebul.cameraservice.av_processing.audio;
 
 import android.test.AndroidTestCase;
 
+import com.example.utils.Timeout;
+import com.example.utils.TimeoutStatus;
 import com.example.zebul.cameraservice.av_processing.PacketProcessingException;
 import com.example.zebul.cameraservice.av_processing.PacketProcessingExceptionListener;
 import com.example.zebul.cameraservice.av_protocols.rtp.aac.AACPacket;
 import com.example.zebul.cameraservice.av_processing.audio.microphone.AACMicrophone;
-import com.example.zebul.cameraservice.utils.Timeout;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -72,8 +73,8 @@ public class AACMicrophoneTest extends AndroidTestCase {
 
         MicrophoneSettings microphoneSettings = new MicrophoneSettings(AudioSettings.DEFAULT);
         producer.start(microphoneSettings);
-        Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
-        while(!timeout.isTimeout()) {
+        Timeout timeout = new Timeout(5, TimeUnit.SECONDS, TimeoutStatus.RESET);
+        while(!timeout.isSet()) {
 
             if(packetReceived.get()){
                 break;

@@ -3,6 +3,8 @@ package com.example.zebul.cameraservice.av_processing.video;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import com.example.utils.Timeout;
+import com.example.utils.TimeoutStatus;
 import com.example.zebul.cameraservice.av_processing.IllegalProductionStateException;
 import com.example.zebul.cameraservice.av_processing.audio.AACMicrophoneTest;
 import com.example.zebul.cameraservice.av_processing.PacketProcessingException;
@@ -12,7 +14,6 @@ import com.example.zebul.cameraservice.av_processing.video.camera.VideoSettings;
 import com.example.zebul.cameraservice.av_protocols.rtp.h264.H264Packet;
 import com.example.zebul.cameraservice.av_processing.video.camera.CameraSettings;
 import com.example.zebul.cameraservice.av_processing.video.camera.H264Camera;
-import com.example.zebul.cameraservice.utils.Timeout;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -64,8 +65,8 @@ public class H264CameraTest extends AndroidTestCase {
 
             //when
             producer.start(defaultCameraSettings);
-            Timeout timeout = new Timeout(2, TimeUnit.SECONDS);
-            while(!timeout.isTimeout()) {
+            Timeout timeout = new Timeout(2, TimeUnit.SECONDS, TimeoutStatus.RESET);
+            while(!timeout.isSet()) {
 
                 if(packetReceived.get()){
                     break;

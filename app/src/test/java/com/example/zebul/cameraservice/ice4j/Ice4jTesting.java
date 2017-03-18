@@ -37,10 +37,13 @@ public class Ice4jTesting {
             }
         }
 
-        IceMediaStream stream = agent.createMediaStream("audio");
-        int port = 5000;
+        IceMediaStream audioStream = agent.createMediaStream("audio");
+        IceMediaStream videoStream = agent.createMediaStream("video");
+        int audioPort = 5000;
+        int videoPort = 6000;
         try {
-            agent.createComponent(stream, Transport.UDP, port, port, port+100);
+            agent.createComponent(audioStream, Transport.UDP, audioPort, audioPort, audioPort+100);
+            agent.createComponent(videoStream, Transport.UDP, videoPort, videoPort, videoPort+100);
             SdpBuilder sdpBuilder = new SdpBuilder();
             String localPeerSdpMessage = sdpBuilder.buildSDPDescription(agent);
 

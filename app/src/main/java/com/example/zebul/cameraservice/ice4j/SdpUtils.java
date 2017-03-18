@@ -17,6 +17,12 @@
  */
 package com.example.zebul.cameraservice.ice4j;
 
+import android.javax.sdp.Attribute;
+import android.javax.sdp.Connection;
+import android.javax.sdp.MediaDescription;
+import android.javax.sdp.SdpFactory;
+import android.javax.sdp.SessionDescription;
+
 import java.util.*;
 import java.util.StringTokenizer;
 
@@ -77,7 +83,7 @@ public class SdpUtils
     // jain-sdp legacy code.
 
 
-    /*
+
     public static void parseSDP(Agent localAgent, String sdp)
         throws Exception
     {
@@ -149,7 +155,7 @@ public class SdpUtils
                 rtcpComponent.setDefaultRemoteCandidate(defaultRtcpCandidate);
             }
         }
-    }*/
+    }
 
     /**
      * Parses the <tt>attribute</tt>.
@@ -163,7 +169,6 @@ public class SdpUtils
      * candidate belonged to a component we don't have.
      */
 
-    /*
     private static RemoteCandidate parseCandidate(Attribute      attribute,
                                                   IceMediaStream stream)
     {
@@ -216,7 +221,5 @@ public class SdpUtils
         component.addRemoteCandidate(cand);
 
         return cand;
-    }*/
-
-
+    }
 }
